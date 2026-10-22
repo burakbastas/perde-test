@@ -1325,15 +1325,16 @@ function kmSoruUret(tip, havuz, agir) {
     });
     const o = rastgele(adaylar);
 
-    if (tip === 'simgeAd') {
-      q.soru = o.glif; q.glifSoru = true; q.alt = 'Bu işaret hangisidir?';
-      q.dogru = { key: o.key, label: o.kisa };
-      q.pool = pool.map(function (x) { return { key: x.key, label: x.kisa }; });
+        if (tip === 'simgeAd') {
+      q.soru = o.glif; q.glifSoru = true; q.alt = 'Bu işaret hangi aralığı gösterir?';
+      q.dogru = { key: o.ad.replace(/ (Diyez|Bemol)$/, ''), label: o.ad.replace(/ (Diyez|Bemol)$/, '') };
+      q.pool = KM_VERI.map(function (v) { return { key: v.ad, label: v.ad }; });
     } else if (tip === 'adSimge') {
-      q.soru = o.kisa; q.alt = 'Hangi işaret?';
+      q.soru = o.ad; q.alt = 'Hangi işaret?';
       q.dogru = { key: o.key, glif: o.glif };
       q.pool = pool.map(function (x) { return { key: x.key, glif: x.glif }; });
     } else {
+
       // Şıklar için bütün semboller kullanılır, böylece hep 4 farklı şık çıkar
       const alan = tip === 'simgeKoma' ? 'koma' : 'kod';
       const son = alan === 'koma' ? ' koma' : '';
