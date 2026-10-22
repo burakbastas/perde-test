@@ -1241,13 +1241,6 @@ if ('serviceWorker' in navigator) {
 }
 
 // =====================================================
-// 13) BAŞLAT
-// =====================================================
-
-// =====================================================
-// 13) BAŞLAT
-// =====================================================
-// =====================================================
 // KOMA MACERASI
 // =====================================================
 const KM_ANAHTAR = 'komaMacerasiV1';
@@ -1262,6 +1255,7 @@ const KM_VERI = [
 ];
 
 // h: KM_VERI sıra numaraları (0 Koma, 1 Bakiye, 2 Küçük, 3 Büyük, 4 Tanini, 5 Artık İkili)
+// agir: bakiye ve küçük mücenneb sembollerinin kaç kat sık çıkacağı
 const KM_TUM = ['adKoma', 'komaAd', 'adKod', 'kodAd'];
 const KM_SEVIYELER = [
   { ad: 'Koma, Bakiye, Tanini: koma değerleri', h: [0,1,4],         t: ['adKoma','komaAd'], n: 6 },
@@ -1269,10 +1263,14 @@ const KM_SEVIYELER = [
   { ad: 'Mücennebler eklendi: koma değerleri',  h: [0,1,2,3,4],     t: ['adKoma','komaAd'], n: 6 },
   { ad: 'Mücennebler: simge harfleri',          h: [0,1,2,3,4],     t: ['adKod','kodAd'],   n: 6 },
   { ad: 'Artık İkili eklendi: karışık',         h: [0,1,2,3,4,5],   t: KM_TUM,              n: 8, boss: true },
-  { ad: 'Diyez ve bemol: Koma, Bakiye',         h: [0,1],           t: ['simgeAd','adSimge'], n: 6 },
-  { ad: 'Diyez ve bemol: dört aralık',          h: [0,1,2,3],       t: ['simgeAd','adSimge'], n: 8 },
-  { ad: 'Diyez ve bemol: Tanini dahil',         h: [0,1,2,3,4],     t: ['simgeAd','adSimge'], n: 8 },
-  { ad: 'Büyük final: her şey karışık',         h: [0,1,2,3,4,5],   t: KM_TUM.concat(['simgeAd','adSimge']), n: 12, boss: true }
+  { ad: 'Diyez ve bemol: Koma, Bakiye',         h: [0,1],           t: ['simgeAd','adSimge','simgeKoma'], n: 8, agir: 2 },
+  { ad: 'Diyez ve bemol: dört aralık',          h: [0,1,2,3],       t: ['simgeAd','simgeKoma','adSimge','simgeKod'], n: 10, agir: 3 },
+  { ad: 'Diyez ve bemol: Tanini dahil',         h: [0,1,2,3,4],     t: ['simgeAd','simgeKoma','adSimge','simgeKod'], n: 10, agir: 3 },
+  { ad: 'Büyük final: her şey karışık',         h: [0,1,2,3,4,5],   t: KM_TUM.concat(['simgeAd','adSimge','simgeKoma','simgeKod']), n: 12, boss: true },
+  { ad: 'Simge → koma değeri',                  h: [0,1,2,3,4],     t: ['simgeKoma','simgeAd'],           n: 10, agir: 3 },
+  { ad: 'Simge → harf (F, B, S, K, T)',         h: [0,1,2,3,4],     t: ['simgeKod','simgeKoma'],          n: 10, agir: 3 },
+  { ad: 'Bakiye ve küçük mücenneb odağı',       h: [0,1,2,3,4],     t: ['simgeAd','simgeKoma','simgeKod','adSimge'], n: 12, agir: 6 },
+  { ad: 'Sembol finali: k, bk, km, bm, T',      h: [0,1,2,3,4],     t: ['simgeAd','simgeKoma','simgeKod','adSimge'], n: 14, agir: 4, boss: true }
 ];
 
 // ---- Kayıt ----
@@ -1296,27 +1294,60 @@ function kmSemboller(havuz) {
   havuz.forEach(function (v) {
     ['+', '-'].forEach(function (y) {
       const kod = kmIsaret(v, y);
-      if (kod) L.push({ key: v.ad + y, ad: v.ad + (y === '+' ? ' Diyez' : ' Bemol'), glif: String.fromCodePoint(kod) });
+      if (kod) {
+        const yon = y === '+' ? 'diyez' : 'bemol';
+        L.push({
+          key: v.ad + y,
+          ad: v.ad + (y === '+' ? ' Diyez' : ' Bemol'),
+          kisa: (v.isaret ? v.isaret : 'tanini') + ' ' + yon,   // k diyez, bk bemol, km diyez...
+          glif: String.fromCodePoint(kod),
+          koma: v.koma.join(' - '),
+          kod: v.kod,
+          agir: (v.isaret === 'bk' || v.isaret === 'km')        // bakiye ve küçük mücenneb
+        });
+      }
     });
   });
   return L;
 }
 
 // ---- Soru üretimi ----
-function kmSoruUret(tip, havuz) {
+function kmSoruUret(tip, havuz, agir) {
   const q = {};
   const kom = function (v) { return v.koma.join(' - '); };
-  if (tip === 'simgeAd' || tip === 'adSimge') {
+  if (tip === 'simgeAd' || tip === 'adSimge' || tip === 'simgeKoma' || tip === 'simgeKod') {
     const pool = kmSemboller(havuz);
-    const o = rastgele(pool);
+    // Bakiye ve küçük mücenneb, "agir" kadar kat daha sık seçilir
+    const adaylar = [];
+    pool.forEach(function (x) {
+      const kat = x.agir ? (agir || 1) : 1;
+      for (let n = 0; n < kat; n++) adaylar.push(x);
+    });
+    const o = rastgele(adaylar);
+
     if (tip === 'simgeAd') {
       q.soru = o.glif; q.glifSoru = true; q.alt = 'Bu işaret hangisidir?';
-      q.dogru = { key: o.key, label: o.ad };
-      q.pool = pool.map(function (x) { return { key: x.key, label: x.ad }; });
-    } else {
-      q.soru = o.ad; q.alt = 'Hangi işaret?';
+      q.dogru = { key: o.key, label: o.kisa };
+      q.pool = pool.map(function (x) { return { key: x.key, label: x.kisa }; });
+    } else if (tip === 'adSimge') {
+      q.soru = o.kisa; q.alt = 'Hangi işaret?';
       q.dogru = { key: o.key, glif: o.glif };
       q.pool = pool.map(function (x) { return { key: x.key, glif: x.glif }; });
+    } else {
+      // Şıklar için bütün semboller kullanılır, böylece hep 4 farklı şık çıkar
+      const alan = tip === 'simgeKoma' ? 'koma' : 'kod';
+      const son = alan === 'koma' ? ' koma' : '';
+      const gorulen = {};
+      q.pool = [];
+      kmSemboller(KM_VERI.slice(0, 5)).forEach(function (x) {
+        if (!gorulen[x[alan]]) {
+          gorulen[x[alan]] = true;
+          q.pool.push({ key: x[alan], label: x[alan] + son });
+        }
+      });
+      q.soru = o.glif; q.glifSoru = true;
+      q.alt = alan === 'koma' ? 'Bu işaret kaç komadır?' : 'Bu işaretin simge harfi nedir?';
+      q.dogru = { key: o[alan], label: o[alan] + son };
     }
     return q;
   }
@@ -1377,7 +1408,7 @@ function kmBaslat(i) {
   for (let j = 0; j < s.n; j++) {
     let q = null;
     for (let d = 0; d < 6; d++) {
-      q = kmSoruUret(s.t[j % s.t.length], havuz);
+      q = kmSoruUret(s.t[j % s.t.length], havuz, s.agir || 1);
       if (q.soru !== onceki) break;
     }
     onceki = q.soru;
