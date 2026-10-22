@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><title>İkon yap</title>
+<style>
+  @font-face { font-family: Bravura; src: url(fonts/Bravura.woff) format("woff"); }
+  body { font-family: system-ui; padding: 20px; }
+  button { font-size: 18px; padding: 12px 18px; margin: 6px; }
+  canvas { border: 1px solid #ccc; width: 192px; height: 192px; display: block; margin: 10px 0; }
+</style></head><body>
+<h2>Perde Macerası ikonları</h2>
+<canvas id="onizleme" width="512" height="512"></canvas>
+<button id="b192">icon-192.png indir</button>
+<button id="b512">icon-512.png indir</button>
+<script>
+function ciz(boyut) {
+  const c = document.createElement('canvas');
+  c.width = c.height = boyut;
+  const x = c.getContext('2d');
+  x.fillStyle = '#2f7d32'; x.fillRect(0, 0, boyut, boyut);
+  const s = boyut * 0.085, y0 = boyut * 0.33;
+  x.strokeStyle = '#fff'; x.lineWidth = Math.max(1, boyut * 0.012);
+  for (let i = 0; i < 5; i++) {
+    x.beginPath(); x.moveTo(boyut * 0.2, y0 + i * s); x.lineTo(boyut * 0.8, y0 + i * s); x.stroke();
+  }
+  x.fillStyle = '#ffd54a';
+  x.font = (4 * s) + 'px Bravura';
+  x.textAlign = 'center';
+  x.fillText(String.fromCodePoint(0xE050), boyut * 0.32, y0 + 3 * s);
+  x.fillText(String.fromCodePoint(0xE0A4), boyut * 0.62, y0 + 2 * s);
+  return c;
+}
+function indir(boyut, ad) {
+  ciz(boyut).toBlob(function (b) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b); a.download = ad; a.click();
+  });
+}
+document.fonts.load('40px Bravura').then(function () {
+  const o = document.getElementById('onizleme');
+  o.getContext('2d').drawImage(ciz(512), 0, 0);
+  document.getElementById('b192').onclick = function () { indir(192, 'icon-192.png'); };
+  document.getElementById('b512').onclick = function () { indir(512, 'icon-512.png'); };
+});
+</script></body></html>
