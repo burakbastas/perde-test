@@ -1,16 +1,32 @@
 {
-  "name": "Perde Macerası",
-  "short_name": "Perde",
-  "description": "Türk müziği perdelerini öğrenme oyunu",
+  "name": "Seyir · Türk müziği öğrenme oyunu",
+  "short_name": "Seyir",
+  "description": "Türk müziği perdelerini, komaları, dörtlü-beşlileri ve makamları oyunla öğren",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#2f7d32",
-  "theme_color": "#1f5e25",
+  "background_color": "#fbf5ea",
+  "theme_color": "#123a6b",
   "lang": "tr",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "icon-192.png?v=2.2.0",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png?v=2.2.0",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png?v=2.2.0",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }

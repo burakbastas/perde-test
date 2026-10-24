@@ -1,0 +1,24 @@
+Seyir – Türk müziği öğrenme oyunu
+Telif Hakkı © 2026 Burak Baştaş. Tüm hakları saklıdır.
+
+Bu depodaki yazılım, metinler, ders içerikleri, soru setleri, görseller ve
+tasarım Burak Baştaş’a aittir. Yazılı izin alınmadan; kopyalanamaz, çoğaltılamaz,
+değiştirilemez, başka bir sitede ya da uygulamada yayımlanamaz, dağıtılamaz ve
+ticari ya da ticari olmayan amaçlarla kullanılamaz.
+
+Uygulamayı https://burakbastas.github.io/perde-oyunu/ adresinden kişisel öğrenme
+amacıyla kullanmak serbesttir.
+
+İzin talepleri için uygulamadaki Profil → “Bana WhatsApp’tan yaz” bölümünü kullanın.
+
+Üçüncü taraf bileşenler kendi lisanslarına tabidir:
+- fonts/seyir-nota.woff: Bravura yazı tipinin küçültülmüş sürümü
+  (© Steinberg Media Technologies GmbH), SIL Open Font License 1.1 – fonts/OFL-Bravura.txt
+- fonts/nunito.woff: Nunito (© The Nunito Project Authors), SIL OFL 1.1 – fonts/OFL-Nunito.txt
+- fonts/baloo2.woff: Baloo 2 (© The Baloo 2 Project Authors), SIL OFL 1.1 – fonts/OFL-Baloo2.txt
+
+----------------------------------------------------------------------------
+Copyright © 2026 Burak Baştaş. All rights reserved.
+No part of this repository may be copied, modified, published or distributed
+without prior written permission. Third-party fonts are licensed separately
+under the SIL Open Font License 1.1 (see the fonts folder).
