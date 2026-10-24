@@ -754,7 +754,15 @@ function eskiKayitTasi(eski, km, db) {
     ozet.push('🎶 Perde: ' + PERDE_UNITELER[yer].no + '. pakete yerleştirildin. Devam etmek için bu paketin ✍️ porteye kurma ve 👑 final seviyelerini geç.');
   } else if (gecti(0)) {
     DURUM.yildiz['p1-1'] = Math.max(1, st(0)); DURUM.yildiz['p1-2'] = Math.max(1, st(1));
-    ozet.push('🎶 Perde: ilk iki seviyen aktarıldı.');
+    DURUM.ders.p1 = true;
+    // Eski 3. seviye (diğer tam notalar) yeni p1-3'e denk gelir
+    if (st(2) > 0) {
+      DURUM.yildiz['p1-3'] = st(2);
+      ozet.push('🎶 Perde: ilk üç seviyen aktarıldı.');
+    } else ozet.push('🎶 Perde: ilk iki seviyen aktarıldı.');
+  } else if (st(0) > 0) {
+    DURUM.yildiz['p1-1'] = st(0);
+    ozet.push('🎶 Perde: ilk seviyen aktarıldı.');
   }
 
   // Koma: seviyeler birebir aynı
