@@ -1,9 +1,9 @@
 /* =====================================================
    PERDE MACERASI · çini / İznik teması
    ===================================================== */
-@font-face { font-family: SeyirNota; src: url(../fonts/seyir-nota.woff?v=2.2.0) format("woff"); font-display: block; }
-@font-face { font-family: Nunito; src: url(../fonts/nunito.woff?v=2.2.0) format("woff"); font-weight: 200 1000; font-display: swap; }
-@font-face { font-family: "Baloo 2"; src: url(../fonts/baloo2.woff?v=2.2.0) format("woff"); font-weight: 400 800; font-display: swap; }
+@font-face { font-family: SeyirNota; src: url(../fonts/seyir-nota.woff?v=2.2.1) format("woff"); font-display: block; }
+@font-face { font-family: Nunito; src: url(../fonts/nunito.woff?v=2.2.1) format("woff"); font-weight: 200 1000; font-display: swap; }
+@font-face { font-family: "Baloo 2"; src: url(../fonts/baloo2.woff?v=2.2.1) format("woff"); font-weight: 400 800; font-display: swap; }
 
 :root {
   --zemin: #fbf5ea;

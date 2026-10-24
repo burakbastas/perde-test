@@ -633,7 +633,7 @@ function antrenmanBaslat(a) {
 }
 
 // Dersten sonra rehberli deneme: 2, 3, 4, 4 şık; ipucu açık; ceza yok
-function rehberBaslat(u, bitince) {
+function isinmaBaslat(u, bitince) {
   const ilk = u.seviyeler[0];
   const L = [];
   for (let i = 0; i < 4; i++) {
@@ -719,7 +719,7 @@ function uniteDersiAc(u) {
     DURUM.ders[u.id] = true;
     (u.ogeler || []).forEach(function (id) { if (ogeDali(id) !== 'bati') DURUM.kart[id] = DURUM.kart[id] || 1; });
     kaydet();
-    rehberBaslat(u);
+    isinmaBaslat(u);
   }, 'Isınma turuna geç →', u.dal === 'bati');
 }
 
