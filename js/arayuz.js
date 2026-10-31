@@ -398,9 +398,9 @@ function ogrenCiz(g) {
     bendirAlt = 'Son: ' + bu.ad + ' ' + u2.olcu + ' · ' + ((B.tempo && B.tempo[bu.id + '/' + u2.payda]) || u2.tempo);
   }
   const kutu = function (renk, ik, ad, alt, f) {
-    return h('button', { class: 'oKutu', type: 'button', style: '--r:' + renk, onclick: f }, h('span', { class: 'ik' }, ik), h('b', null, ad), h('small', null, alt));
+    return h('button', { class: 'oKutu', type: 'button', style: '--r:' + renk, onclick: f, title: alt, 'aria-label': ad + ': ' + alt }, h('span', { class: 'ik' }, ik), h('b', null, ad), h('small', null, alt));
   };
-  g.appendChild(h('div', { class: 'oIzgara' },
+  g.appendChild(h('div', { class: 'oIzgara kucuk' },
     kutu('var(--kobalt)', '🧠', 'Perde ezber', 'Günün 5 perdesi, eşleştir, çağrışım', perdeEzberAraci),
     kutu('var(--turkuaz)', '🪜', 'Perde bul', 'Bir perdenin merdiveni ve yazımı', perdeBulAraci),
     kutu('var(--mercan)', '⭕', 'Koma dairesi', 'Makam dizileri çember üzerinde', komaDairesiAraci),
@@ -408,10 +408,8 @@ function ogrenCiz(g) {
     kutu('var(--turkuaz)', '📏', 'Hızlı bakış', 'Koma, perde, makam, usul tabloları', function () { hizliBakis(); }),
     kutu('var(--kobalt)', '📖', 'Sözlük', 'Terimler ve anlamları', sozlukAc),
     kutu('var(--safran)', '🥁', 'Bendir', bendirAlt, bendirSayfasi),
+    kutu('var(--kiremit)', '📜', 'Formlar', 'Genel kültür: peşrev, saz semaisi, şarkı, fasıl', formlarAc),
     kutu('var(--mor)', '🖼️', 'Arka planlar', 'Telefon ve bilgisayar duvar kâğıdı', arkaPlanlar)));
-  g.appendChild(h('div', { class: 'oBolum' }, 'Genel kültür'));
-  g.appendChild(h('div', { class: 'oIzgara' },
-    kutu('var(--kiremit)', '📜', 'Formlar', 'Peşrev, saz semaisi, şarkı, fasıl', formlarAc)));
   g.appendChild(h('p', { class: 'kucukNot ortala' }, 'İpucu: derslerde ve açıklamalarda altı noktalı terimlere dokunursan sözlük açılır.'));
   ortakBolumCiz(g);
 }

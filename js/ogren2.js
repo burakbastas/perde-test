@@ -240,3 +240,9 @@ function kaynaklarSayfasi() {
     '<li>Bendir vuruşları: Freesound #140548 “aksaksemai_bendir” (barisbozkurt), çalan Eren Ergen; CompMusic projesi (Universitat Pompeu Fabra) kaydı.</li></ul>' +
     '<p class="kucukNot">Uygulamadaki bilgiler bu kaynaklara dayanır; bir hata görürsen Profil’deki geri bildirim bağlantısından yaz.</p>' }));
 }
+
+// Temel bilgilerin ders sırası (perde merdivenleri perdelerden hemen sonra)
+(function () {
+  const sira = ['nota', 'oktav', 'aralik', 'isaret', 'perde', 'merdiven', 'usul', 'cesni', 'gocurme', 'makam', 'ahenk', 'tartim'];
+  OGREN_MODULLERI.sort(function (a, b) { const x = sira.indexOf(a.id), y = sira.indexOf(b.id); return (x < 0 ? 99 : x) - (y < 0 ? 99 : y); });
+})();

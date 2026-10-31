@@ -1,9 +1,9 @@
 /* =====================================================
    PERDE MACERASI · çini / İznik teması
    ===================================================== */
-@font-face { font-family: SeyirNota; src: url(../fonts/seyir-nota.woff?v=3.0.4) format("woff"); font-display: block; }
-@font-face { font-family: Nunito; src: url(../fonts/nunito.woff?v=3.0.4) format("woff"); font-weight: 200 1000; font-display: swap; }
-@font-face { font-family: "Baloo 2"; src: url(../fonts/baloo2.woff?v=3.0.4) format("woff"); font-weight: 400 800; font-display: swap; }
+@font-face { font-family: SeyirNota; src: url(../fonts/seyir-nota.woff?v=3.0.5) format("woff"); font-display: block; }
+@font-face { font-family: Nunito; src: url(../fonts/nunito.woff?v=3.0.5) format("woff"); font-weight: 200 1000; font-display: swap; }
+@font-face { font-family: "Baloo 2"; src: url(../fonts/baloo2.woff?v=3.0.5) format("woff"); font-weight: 400 800; font-display: swap; }
 
 :root {
   --zemin: #fbf5ea;
@@ -898,13 +898,13 @@ svg.komaDaire { width: 100%; max-width: 320px; height: auto; }
 .kdAralik { font-size: 11px; font-weight: 800; fill: var(--mercan); }
 .kdOrta { font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 16px; fill: var(--metin); }
 .kartPorte small { display: block; font-weight: 800; color: var(--soluk); font-size: 12px; text-align: center; }
-/* 3.0.4: yanlışta kart geniş ekranda büyümesin, panel kaydırma gerektirmesin */
+/* 3.0.5: yanlışta kart geniş ekranda büyümesin, panel kaydırma gerektirmesin */
 .hkKart, .hkKucuk { box-sizing: border-box; width: 100%; }
 .hkKart svg.merdiven { display: block; width: 100%; max-width: 340px; max-height: 140px; margin: 0 auto; }
 .hkKart .mdKutu { padding: 0 4px; }
 .hkSatir { padding: 3px 8px; margin-top: 4px; }
 
-/* 3.0.4: geri bildirim paneli tek ekrana sığsın */
+/* 3.0.5: geri bildirim paneli tek ekrana sığsın */
 .geriPorte svg.porte { max-height: 150px; }
 details.hesapKatla { margin: 4px 0; }
 details.hesapKatla summary { cursor: pointer; font-weight: 800; color: var(--kobalt); font-size: 14px; }
@@ -920,3 +920,11 @@ details.hesapKatla summary { cursor: pointer; font-weight: 800; color: var(--kob
 .mkSecSatir { display: flex; gap: 8px; align-items: center; margin: 6px 0 10px; }
 .mkSec { flex: 1; min-width: 0; font: inherit; padding: 8px; border-radius: 10px; border: 1.5px solid var(--cizgi); background: var(--kart); color: var(--metin); }
 .sinifKutu { min-width: 0; overflow-wrap: anywhere; line-height: 1.2; }
+
+/* 3.0.5: Araçlar küçük kutular (3 sütun, açıklama gizli) */
+.oIzgara.kucuk { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.oIzgara.kucuk .oKutu { min-height: 0; padding: 10px 6px 9px; border-radius: 14px; align-items: center; text-align: center; gap: 4px; }
+.oIzgara.kucuk .oKutu .ik { font-size: 22px; width: 36px; height: 36px; border-radius: 11px; }
+.oIzgara.kucuk .oKutu b { font-size: 14px; line-height: 1.15; }
+.oIzgara.kucuk .oKutu small { display: none; }
+@media (min-width: 700px) { .oIzgara.kucuk { grid-template-columns: repeat(5, 1fr); } }
