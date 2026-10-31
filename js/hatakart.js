@@ -117,7 +117,7 @@ function yanlisKarti(ic, veri, q) {
   } else {
     const kap = h('div', { class: 'hkKucuk' });
     kap.appendChild(h('span', { html: k.satir() }));
-    kap.appendChild(h('button', { class: 'hkAc', type: 'button', onclick: function () { kap.replaceWith(k.kart()); otoIptal(); } }, 'Kart'));
+    kap.appendChild(h('button', { class: 'hkAc', type: 'button', onclick: function () { const el = k.kart(); if (el) kap.replaceWith(el); otoIptal(); } }, 'Kart'));
     ic.appendChild(kap);
   }
 }
@@ -128,6 +128,8 @@ function hataKartlariBolumu(t) {
   if (!L || !L.length) return null;
   const tek = benzersiz(L, function (k) { return k.anahtar; });
   const d = h('details', { class: 'hkToplu' }, h('summary', null, '🔍 Hatalarını gözden geçir (' + tek.length + ')'));
-  tek.forEach(function (k) { d.appendChild(k.kart()); });
+  let n = 0;
+  tek.forEach(function (k) { const el = k.kart(); if (el) { d.appendChild(el); n++; } });
+  if (!n) return null;
   return d;
 }

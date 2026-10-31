@@ -240,6 +240,12 @@ function bilgiSoru(B) {
 }
 
 function usulSoru(tip, u, havuz) {
+  const q = usulSoru0(tip, u, havuz);
+  // 3.0.4: usul sorusu Tekrar'a girsin (öğe kimliği u:<id>); genel bilgi soruları hariç
+  if (q && !q.oge && tip !== 'bilgi' && u && u.id) q.oge = 'u:' + u.id;
+  return q;
+}
+function usulSoru0(tip, u, havuz) {
   const q = { oge: null, tip: 'secim', aciklama: usulAciklama(u), ipucu: u.zaman + ' zamanlı' };
   const ayniZaman = /Ayni$/.test(tip);
   tip = tip.replace(/Ayni$/, '');
@@ -889,4 +895,11 @@ function bendirSayfasi() {
       secim('Yavaştan hızlan', 'hizlan', '24 aşağıdan başlar, her 4 devirde +4 artar')),
     h('label', { class: 'bendirSes' }, '🔈', sesK, '🔊'),
     dugme('Kapat', modalKapat, 'gri')), { genis: true, kapaninca: dur });
+}
+
+// Tekrar için usul öğe sorusu
+function usulOgeSorusu(id) {
+  const u = USUL[id];
+  const havuz = USULLER.filter(function (x) { return U_HEPSI.indexOf(x.id) >= 0; });
+  return usulSoru(rastgele(['notaAd', 'adNota', 'zaman', 'hece', 'eksik']), u, havuz);
 }

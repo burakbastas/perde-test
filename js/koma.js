@@ -153,10 +153,14 @@ function kmPerdeIsaretSorusu(adlar, havuz) {
   const p = rastgele(adaylar.length ? adaylar : perdeler(adlar).filter(function (x) { return !x.tam; }));
   const iki = p.parcalar.length === 2;
   const v = KM_VERI.find(function (k) { return k.isaret === p.parcalar[0].a.slice(1); });
+  // Perdenin yeri: alttaki tam perdeden kaç koma tiz (soru perde adını değil aralığın işaretini ölçer)
+  let altTam = null;
+  PERDELER.forEach(function (x) { if (x && x.tam && x.koma < p.koma && (!altTam || x.koma > altTam.koma)) altTam = x; });
+  const yerSatiri = altTam ? p.ad + ': ' + altTam.ad + ayrilmaEki(altTam.ad) + ' ' + (p.koma - altTam.koma) + ' koma tiz' : '';
   return {
-    oge: v ? v.oge : null, tip: 'yer', kartPerde: p.ad,
+    oge: v ? v.oge : null, tip: 'yer', kartPerde: p.ad, yerSatiri: yerSatiri,
     soru: { metin: p.ad },
-    alt: iki ? 'Bu perdenin iki yazımı: iki notaya da işaretini koy' : 'Notaya bu perdenin işaretini koy',
+    alt: (yerSatiri ? yerSatiri + '. ' : '') + (iki ? 'İki yazımın da işaretini koy' : 'Notaya işaretini koy'),
     yer: { slotlar: p.parcalar.map(function (n) { return { konum: n }; }), palet: 'aeuKarisik', beklenen: p.parcalar, etiketler: iki ? ['diyezli', 'bemollü'] : null },
     dogruMetin: perdeYazimMetni(p),
     ipucu: perdeKural(p),

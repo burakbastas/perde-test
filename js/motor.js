@@ -207,6 +207,8 @@ function ogeGecerli(id) {
   if (p === 'd') return CESNILER.some(function (c) { return c.oge === id; });
   if (p === 'm') return !!makamBul(id);
   if (p === 'b') return true;
+  if (p === 'u') return !!USUL[id.slice(2)];
+  if (p === 'g') return !!(MAKAM[id.slice(2)] || CESNI[id.slice(2)]);
   return false;
 }
 function vadesiGelenler() {
@@ -225,15 +227,19 @@ function ogeAdi(id) {
   if (p[0] === 'd') return CESNILER.find(function (c) { return c.oge === id; }).ad;
   if (p[0] === 'm') return makamBul(id).ad;
   if (p[0] === 'b') return p[1] === 'a' ? kodAd(p[2]) : tonAd(+p[2], 'majör') + ' / ' + tonAd(+p[2], 'minör');
+  if (p[0] === 'u') return USUL[p[1]].ad;
+  if (p[0] === 'g') return (MAKAM[p[1]] ? MAKAM[p[1]].ad + ' dizisi' : CESNI[p[1]].ad) + ' göçürme';
   return id;
 }
-function ogeDali(id) { return { p: 'perde', k: 'koma', d: 'cesni', m: 'makam', b: 'bati' }[id.split(':')[0]]; }
+function ogeDali(id) { return { p: 'perde', k: 'koma', d: 'cesni', m: 'makam', b: 'bati', u: 'usul', g: 'gocurme' }[id.split(':')[0]]; }
 function ogeSorusu(id) {
   const p = id.split(':')[0];
   if (p === 'p') return perdeOgeSorusu(id);
   if (p === 'k') return komaOgeSorusu(id);
   if (p === 'd') return cesniOgeSorusu(id);
   if (p === 'm') return makamOgeSorusu(id);
+  if (p === 'u') return usulOgeSorusu(id.slice(2));
+  if (p === 'g') return gocurmeOgeSorusu(id);
   return batiOgeSorusu(id);
 }
 
@@ -366,6 +372,19 @@ function soruGoster() {
     g.appendChild(btn);
   }
 
+  // Formülü göster: göçürme ve dizi yazma sorularında formül başlıkta verilmez; isteyen yarım kalp (kalpsiz turda yarım hata) karşılığı açar
+  if (veri.formul) {
+    const fb = h('button', { class: 'dugme ince formulDugme', type: 'button' }, '🔑 Formülü göster' + (TUR.kalpVar ? ' (½ ❤️)' : ' (½ hata)'));
+    fb.disabled = TUR.kalpVar && TUR.kalpKalan <= 0.5;
+    fb.onclick = function () {
+      if (q.cevaplandi || q.formulAcik) return;
+      if (TUR.kalpVar) { if (TUR.kalpKalan <= 0.5) return; TUR.kalpKalan -= 0.5; }
+      TUR.hata += 0.5; q.formulAcik = true;
+      kalpYaz();
+      fb.replaceWith(h('div', { class: 'formulAcik' }, 'Formül: ', h('b', null, veri.formul)));
+    };
+    g.appendChild(fb);
+  }
   const ip = h('div', { id: 'oyIpucu', class: 'ipucu', hidden: true });
   g.appendChild(ip);
   if (TUR.ipucuAcik && veri.ipucu) ipucuGoster(veri.ipucu);
@@ -603,7 +622,7 @@ function sinifCiz(alan, veri, q, kontrol) {
     c.ogeler.forEach(function (o) {
       const satir = h('div', { class: 'sinifSatir' + (sonuc[o.key] ? ' ' + sonuc[o.key] : '') },
         h('div', { class: 'sinifOge' + (o.glif ? ' bravura' : '') }, o.glif || o.metin));
-      const dug = h('div', { class: 'sinifKutular' + (c.kutular.length > 3 ? ' cok' : '') });
+      const dug = h('div', { class: 'sinifKutular' + (c.kutular.length > 2 ? ' cok' : '') });
       c.kutular.forEach(function (k) {
         const b = h('button', { class: 'sinifKutu' + (secim[o.key] === k.key ? ' secili' : ''), type: 'button', disabled: q.cevaplandi || sonuc[o.key] === 'dogru' }, k.metin);
         b.onclick = function () { secim[o.key] = k.key; if (sonuc[o.key] === 'yanlis') sonuc[o.key] = ''; ciz(); };
@@ -664,7 +683,7 @@ function cevapla(dogru, ozelMesaj, dogruGorsel, ekAciklama) {
     sonsuzDogru(q, false);
     if (TUR.kayit && veri.oge && !q.joker) {
       ogeCevap(veri.oge, true);
-      if (!DURUM.kart[veri.oge] && ogeDali(veri.oge) !== 'bati') { DURUM.kart[veri.oge] = 1; TUR.yeniKart.push(ogeAdi(veri.oge)); }
+      if (!DURUM.kart[veri.oge] && 'pkdm'.indexOf(veri.oge[0]) >= 0) { DURUM.kart[veri.oge] = 1; TUR.yeniKart.push(ogeAdi(veri.oge)); }
     }
   } else {
     TUR.hata++;

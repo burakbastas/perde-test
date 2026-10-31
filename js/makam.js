@@ -189,6 +189,7 @@ function makamSoru(tip, m, havuz) {
     q.yer = { slotlar: m.dizi.map(function (n, i) { return i === 0 ? { sabit: n } : {}; }), palet: 'aeu', beklenen: m.dizi, harfSirali: true, smin: 24, smax: 45 };
     q.dogruMetin = m.dizi.map(perdeAdiNota).join(' – ');
     q.ipucu = m.altAd + ' + ' + m.ustAd;
+    q.formul = formulMetni(m.dizi.slice(1).map(function (n, i) { return komaOf(n) - komaOf(m.dizi[i]); }));
   } else if (tip === 'makamKur') {
     q.tip = 'dizi';
     q.soru = { metin: m.ad }; q.alt = 'Makamın dizisini kur: önce alt parça, sonra üst parça';
@@ -437,12 +438,13 @@ function yanlisYazim(notalar) {
 function gocurmeSorusu(asama, tip, perdesiz) {
   if (Array.isArray(asama)) asama = rastgele(asama);
   let yapi, ad, yer, gucluIdx = null, oge = null;
+  const sabit = GOCURME_SABIT; GOCURME_SABIT = null;
   if (asama === 'makam') {
-    const m = rastgele(MAKAMLAR);
-    yapi = m.altC.araliklar.concat(m.ustC.araliklar); ad = m.ad + ' makamı dizisi'; yer = m.karar; gucluIdx = m.gucluIdx;
+    const m = sabit && MAKAM[sabit.slice(2)] ? MAKAM[sabit.slice(2)] : rastgele(MAKAMLAR.filter(function (x) { return x.dizi && MK_TUM12.indexOf(x.id) >= 0; }));
+    yapi = m.dizi.slice(1).map(function (n, i) { return komaOf(n) - komaOf(m.dizi[i]); }); ad = m.ad + ' makamı dizisi'; yer = m.karar; gucluIdx = m.gucluIdx; oge = 'g:' + m.id;
   } else {
-    const c = rastgele(cesniler(asama === 'dortlu' ? D_TEMEL : B_TEMEL));
-    yapi = c.araliklar; ad = c.ad; yer = c.yer; oge = c.oge;
+    const c = sabit && CESNI[sabit.slice(2)] ? CESNI[sabit.slice(2)] : rastgele(cesniler(asama === 'dortlu' ? D_TEMEL : B_TEMEL));
+    yapi = c.araliklar; ad = c.ad; yer = c.yer; oge = 'g:' + c.id;
   }
   const g = gocurmeBul(yapi, yer, perdesiz ? GOCURME_BASLANGIC_TAM : null);
   if (!g) return gocurmeSorusu(asama, tip, perdesiz);
@@ -455,7 +457,7 @@ function gocurmeSorusu(asama, tip, perdesiz) {
     : '<b>' + ad + '</b> ' + hedef + ' perdesinde: ' +
       g.notalar.map(function (n) { return KOMADAN_PERDE[komaOf(n)].ad; }).join(' – ') +
       gocurmeAdimlari(g.notalar);
-  const baslik = perdesiz ? ad + ' · ' + formul : ad + ' → ' + hedef;
+  const baslik = perdesiz ? ad : ad + ' → ' + hedef;
   if (r < 0.4) {
     // n. ses hangi perde
     let i = gucluIdx && Math.random() < 0.5 ? gucluIdx : 1 + Math.floor(Math.random() * (g.notalar.length - 1));
@@ -484,7 +486,7 @@ function gocurmeSorusu(asama, tip, perdesiz) {
       soru: { metin: baslik, kucuk: true }, alt: perdesiz ? 'Aynı sesten başlayan dört yazım var. Doğru göçürülmüş olan hangisi?' : 'Doğru yazım hangisi?',
       siklar: [{ key: 'd', porte: { notalar: g.notalar, aralik: genis ? 33 : 38, enAz: genis ? 320 : 250 }, genis: true }]
         .concat(yanlislar.map(function (y, i) { return { key: 'y' + i, porte: { notalar: y.n, aralik: genis ? 33 : 38, enAz: genis ? 320 : 250 }, genis: true }; })),
-      dogru: 'd', dogruMetin: g.notalar.map(perdesiz ? notaKisa : perdeAdiNota).join(' – '), aciklama: aciklama,
+      dogru: 'd', dogruMetin: g.notalar.map(perdesiz ? notaKisa : perdeAdiNota).join(' – '), aciklama: aciklama, formul: perdesiz ? formul : null,
       ipucu: perdesiz ? 'Her adımda doğal aralığı bul (Mi–Fa ve Si–Do bakiye, diğerleri tanini), gereken aralıkla farkını işarete çevir.' : 'Her sesin perdesini bul, sonra o harfe göre işaretini seç.'
     };
   }
@@ -493,8 +495,15 @@ function gocurmeSorusu(asama, tip, perdesiz) {
     soru: { metin: baslik, kucuk: true }, alt: perdesiz ? 'İlk ses verildi. Aynı aralıklarla kalan sesleri porteye kur' : 'İlk ses verildi. Göçürülmüş diziyi porteye kur',
     yer: { slotlar: g.notalar.map(function (n, i) { return i === 0 ? { sabit: n } : {}; }), palet: 'aeu', beklenen: g.notalar, harfSirali: true },
     dogruMetin: g.notalar.map(function (n) { return perdesiz ? notaKisa(n) : KOMADAN_PERDE[komaOf(n)].ad; }).join(' – '),
-    aciklama: aciklama, ipucu: 'Her ses bir sonraki harfe yazılır.'
+    aciklama: aciklama, ipucu: 'Her ses bir sonraki harfe yazılır.', formul: formul
   };
+}
+let GOCURME_SABIT = null;   // Tekrar: belirli bir yapının göçürme sorusu
+function gocurmeOgeSorusu(id) {
+  const kim = id.slice(2);
+  GOCURME_SABIT = id;
+  const asama = MAKAM[kim] ? 'makam' : (CESNI[kim] && CESNI[kim].tur === 'Beşli' ? 'besli' : 'dortlu');
+  return gocurmeSorusu(asama, rastgele(['porte', 'kur']), true);
 }
 function gocurmeUretici(asama, perdesiz) {
   return function (n) { const L = []; for (let i = 0; i < n; i++) L.push(gocurmeSorusu(asama, undefined, perdesiz)); return L; };

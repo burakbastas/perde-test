@@ -133,7 +133,9 @@ function notaCiz(svg, n, nx, renk) {
 function porteSVG(spec) {
   spec = spec || {};
   const notalar = spec.notalar || [];
-  const aralik = spec.aralik || 40;
+  // Etiketler (notaların altındaki yazılar) birbirine girmesin: en uzun etikete göre notaları aç
+  const enUzun = spec.etiketler ? Math.max.apply(null, spec.etiketler.map(function (e) { return e ? String(e).length : 0; })) : 0;
+  const aralik = Math.max(spec.aralik || 40, Math.ceil(enUzun * 6.4 + 10));
   const svg = svgEl('svg', { class: 'porte', preserveAspectRatio: 'xMidYMid meet', role: 'img' });
   const x = 46 + (spec.donanim ? spec.donanim.length : 0) * 12;
   const basla = Math.max(spec.donanim && spec.donanim.length ? x + 26 : 74, 74);

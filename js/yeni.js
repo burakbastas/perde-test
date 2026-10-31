@@ -71,7 +71,7 @@ function ykEksik(q, mod) {
   });
   const yq = Object.assign({}, q, { yer: Object.assign({}, y, { slotlar: yeniSlot, kabul: kabul.length ? kabul : [bek] }) });
   const isaretli = bos.every(function (i) { return y.slotlar[i].konum; });
-  if (isaretli && bos.length === 1 && serbest.length === 2) yq.alt = 'Bir yazım verildi: öbür notanın işaretini koy';
+  if (isaretli && bos.length === 1 && serbest.length === 2) yq.alt = (q.yerSatiri ? q.yerSatiri + '. ' : '') + 'Bir yazım verildi: öbür notanın işaretini koy';
   else if (isaretli) yq.alt = 'Bazı işaretler verildi: eksik işaretleri koy';
   else yq.alt = (mod === 'tek' ? 'Tek eksik nota: ' : 'Eksik notaları tamamla: ') + (q.alt || '');
   return yq;

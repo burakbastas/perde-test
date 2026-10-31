@@ -148,7 +148,9 @@ function karsilastirKarti(c) {
   return { baslik: a.ad + ' – ' + b.ad, cizim: function () {
       return h('div', null, h('div', { class: 'kartPorte' }, h('small', null, a.ad), porteSVG(makamDiziPorte(a))), h('div', { class: 'kartPorte' }, h('small', null, b.ad), porteSVG(makamDiziPorte(b))));
     },
-    metin: '<p>İkisinin de kararı ' + (a.karar === b.karar ? '<b>' + a.karar + '</b>' : a.karar + ' / ' + b.karar) + '.</p><p>Ayrıldıkları yer: ' + (fark.length ? fark.join('; ') : 'dizi aynı, seyir farklı') + '.</p>' };
+    metin: '<p>Karar: ' + (a.karar === b.karar ? '<b>' + a.karar + '</b> (ikisinde de)' : a.ad + ' ' + a.karar + ', ' + b.ad + ' ' + b.karar) + '.</p>' +
+      '<p>Ayrıldıkları yer: ' + (fark.length ? fark.join('; ') : 'dizi ve güçlü aynı') + '.</p>' +
+      '<p>Seyir: ' + a.ad + ' ' + (a.seyir || '?') + ', ' + b.ad + ' ' + (b.seyir || '?') + '.</p>' };
 }
 
 // ---------- Genel kültür: Formlar ----------
@@ -166,18 +168,58 @@ const FORM_KARTLARI = [
     deneme: { soru: 'Klasik fasıl hangi eserle kapanır?', siklar: ['Saz semaisi', 'Peşrev', 'Beste'], dogru: 'Saz semaisi', aciklama: 'Fasıl peşrevle açılır, saz semaisiyle kapanır.' } }
 ];
 
-// ---------- Modülleri ekle ----------
-OGREN_MODULLERI.push(
-  { id: 'koken', ikon: '🗺️', ad: 'Perde adlarının kökeni', baglanti: 'p1', kartlar: KOKEN_KARTLARI },
-  { id: 'ezber', ikon: '🧠', ad: 'Perde ezberleme araçları', baglanti: 'p2', kartlar: EZBER_KARTLARI },
-  { id: 'daire', ikon: '⭕', ad: 'Koma dairesi', baglanti: 'gc1', kartlar: function () { return [komaDairesiKarti()]; } },
-  { id: 'karsilastir', ikon: '⚖️', ad: 'Makam karşılaştırma', baglanti: 'mk3', kartlar: function () { return KARSILASTIR.map(karsilastirKarti).filter(Boolean); } },
-  { id: 'formlar', ikon: '📜', ad: 'Genel kültür: formlar', baglanti: null, kartlar: FORM_KARTLARI }
-);
-(function () {
-  const sira = ['nota', 'oktav', 'aralik', 'isaret', 'perde', 'koken', 'merdiven', 'ezber', 'usul', 'cesni', 'gocurme', 'daire', 'makam', 'karsilastir', 'ahenk', 'formlar', 'tartim'];
-  OGREN_MODULLERI.sort(function (a, b) { const x = sira.indexOf(a.id), y = sira.indexOf(b.id); return (x < 0 ? 99 : x) - (y < 0 ? 99 : y); });
-})();
+// ---------- Araçlar (Öğren → Araçlar) ----------
+// Ders sırasına girmeyen, istendiğinde açılan araçlar; ilerleme sayacını etkilemez
+function aracModal(baslik, govde, alt) {
+  modalAc(h('div', { class: 'aracModal' }, h('h2', null, baslik), govde, alt || null, dugme('Kapat', modalKapat, 'gri')), { genis: true });
+}
+function perdeEzberAraci() {
+  aracModal('🧠 Perde ezber', h('div', { class: 'ezberAraclar' },
+    dugme('🗓️ Günün 5 perdesi', function () { modalKapat(); gununPerdeleriBaslat(); }),
+    dugme('🧩 Eşleştir: ad ↔ yazım', function () { modalKapat(); perdeEslestirBaslat(); }, 'ikincil'),
+    dugme('💭 Kendi çağrışımın', cagrisimSayfasi, 'ikincil'),
+    dugme('🗺️ Perde adlarının kökeni', function () { modalKapat(); dersGoster('🗺️ Perde adlarının kökeni', KOKEN_KARTLARI, function () { ekranAc('ekranAna'); sekmeAc('ogren'); }, 'Bitir'); }, 'ikincil')),
+    h('p', { class: 'kucukNot' }, 'Günün 5 perdesi her gün değişir: önce kartlar, sonra kısa bir hız turu. Çağrışımların yalnız bu cihazda saklanır.'));
+}
+function komaDairesiAraci() {
+  const k = komaDairesiKarti();
+  aracModal('⭕ Koma dairesi', k.cizim(), h('div', { class: 'kucukNot', html: k.metin }));
+}
+function perdeBulAraci() {
+  const sonuc = h('div', { class: 'pbSonuc' });
+  const goster = function (p) {
+    bosalt(sonuc);
+    sonuc.appendChild(h('div', { class: 'pbBaslik' }, h('b', null, p.ad), ' = ' + perdeYazimMetni(p)));
+    const kart = p.tam ? null : hkPerdeKarti(p, null);
+    if (kart) sonuc.appendChild(kart);
+    sonuc.appendChild(h('p', { class: 'kucukNot' }, perdeKural(p)));
+    if (cagrisimOku(p.ad)) sonuc.appendChild(h('p', { class: 'kucukNot' }, '💭 ' + cagrisimOku(p.ad)));
+  };
+  const izgara = h('div', { class: 'pbIzgara' });
+  PERDELER.filter(Boolean).forEach(function (p) {
+    izgara.appendChild(h('button', { type: 'button', class: 'cip' + (p.tam ? ' tam' : ''), onclick: function () { goster(p); sonuc.scrollIntoView({ block: 'nearest' }); } }, p.ad));
+  });
+  goster(PERDE['Segâh']);
+  aracModal('🪜 Perde bul', h('div', null, sonuc, h('p', { class: 'kucukNot' }, 'Bir perdeye dokun:'), izgara));
+}
+function makamKarsilastirAraci() {
+  const L = MAKAMLAR.filter(function (m) { return m.dizi; });
+  const sec = function (varsayilan) {
+    const s = h('select', { class: 'mkSec' });
+    L.forEach(function (m) { const o = h('option', { value: m.id }, m.ad); if (m.id === varsayilan) o.selected = true; s.appendChild(o); });
+    return s;
+  };
+  const a = sec('ussak'), b = sec('kurdi'), alan = h('div');
+  const ciz = function () {
+    const k = karsilastirKarti([a.value, b.value]);
+    bosalt(alan);
+    if (a.value === b.value) { alan.appendChild(h('p', { class: 'kucukNot' }, 'İki farklı makam seç.')); return; }
+    alan.appendChild(k.cizim()); alan.appendChild(h('div', { class: 'metinSayfa', html: k.metin }));
+  };
+  a.onchange = ciz; b.onchange = ciz; ciz();
+  aracModal('⚖️ Makam karşılaştır', h('div', null, h('div', { class: 'mkSecSatir' }, a, h('span', null, '↔'), b), alan));
+}
+function formlarAc() { dersGoster('📜 Formlar', FORM_KARTLARI, function () { ekranAc('ekranAna'); sekmeAc('ogren'); }, 'Bitir'); }
 
 // ---------- Kaynaklar ve lisanslar ----------
 function kaynaklarSayfasi() {

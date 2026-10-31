@@ -113,6 +113,8 @@ function cesniSoru(tip, c, havuz, sikSay) {
     if (c.formul.indexOf('A') >= 0 || havuz.some(function (x) { return x.formul.indexOf('A') >= 0; })) harfler.push('A');
     q.dizi = { havuz: harfler.map(function (x) { return { key: x, metin: x }; }), uzunluk: c.formul.length, beklenen: c.formul.split(''), tekrarli: true };
     q.dogruMetin = formulGoster(c.formul);
+    // Yanlışta çeşni porte üzerinde de gösterilir: notalar ve aralık harfleri
+    q.dogruGorsel = function () { return porteSVG({ notalar: c.notalar, aralik: 40, enAz: 240, etiketler: [c.yer].concat(c.formul.split('')) }); };
   } else if (tip === 'porteKur') {
     q.tip = 'yer';
     q.soru = { metin: c.ad }; q.alt = 'İlk ses verildi. Kalan sesleri porteye kur (her ses bir sonraki harfe yazılır)';
