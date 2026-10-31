@@ -105,7 +105,7 @@ function kesfetPorte() {
       const n = y && y.deger()[0];
       if (!n) return;
       const p = PERDELER.find(function (x) { return x.tam && notaEsit(x.parcalar[0], n); });
-      ad.innerHTML = '<b>' + HARF_AD[n.h] + n.o + '</b>' + (p ? ' · perde adı: <b>' + p.ad + '</b>' : '');
+      ad.innerHTML = '<b>' + HARF_AD[n.h] + '</b>' + (p ? ' · perde adı: <b>' + p.ad + '</b>' : '');
     }
   });
   kap.appendChild(y.el);
@@ -136,7 +136,7 @@ const OGREN_MODULLERI = [
   { id: 'oktav', ikon: '↕️', ad: 'Oktav, pest ve tiz', baglanti: 'p1', kartlar: [
     { baslik: 'Oktav', cizim: function () { return h('div', { class: 'kartPorte' }, porteSVG({ notalar: [{ h: 4, o: 4 }, { h: 4, o: 5 }], aralik: 60, etiketler: ['Rast', 'Gerdâniye'] })); },
       metin: '<p>Aynı adlı iki notanın arasındaki uzaklık <b>oktav</b>dır. Batı’da ikisi de Sol; Türk müziğinde pestteki <b>Rast</b>, tizdeki <b>Gerdâniye</b> adını alır.</p>' },
-    { baslik: 'Ek çizgiler', cizim: function () { return h('div', { class: 'kartPorte' }, porteSVG({ notalar: [{ h: 0, o: 4 }, { h: 1, o: 4 }, { h: 5, o: 5 }, { h: 0, o: 6 }], aralik: 44, etiketler: ['Do4', 'Re4', 'La5', 'Do6'] })); },
+    { baslik: 'Ek çizgiler', cizim: function () { return h('div', { class: 'kartPorte' }, porteSVG({ notalar: [{ h: 0, o: 4 }, { h: 1, o: 4 }, { h: 5, o: 5 }, { h: 0, o: 6 }], aralik: 44, etiketler: ['Do', 'Re', 'La', 'Do'] })); },
       metin: '<p>Porteye sığmayan notalar için kısa <b>ek çizgiler</b> çizilir. Alttaki Do, bir ek çizgi üzerindedir.</p>' },
     { baslik: 'Kaba ve Tiz', metin: '<p>Perde adlarında <b>Kaba</b> bir oktav pest, <b>Tiz</b> bir oktav tiz demektir: Çargâh → <b>Kaba Çargâh</b> ve <b>Tiz Çargâh</b>.</p>',
       deneme: { soru: 'Tiz Bûselik, Bûselik’e göre nerede?', siklar: ['Bir oktav tizde', 'Bir oktav pestte', 'Aynı yerde'], dogru: 'Bir oktav tizde', aciklama: 'Tiz öneki bir oktav yukarısı demektir.' } }
@@ -158,6 +158,7 @@ const OGREN_MODULLERI = [
     { baslik: 'Bir perde, iki yazım', cizim: function () { return h('div', { class: 'kartPorte' }, porteSVG({ notalar: PERDE['Segâh'].parcalar, aralik: 48, etiketler: ['diyezli', 'bemollü'] })); },
       metin: '<p>Ara perdeler hem diyezle hem bemolle yazılabilir. <b>Segâh</b> = La büyük mücenneb diyez = Si koma bemol. Oyunda ikisini birlikte göreceksin.</p>' }
   ] },
+  { id: 'merdiven', ikon: '🪜', ad: 'Perde merdivenleri', baglanti: 'p2', kartlar: function () { return merdivenKartlari(); } },
   { id: 'cesni', ikon: '🎻', ad: 'Dörtlü, beşli, çeşni', baglanti: 'db1', kartlar: [
     { baslik: 'Küçük yapı taşları', cizim: function () { return h('div', { class: 'kartPorte' }, porteSVG({ notalar: CESNI['d-rast'].notalar, aralik: 40, enAz: 240, etiketler: ['Rast', 'T', 'K', 'S'] })); },
       metin: '<p>Art arda dört sese <b>dörtlü</b>, beş sese <b>beşli</b> denir. Seslerin arasındaki aralıklar harflerle yazılır: Rast dörtlüsü <b>T K S</b>.</p><p>Bu küçük yapılar makamların yapı taşıdır; melodik renklerine <b>çeşni</b> denir.</p>' }
@@ -170,4 +171,68 @@ const OGREN_MODULLERI = [
   ] },
   { id: 'gocurme', ikon: '🔁', ad: 'Göçürme', baglanti: null, kartlar: null }   // kartları göçürme dersinden alır
 ];
-OGREN_MODULLERI[7].kartlar = gocurmeDersi();
+OGREN_MODULLERI.push(
+  { id: 'usul', ikon: '🥁', ad: 'Usul nedir?', baglanti: 'u1', kartlar: function () { return USUL_UNITELER[0].ders(); } },
+  { id: 'ahenk', ikon: '🎚️', ad: 'Ahenk', baglanti: 'a1', kartlar: function () { return AHENK_UNITELER[0].ders(); } },
+  { id: 'tartim', ikon: '🎵', ad: 'Tartım ve ritim', baglanti: 'b11', kartlar: function () { return T2_DERS.b11.concat(T2_DERS.b12.slice(0, 1), T2_DERS.b13.slice(0, 1), T2_DERS.b15.slice(0, 1)); } }
+);
+OGREN_MODULLERI.find(function (m) { return m.id === 'gocurme'; }).kartlar = gocurmeTemelDersi;
+// Pedagojik sıra (Dallar ile aynı): koma → perde → usul → çeşni → göçürme → makam → ahenk → tartım
+(function () {
+  const sira = ['nota', 'oktav', 'aralik', 'isaret', 'perde', 'usul', 'cesni', 'gocurme', 'makam', 'ahenk', 'tartim'];
+  OGREN_MODULLERI.sort(function (a, b) { return sira.indexOf(a.id) - sira.indexOf(b.id); });
+})();
+function modulKartlari(m) { return typeof m.kartlar === 'function' ? m.kartlar() : m.kartlar; }
+
+// =====================================================
+// HIZLI BAKIŞ: başvuru tabloları
+// =====================================================
+function hizliBakis(baslangic) {
+  let sekme = baslangic || 'koma';
+  const cipler = h('div', { class: 'hbCipler' });
+  const govde = h('div', { class: 'hbGovde' });
+  const SEK = [['koma', 'Koma'], ['perde', 'Perdeler'], ['cesni', 'Dörtlü-beşli'], ['makam', 'Makamlar'], ['usul', 'Usuller'], ['ahenk', 'Ahenkler']];
+  function tablo(basliklar, satirlar) {
+    return h('table', { class: 'hbTablo' }, h('thead', null, h('tr', null, basliklar.map(function (b) { return h('th', null, b); }))),
+      h('tbody', null, satirlar.map(function (r) { return h('tr', null, r.map(function (x) { return h('td', null, x); })); })));
+  }
+  function ciz() {
+    if (typeof ritimDur === 'function') ritimDur();
+    bosalt(cipler);
+    SEK.forEach(function (x) { cipler.appendChild(h('button', { type: 'button', class: 'cip' + (x[0] === sekme ? ' aktif' : ''), onclick: function () { sekme = x[0]; ciz(); } }, x[1])); });
+    bosalt(govde);
+    if (sekme === 'koma') {
+      govde.appendChild(h('div', { class: 'hbCizim' }, komaCetveliSVG()));
+      govde.appendChild(tablo(['Aralık', 'Koma', 'Harf'], [['Koma', '1', 'F'], ['Bakiye', '4', 'B'], ['Küçük mücenneb', '5', 'S'], ['Büyük mücenneb', '8', 'K'], ['Tanini', '9', 'T'], ['Artık ikili', '12–13', 'A']]));
+      govde.appendChild(h('p', { class: 'kucukNot' }, 'Bir oktav 53 koma. Diyez (sol) ve bemol (sağ) işaretleri:'));
+      govde.appendChild(aeuIsaretTablosu());
+    } else if (sekme === 'perde') {
+      // Sent: Rast'tan uzaklık (1 koma ≈ 22,6 sent); Batı farkı: eşit bölünmüş en yakın yarım sese göre sapma
+      const R0 = PERDE['Rast'].koma;
+      govde.appendChild(tablo(['Perde', 'Yazım', 'Koma', 'Sent', 'Batı farkı'], PERDELER.map(function (p) {
+        const k = p.koma - R0, sent = k * 1200 / 53, yarim = Math.round(sent / 100), sap = Math.round(sent - yarim * 100);
+        return [p.tam ? h('b', null, p.ad) : p.ad, p.parcalar.map(notaKisa).join(' = '), String(k), String(Math.round(sent)), (sap > 0 ? '+' : sap < 0 ? '−' : '±') + Math.abs(sap)];
+      })));
+      govde.appendChild(h('p', { class: 'kucukNot' }, 'Koma ve sent Rast’a göre (1 koma ≈ 22,6 sent). Batı farkı: piyanodaki en yakın sese göre kaç sent tiz (+) ya da pest (−).'));
+    } else if (sekme === 'cesni') {
+      govde.appendChild(tablo(['Dörtlü / beşli', 'Aralıklar', 'Yeri'], CESNILER.map(function (c) { return [c.ad, formulGoster(c.formul), c.yer]; })));
+      govde.appendChild(h('p', { class: 'kucukNot' }, 'T tanini · K büyük mücenneb · S küçük mücenneb · B bakiye · A artık ikili'));
+    } else if (sekme === 'makam') {
+      govde.appendChild(tablo(['Makam', 'Karar', 'Güçlü', 'Seyir', 'Yapı'], MAKAMLAR.map(function (m) { return [h('b', null, m.ad), m.karar, m.guclu, m.seyir || '', m.altAd + ' + ' + m.ustAd]; })));
+    } else if (sekme === 'usul') {
+      govde.appendChild(tablo(['Usul', 'Ölçü', 'Vuruşlar', ''], U_HEPSI.map(function (id) {
+        const u = USUL[id];
+        return [h('b', null, u.ad), u.olcu, u.olaylar.map(function (e) { return e.hece; }).join(' '),
+          h('button', { class: 'hbCal', type: 'button', 'aria-label': u.ad + ' çal', onclick: function () {
+            sesHazirla(); ritimCal({ olaylar: u.olaylar, onaltilikSn: function () { return usulOnaltilikSn(u); }, devir: 2 });
+          } }, '▶')];
+      })));
+      govde.appendChild(h('p', { class: 'kucukNot' }, '▶ usulü iki devir çalar. Hız ve mertebe seçmek için Bendir’i kullan.'));
+    } else if (sekme === 'ahenk') {
+      govde.appendChild(tablo(['Ahenk', 'Yeni adı', 'Rast’ın sesi'], AHENKLER.map(function (a) { return [h('b', null, a.ad), a.yeniTam, a.rast]; })));
+    }
+  }
+  ciz();
+  modalAc(h('div', null, h('h2', null, '📏 Hızlı bakış'), cipler, govde, dugme('Kapat', modalKapat, 'gri')),
+    { genis: true, kapaninca: function () { if (typeof ritimDur === 'function') ritimDur(); } });
+}

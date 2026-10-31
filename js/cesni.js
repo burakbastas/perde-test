@@ -226,6 +226,89 @@ CESNI_UNITELER[4].ders = function () {
     .concat(cesniler(C_ILERI).map(cesniKarti));
 };
 
+// =====================================================
+// db6 · ÇEŞNİYİ DİZİDE BUL (makam dizilerinin içindeki dörtlü ve beşliler)
+// Makamlar makam.js'de tanımlı; liste ilk kullanımda hesaplanır.
+// =====================================================
+let CESNI_BULUNTU = null;
+function cesniBuluntulari() {
+  if (CESNI_BULUNTU) return CESNI_BULUNTU;
+  CESNI_BULUNTU = [];
+  MAKAMLAR.forEach(function (m) {
+    if (!m.dizi) return;
+    const k = m.dizi.map(komaOf);
+    CESNILER.forEach(function (c) {
+      for (let i = 0; i + c.araliklar.length < k.length; i++) {
+        let tut = true;
+        for (let j = 0; j < c.araliklar.length; j++) if (k[i + j + 1] - k[i + j] !== c.araliklar[j]) { tut = false; break; }
+        if (tut) CESNI_BULUNTU.push({ m: m, c: c, i: i });
+      }
+    });
+  });
+  return CESNI_BULUNTU;
+}
+function diziVurguPorte(m, bas, uzun) {
+  return { notalar: m.dizi.map(function (n, i) { return i >= bas && i <= bas + uzun ? Object.assign({ renk: 'var(--vurgu)' }, n) : n; }), aralik: 34, enAz: 330 };
+}
+function cesniDiziSorusu(tip, turFiltre) {
+  const tum = cesniBuluntulari().filter(function (b) { return !turFiltre || b.c.tur === turFiltre; });
+  if (tip === 'yerBul') {
+    // dizide yalnızca bir kez geçen çeşniler
+    const tek = tum.filter(function (b) { return tum.filter(function (x) { return x.m === b.m && x.c === b.c; }).length === 1; });
+    const b = rastgele(tek);
+    const enSon = b.m.dizi.length - 1 - b.c.araliklar.length;
+    const adaylar = karistir(Array.from({ length: enSon + 1 }, function (_, i) { return i; }).filter(function (i) { return i !== b.i; })).slice(0, 3);
+    const sik = function (i) { return { key: 'i' + i, metin: (i + 1) + '. ses · ' + HARF_AD[b.m.dizi[i].h] }; };
+    return {
+      oge: b.c.oge, tip: 'secim',
+      soru: { porte: { notalar: b.m.dizi, aralik: 34, enAz: 330, etiketler: b.m.dizi.map(function (_, i) { return String(i + 1); }) } },
+      alt: b.m.ad + ' dizisinde ' + b.c.ad + ' kaçıncı sesten başlıyor?',
+      siklar: [sik(b.i)].concat(adaylar.map(sik)), dogru: 'i' + b.i, dogruMetin: (b.i + 1) + '. ses (' + KOMADAN_PERDE[komaOf(b.m.dizi[b.i])].ad + ')',
+      ipucu: b.c.ad + ': ' + formulGoster(b.c.formul) + '. Komşu sesler arasındaki aralıkları say.',
+      aciklama: '<b>' + b.c.ad + '</b> (' + formulGoster(b.c.formul) + ') ' + b.m.ad + ' dizisinin ' + (b.i + 1) + '. sesinden, <b>' + KOMADAN_PERDE[komaOf(b.m.dizi[b.i])].ad + '</b> perdesinden başlar.'
+    };
+  }
+  const anlamli = tum.filter(function (b) { return !(b.c === b.m.altC && b.i === 0) && !(b.c === b.m.ustC && b.i === b.m.altC.notalar.length - 1); });
+  const b = rastgele(anlamli.length ? anlamli : tum);
+  const ayniUzun = CESNILER.filter(function (x) { return x.tur === b.c.tur && x !== b.c; });
+  const dis = karistir(ayniUzun).slice(0, 3);
+  return {
+    oge: b.c.oge, tip: 'secim',
+    soru: { porte: diziVurguPorte(b.m, b.i, b.c.araliklar.length) },
+    alt: b.m.ad + ' dizisi · Renkli ' + (b.c.araliklar.length + 1) + ' ses hangi ' + b.c.tur.toLowerCase() + '?',
+    siklar: [b.c].concat(dis).map(function (x) { return { key: x.id, metin: x.ad }; }), dogru: b.c.id, dogruMetin: b.c.ad,
+    ipucu: 'Renkli seslerin aralıklarını sırayla oku.',
+    aciklama: cesniAciklama(b.c) + '<br>' + b.m.ad + ' dizisinde ' + KOMADAN_PERDE[komaOf(b.m.dizi[b.i])].ad + ' perdesinden başlar.'
+  };
+}
+function cesniDiziUretici(tipler) {
+  return function (n) {
+    const L = [];
+    for (let i = 0; i < n; i++) { const t = tipler[i % tipler.length]; L.push(cesniDiziSorusu(t[0], t[1])); }
+    return karistir(L);
+  };
+}
+CESNI_UNITELER.push({
+  id: 'db6', dal: 'cesni', no: 6, ad: 'Çeşniyi dizide bul', kisa: 'Makam dizilerinin içindeki dörtlü ve beşliler', ogeler: [],
+  seviyeler: [
+    { id: 'db6-1', tip: 'seviye', ad: 'Renkli dörtlü hangisi?', soruSay: 8, uret: cesniDiziUretici([['vurgu', 'Dörtlü']]) },
+    { id: 'db6-2', tip: 'seviye', ad: 'Renkli beşli hangisi?', soruSay: 8, uret: cesniDiziUretici([['vurgu', 'Beşli'], ['vurgu', 'Dörtlü']]) },
+    { id: 'db6-3', tip: 'seviye', ad: 'Çeşni nerede başlıyor?', soruSay: 8, uret: cesniDiziUretici([['yerBul']]) },
+    { id: 'db6-boss', tip: 'boss', ad: 'Çeşni avcısı finali', soruSay: 10, uret: cesniDiziUretici([['vurgu'], ['yerBul'], ['vurgu', 'Beşli']]) }
+  ]
+});
+CESNI_UNITELER[5].ders = function () {
+  const m = MAKAM.rast;
+  return [
+    { baslik: 'Dizinin içinde başka çeşniler', cizim: function () { return h('div', { class: 'kartPorte' }, porteSVG(diziVurguPorte(m, 1, 3))); }, metin:
+      '<p>Bir makam dizisi yalnızca iki parçadan ibaret değildir. Dizinin <b>farklı seslerinden</b> başlayarak bakınca içinde başka dörtlü ve beşliler de görülür.</p>' +
+      '<p>Örnek: Rast dizisinde <b>Dügâh</b>’tan başlayan dört ses (La, Si koma bemol, Do, Re) <b>K S T</b>: bir <b>Uşşak dörtlüsü</b>.</p>' },
+    { baslik: 'Nasıl bulunur?', metin:
+      '<p>1️⃣ Komşu sesler arasındaki aralıkları sırayla oku.<br>2️⃣ Harf dizisini (T, K, S, B, A) çeşnilerin formülleriyle karşılaştır.</p>' +
+      '<p>Geçkiler ve çeşniler, makamların içindeki bu küçük yapılardan doğar.</p>' }
+  ];
+};
+
 function cesniOgeSorusu(id) {
   const c = CESNILER.find(function (x) { return x.oge === id; });
   const havuz = CESNILER.slice(0, 12).concat(C_ILERI.indexOf(c.id) >= 0 ? cesniler(C_ILERI) : []);

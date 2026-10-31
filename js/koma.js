@@ -49,7 +49,7 @@ function dortle(dogruKey, havuzListesi, tumListe, anahtar) {
   return karistir(once).concat(karistir(sonra)).slice(0, 3);
 }
 
-function kmSoru(tip, havuz, agir) {
+function kmSoru0(tip, havuz, agir) {
   if (tip === 'simgeAd' || tip === 'adSimge' || tip === 'simgeKoma' || tip === 'simgeKod') {
     const pool = kmSemboller(havuz);
     const adaylar = [];
@@ -114,30 +114,71 @@ function kmSoru(tip, havuz, agir) {
   return q;
 }
 
-// Porteye işaretli nota yazma (sadece gerçek bir perdeye denk gelen yazımlar)
-function kmYazSorusu(havuz) {
-  const adaylar = [];
-  PERDELER.forEach(function (p) {
-    p.parcalar.forEach(function (n) {
-      if (!n.a) return;
-      const tur = n.a.slice(1);
-      if (!havuz.some(function (v) { return v.isaret === tur; })) return;
-      const s = adim(n);
-      if (s < 28 || s > 41) return;
-      adaylar.push({ p: p, n: n });
-    });
+// Yanlış cevaptan sonra gösterilen aralık kartı için: sorunun hangi yüzü sorduğu ve şıkların türü
+const KM_KART_YUZ = {
+  simgeAd: ['ad', 'ad'], adSimge: [null, 'sembol'], simgeKoma: ['koma', 'koma'], simgeKod: ['harf', 'kod'],
+  adKoma: ['koma', 'koma'], komaAd: ['ad', 'ad'], adKod: ['harf', 'kod'], kodAd: ['ad', 'ad']
+};
+function kmSoru(tip, havuz, agir) {
+  const q = kmSoru0(tip, havuz, agir);
+  const y = KM_KART_YUZ[tip];
+  if (y) q.kmKart = { yuz: y[0] || (String(q.dogru).slice(-1) === '+' ? 'diyez' : 'bemol'), tur: y[1] };
+  return q;
+}
+// Şık anahtarından aralığı bul (yanlış seçilen aralığın kartı için)
+function kmSecilenBul(key, tur) {
+  if (key === undefined || key === null) return null;
+  if (tur === 'ad') return KM_VERI.find(function (v) { return v.ad === key; }) || null;
+  if (tur === 'koma') return KM_VERI.find(function (v) { return kmKoma(v) === key; }) || null;
+  if (tur === 'kod') return KM_VERI.find(function (v) { return v.kod === key; }) || null;
+  if (tur === 'sembol') {
+    const yon = String(key).slice(-1), ad = String(key).slice(0, -1);
+    const v = KM_VERI.find(function (x) { return x.ad === ad; });
+    return v ? { v: v, yon: yon } : null;
+  }
+  return null;
+}
+
+// Perde adından işaret: nota yeri hazır, öğrenci işaretini seçer. İki yazımlı perdede ikisi birden
+// (diyezli ve bemollü yazım). Böylece hem işaret hem perde adı ve iki yazımı öğrenilir.
+// Sıklık sırası: en çok kullanılan ara perdeler önce.
+const KM_PERDE_SIK = P2_A.concat(P2_B, P2_C);
+const KM_PERDE_HEPSI = KM_PERDE_SIK.concat(PAKET[2], PAKET[3], PAKET[4]);
+function kmPerdeIsaretSorusu(adlar, havuz) {
+  const tur = havuz ? havuz.map(function (v) { return v.isaret; }) : null;
+  const adaylar = perdeler(adlar).filter(function (p) {
+    if (p.tam) return false;
+    return !tur || p.parcalar.every(function (n) { return n.a && tur.indexOf(n.a.slice(1)) >= 0; });
   });
-  const x = rastgele(adaylar);
-  const v = KM_VERI.find(function (k) { return k.isaret === x.n.a.slice(1); });
+  const p = rastgele(adaylar.length ? adaylar : perdeler(adlar).filter(function (x) { return !x.tam; }));
+  const iki = p.parcalar.length === 2;
+  const v = KM_VERI.find(function (k) { return k.isaret === p.parcalar[0].a.slice(1); });
   return {
-    oge: v.oge, tip: 'yer',
-    soru: { metin: HARF_AD[x.n.h] + x.n.o + ' ' + TUR_AD[x.n.a.slice(1)] + ' ' + (x.n.a[0] === '+' ? 'diyez' : 'bemol') },
-    alt: 'Notayı porteye yerleştir, işaretini seç',
-    yer: { slotlar: [{}], palet: 'aeu', beklenen: [x.n] },
-    dogruMetin: notaMetni(x.n),
-    ipucu: v.ad + ' = ' + kmKoma(v) + ' koma · ' + (x.n.a[0] === '+' ? 'diyez (tize)' : 'bemol (peste)'),
-    aciklama: '<b>' + kacis(notaMetni(x.n)) + '</b> = <b>' + x.p.ad + '</b> perdesi.<br>' + kmAciklama(v)
+    oge: v ? v.oge : null, tip: 'yer', kartPerde: p.ad,
+    soru: { metin: p.ad },
+    alt: iki ? 'Bu perdenin iki yazımı: iki notaya da işaretini koy' : 'Notaya bu perdenin işaretini koy',
+    yer: { slotlar: p.parcalar.map(function (n) { return { konum: n }; }), palet: 'aeuKarisik', beklenen: p.parcalar, etiketler: iki ? ['diyezli', 'bemollü'] : null },
+    dogruMetin: perdeYazimMetni(p),
+    ipucu: perdeKural(p),
+    aciklama: '<b>' + p.ad + '</b> = ' + kacis(perdeYazimMetni(p)) + '<br><span class="soluk">' + kacis(perdeKural(p)) + '</span>'
   };
+}
+function kmPerdeUretici(adlar, h_) {
+  return function (n) {
+    const havuz = h_ ? h_.map(function (x) { return KM_VERI[x]; }) : null;
+    const L = []; let onceki = '';
+    for (let j = 0; j < n; j++) {
+      let q = null;
+      for (let d = 0; d < 8; d++) { q = kmPerdeIsaretSorusu(adlar, havuz); if (q.soru.metin !== onceki) break; }
+      onceki = q.soru.metin; L.push(q);
+    }
+    return L;
+  };
+}
+// Karışık üretici: tipli sorular + perde adından işaret soruları
+function kmKarmaUretici(h_, tipler, agir, adlar, oran) {
+  const a = kmUretici(h_, tipler, agir), b = kmPerdeUretici(adlar, h_);
+  return function (n) { const k = Math.round(n * oran); return karistir(a(n - k).concat(b(k))); };
 }
 
 function kmUretici(h_, tipler, agir) {
@@ -157,15 +198,6 @@ function kmUretici(h_, tipler, agir) {
     return karistir(L);
   };
 }
-function kmYazUretici(h_) {
-  return function (n) {
-    const havuz = h_.map(function (x) { return KM_VERI[x]; });
-    const L = [];
-    for (let j = 0; j < n; j++) L.push(kmYazSorusu(havuz));
-    return L;
-  };
-}
-
 const KM_TUM = ['adKoma', 'komaAd', 'adKod', 'kodAd'];
 const KM_SEMBOL = ['simgeAd', 'adSimge', 'simgeKoma', 'simgeKod'];
 
@@ -207,10 +239,9 @@ const KOMA_UNITELER = [
     kisa: 'Koma, bakiye, mücennebler, tanini, artık ikili',
     ogeler: KM_VERI.map(function (v) { return v.oge; }),
     seviyeler: [
-      { id: 'km1', tip: 'seviye', ad: 'Koma, Bakiye, Tanini: koma değerleri', soruSay: 6, uret: kmUretici([0, 1, 4], ['adKoma', 'komaAd']) },
-      { id: 'km2', tip: 'seviye', ad: 'Koma, Bakiye, Tanini: simge harfleri', soruSay: 6, uret: kmUretici([0, 1, 4], ['adKod', 'kodAd']) },
-      { id: 'km3', tip: 'seviye', ad: 'Mücennebler eklendi: koma değerleri', soruSay: 6, uret: kmUretici([0, 1, 2, 3, 4], ['adKoma', 'komaAd']) },
-      { id: 'km4', tip: 'seviye', ad: 'Mücennebler: simge harfleri', soruSay: 6, uret: kmUretici([0, 1, 2, 3, 4], ['adKod', 'kodAd']) },
+      // 2.11: ilk dört seviye ikiye indirildi (km2 → km1, km4 → km3; yıldızlar taşındı)
+      { id: 'km1', tip: 'seviye', ad: 'Koma, Bakiye, Tanini: değer ve harf', soruSay: 8, uret: kmUretici([0, 1, 4], KM_TUM) },
+      { id: 'km3', tip: 'seviye', ad: 'Mücennebler eklendi: değer ve harf', soruSay: 8, uret: kmUretici([0, 1, 2, 3, 4], KM_TUM) },
       { id: 'km5', tip: 'boss', ad: 'Artık İkili eklendi: karışık', soruSay: 8, uret: kmUretici([0, 1, 2, 3, 4, 5], KM_TUM) }
     ]
   },
@@ -222,8 +253,8 @@ const KOMA_UNITELER = [
       { id: 'km6', tip: 'seviye', ad: 'Diyez ve bemol: Koma, Bakiye', soruSay: 8, uret: kmUretici([0, 1], ['simgeAd', 'adSimge', 'simgeKoma'], 2) },
       { id: 'km7', tip: 'seviye', ad: 'Diyez ve bemol: dört aralık', soruSay: 10, uret: kmUretici([0, 1, 2, 3], ['simgeAd', 'simgeKoma', 'adSimge', 'simgeKod'], 3) },
       { id: 'km8', tip: 'seviye', ad: 'Diyez ve bemol: Tanini dahil', soruSay: 10, uret: kmUretici([0, 1, 2, 3, 4], ['simgeAd', 'simgeKoma', 'adSimge', 'simgeKod'], 3) },
-      { id: 'km-yer', tip: 'yer', ad: 'İşaretli notayı porteye yaz', soruSay: 8, uret: kmYazUretici([0, 1, 2, 3]) },
-      { id: 'km9', tip: 'boss', ad: 'Büyük final: her şey karışık', soruSay: 12, uret: kmUretici([0, 1, 2, 3, 4, 5], KM_TUM.concat(KM_SEMBOL)) }
+      { id: 'km-yer', tip: 'yer', ad: 'Perde adından işareti koy', soruSay: 8, uret: kmPerdeUretici(KM_PERDE_SIK, [0, 1, 2, 3]) },
+      { id: 'km9', tip: 'boss', ad: 'Büyük final: her şey karışık', soruSay: 12, uret: kmKarmaUretici([0, 1, 2, 3, 4, 5], KM_TUM.concat(KM_SEMBOL), 1, KM_PERDE_SIK, 0.33) }
     ]
   },
   {
@@ -234,7 +265,8 @@ const KOMA_UNITELER = [
       { id: 'km10', tip: 'seviye', ad: 'Simge → koma değeri', soruSay: 10, uret: kmUretici([0, 1, 2, 3, 4], ['simgeKoma', 'simgeAd'], 3) },
       { id: 'km11', tip: 'seviye', ad: 'Simge → harf (F, B, S, K, T)', soruSay: 10, uret: kmUretici([0, 1, 2, 3, 4], ['simgeKod', 'simgeKoma'], 3) },
       { id: 'km12', tip: 'seviye', ad: 'Bakiye ve küçük mücenneb odağı', soruSay: 12, uret: kmUretici([0, 1, 2, 3, 4], ['simgeAd', 'simgeKoma', 'simgeKod', 'adSimge'], 6) },
-      { id: 'km13', tip: 'boss', ad: 'Sembol finali: k, bk, km, bm, T', soruSay: 14, uret: kmUretici([0, 1, 2, 3, 4], ['simgeAd', 'simgeKoma', 'simgeKod', 'adSimge'], 4) }
+      { id: 'km-yer2', tip: 'yer', ad: 'Perde adından işaret: bütün perdeler', soruSay: 10, uret: kmPerdeUretici(KM_PERDE_HEPSI) },
+      { id: 'km13', tip: 'boss', ad: 'Sembol finali: k, bk, km, bm, T', soruSay: 14, uret: kmKarmaUretici([0, 1, 2, 3, 4], ['simgeAd', 'simgeKoma', 'simgeKod', 'adSimge'], 4, KM_PERDE_HEPSI, 0.4) }
     ]
   }
 ];
@@ -257,7 +289,15 @@ KOMA_UNITELER[1].ders = function () {
     { baslik: 'Diyez ve bemol', metin:
       '<p><b>Diyez</b> sesi tizleştirir (yukarı), <b>bemol</b> pestleştirir (aşağı).</p>' +
       '<p>Arel-Ezgi-Uzdilek sisteminde her aralığın kendi diyez ve bemol işareti vardır: toplam <b>8 işaret</b>.</p>' }
-  ].concat(KM_VERI.slice(0, 5).map(isaretKarti));
+  ].concat(KM_VERI.slice(0, 5).map(isaretKarti)).concat([
+    { baslik: 'Perde adından işaret', cizim: function () {
+        const p = PERDE['Dik Hisar'];
+        return h('div', null, h('div', { class: 'kartPorte' }, porteSVG({ notalar: p.parcalar, aralik: 48, etiketler: ['diyezli', 'bemollü'] })), h('div', { class: 'kartCetvel' }, cetvelSVG(p)));
+      },
+      metin: '<p>Bu ünitede sana bir <b>perde adı</b> verilecek; notası porteye hazır konmuş olacak. Sen yalnızca <b>işaretini</b> seçeceksin.</p>' +
+        '<p>Çoğu ara perdenin <b>iki yazımı</b> var: biri diyezli, biri bemollü. İkisine de işaret koyacaksın. Örnek: <b>Dik Hisar</b> = Re büyük mücenneb diyezi = Mi koma bemolü.</p>' +
+        '<p>İşaret düğmelerinde isim yok ve sıraları her soruda değişir: işareti şeklinden tanı.</p>' }
+  ]);
 };
 KOMA_UNITELER[2].ders = function () {
   return [

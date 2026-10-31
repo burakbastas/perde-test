@@ -176,16 +176,18 @@ function tonSoru(tip, kumeler) {
     const dis = yakinTonlar(s, tum, 3);
     q.siklar = [s].concat(dis).map(function (k) { return { key: String(k), porte: dpo(k) }; });
     q.dogru = String(s); q.dogruMetin = arizaMetni(s);
+    if (tur === 'minör') q.ipucu = 'İlgili majörü bul: küçük üçlü (3 yarım ses) yukarı çık. Ya da aynı adlı majörün donanımına 3 bemol ekle (3 diyez çıkar).';
   } else if (tip === 'donanimDiz') {
     if (s === 0) return tonSoru(tip, kumeler.filter(function (k) { return k !== 0; }).length ? kumeler.filter(function (k) { return k !== 0; }) : [1]);
     q.tip = 'dizi';
-    q.soru = { metin: tonAd(s, 'majör') }; q.alt = 'Donanımdaki işaretleri sırasıyla diz';
+    q.soru = { metin: tonAd(s, 'majör') }; q.alt = 'Donanımdaki işaretleri sırasıyla seç, bitince Kontrol et’e bas';
     const dogru = donanimNotalari(s).map(function (n) { return batiAd(n, true); });
-    const sira = (s > 0 ? DIYEZ_SIRA : BEMOL_SIRA).map(function (n) { return batiAd({ h: n.h, a: s > 0 ? '#' : 'b' }, true); });
-    const ek = sira.filter(function (x) { return dogru.indexOf(x) < 0; }).slice(0, 2);
-    q.dizi = { havuz: karistir(dogru.concat(ek)).map(function (x) { return { key: x, metin: x }; }), uzunluk: dogru.length, beklenen: dogru, tekrarli: false };
-    q.dogruMetin = dogru.join(' ');
-    q.ipucu = s > 0 ? 'Diyezlerin sırası: Fa Do Sol Re La Mi Si' : 'Bemollerin sırası: Si Mi La Re Sol Do Fa';
+    // Havuzda 7 diyez ve 7 bemolün hepsi; kutu sayısı gösterilmez (kaç işaret ve hangi tür, sorunun parçası)
+    const hepsi = DIYEZ_SIRA.map(function (n) { return batiAd({ h: n.h, a: '#' }, true); })
+      .concat(BEMOL_SIRA.map(function (n) { return batiAd({ h: n.h, a: 'b' }, true); }));
+    q.dizi = { havuz: karistir(hepsi).map(function (x) { return { key: x, metin: x }; }), uzunluk: dogru.length, beklenen: dogru, tekrarli: false, acik: true, enCok: 7 };
+    q.dogruMetin = dogru.length + ' ' + (s > 0 ? 'diyez' : 'bemol') + ': ' + dogru.join(' ');
+    q.ipucu = 'Önce kaç işaret olduğunu bul. Diyez sırası: Fa Do Sol Re La Mi Si; bemol sırası bunun tersi.';
   } else if (tip === 'ilgili') {
     if (Math.random() < 0.5) {
       q.soru = { metin: tonAd(s, 'majör') }; q.alt = 'İlgili minörü hangisi?';
@@ -372,13 +374,13 @@ const BATI_UNITELER = [
   bUnite('b6', 6, 'Majör tonlar: diyezliler', 'Sol majörden Do diyez majöre', [
     { id: 'b6-1', tip: 'seviye', ad: '3 diyeze kadar', soruSay: 8, uret: tonUretici(['donanimMajor', 'tonDonanim'], araliktan(0, 3)) },
     { id: 'b6-2', tip: 'seviye', ad: '7 diyeze kadar', soruSay: 10, uret: tonUretici(['donanimMajor', 'tonDonanim'], POZ) },
-    { id: 'b6-yer', tip: 'yer', ad: 'Diyezleri sırayla diz', soruSay: 8, uret: tonUretici(['donanimDiz'], araliktan(1, 7)) },
+    { id: 'b6-yer', tip: 'yer', ad: 'Donanımı kendin diz', soruSay: 8, uret: tonUretici(['donanimDiz'], araliktan(1, 7)) },
     { id: 'b6-boss', tip: 'boss', ad: 'Diyezli tonlar finali', soruSay: 12, uret: tonUretici(['donanimMajor', 'tonDonanim', 'donanimDiz'], POZ) }
   ]),
   bUnite('b7', 7, 'Majör tonlar: bemollüler', 'Fa majörden Do bemol majöre', [
     { id: 'b7-1', tip: 'seviye', ad: '3 bemole kadar', soruSay: 8, uret: tonUretici(['donanimMajor', 'tonDonanim'], araliktan(-3, 0)) },
     { id: 'b7-2', tip: 'seviye', ad: '7 bemole kadar', soruSay: 10, uret: tonUretici(['donanimMajor', 'tonDonanim'], NEG) },
-    { id: 'b7-yer', tip: 'yer', ad: 'Bemolleri sırayla diz', soruSay: 8, uret: tonUretici(['donanimDiz'], araliktan(-7, -1)) },
+    { id: 'b7-yer', tip: 'yer', ad: 'Donanımı kendin diz', soruSay: 8, uret: tonUretici(['donanimDiz'], araliktan(-7, -1)) },
     { id: 'b7-boss', tip: 'boss', ad: 'Bütün majör tonlar', soruSay: 12, uret: tonUretici(['donanimMajor', 'tonDonanim', 'donanimDiz'], araliktan(-7, 7)) }
   ]),
   bUnite('b8', 8, 'Minör tonlar', 'İlgili ve aynı adlı tonlar', [

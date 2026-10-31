@@ -1,172 +1,142 @@
 // =====================================================
-// GÖÇÜRME DALI: aralık adımları → dörtlü → beşli → makam dizisi
+// GÖÇÜRME DALI
+// İlk üç ünitede perde adı sorulmaz: öğrenci perde adlarını ezberlememiş olsa da
+// göçürmeye başlayabilsin. Arızalı seslerin perde adları cevaptan sonra dipnot olarak verilir.
+// Perde adları son ünitede, zorluk arttıkça devreye girer.
 // (Tekrar sekmesindeki göçürme antrenmanı da aynı motoru kullanır: makam.js)
 // =====================================================
 'use strict';
 
-const ADIM_HARF = { T: 9, K: 8, S: 5, B: 4 };
-const ADIM_AD = { T: 'tanini', K: 'büyük mücenneb', S: 'küçük mücenneb', B: 'bakiye' };
-const ADIM_BASLANGIC_TAM = ['Yegâh', 'Hüseyni Aşiran', 'Acem Aşiran', 'Rast', 'Dügâh', 'Bûselik', 'Çargâh', 'Neva', 'Hüseyni', 'Acem', 'Gerdâniye'];
-const ADIM_BASLANGIC_ISARETLI = ['Irak', 'Geveşt', 'Nim Zirgüle', 'Zirgüle', 'Kürdi', 'Dik Kürdi', 'Segâh', 'Nim Hicaz', 'Hicaz', 'Nim Hisar', 'Hisar', 'Dik Hisar', 'Evç', 'Mahur', 'Dik Acem'];
-
-// Bir perdeden tek aralık yukarı: geçerli ve yaygın perdelere düşen bir adım bul
-function adimBul(baslangiclar, harfler) {
-  for (let d = 0; d < 200; d++) {
-    const p = PERDE[rastgele(baslangiclar)], harf = rastgele(harfler);
-    const L = gocurPerde([ADIM_HARF[harf]], p);
-    if (!L) continue;
-    const hedef = KOMADAN_PERDE[komaOf(L[1])];
-    if (!GOCURME_YAYGIN[hedef.ad]) continue;
-    return { bas: p, hedef: hedef, harf: harf, notalar: L };
-  }
-  return null;
-}
-
-function adimSorusu(tip, baslangiclar, harfler) {
-  const x = adimBul(baslangiclar, harfler);
-  if (!x) return adimSorusu(tip, ADIM_BASLANGIC_TAM, ['T']);
-  const aciklama = '<b>' + x.bas.ad + '</b>' + ayrilmaEki(x.bas.ad) + ' ' + x.harf + ' (' + ADIM_AD[x.harf] + ') yukarı → <b>' + x.hedef.ad + '</b>' + gocurmeAdimlari(x.notalar);
-  const q = { oge: null, tip: 'secim', aciklama: aciklama, ipucu: 'Önce harfler arası doğal aralığı bul: Mi–Fa ve Si–Do bakiye (4), diğerleri tanini (9).' };
-  if (tip === 'adimPerde') {
-    q.soru = { metin: x.bas.ad + ' + ' + x.harf, kucuk: false };
-    q.alt = x.bas.ad + ' perdesinden ' + ADIM_AD[x.harf] + ' (' + ADIM_HARF[x.harf] + ' koma) yukarı hangi perde?';
-    const komsu = PERDELER.filter(function (p) { return p !== x.hedef && GOCURME_YAYGIN[p.ad] && Math.abs(p.koma - x.hedef.koma) <= 9; });
-    q.siklar = [x.hedef].concat(karistir(komsu).slice(0, 3)).map(function (p) { return { key: p.id, metin: p.ad }; });
-    q.dogru = x.hedef.id; q.dogruMetin = x.hedef.ad;
-  } else if (tip === 'adimAralik') {
-    q.soru = { metin: x.bas.ad + ' → ' + x.hedef.ad };
-    q.alt = 'Bu iki perde arasındaki aralık hangisi?';
-    q.siklar = ['T', 'K', 'S', 'B'].map(function (h_) { return { key: h_, metin: h_ + ' · ' + ADIM_AD[h_] }; });
-    q.dogru = x.harf; q.dogruMetin = x.harf + ' · ' + ADIM_AD[x.harf] + ' (' + ADIM_HARF[x.harf] + ')';
-  } else {
-    q.tip = 'yer';
-    q.soru = { metin: x.bas.ad + ' + ' + x.harf };
-    q.alt = ADIM_AD[x.harf] + ' (' + ADIM_HARF[x.harf] + ') yukarıdaki sesi bir sonraki harfe yaz, işaretini seç';
-    q.yer = { slotlar: [{ sabit: x.notalar[0] }, {}], palet: 'aeu', beklenen: x.notalar };
-    q.dogruMetin = notaKisa(x.notalar[1]) + ' = ' + x.hedef.ad;
-  }
-  return q;
-}
-
-function dogalAralikSorusu() {
-  const i = Math.floor(Math.random() * 7);
-  const a = HARF_AD[i], b = HARF_AD[(i + 1) % 7];
-  const dogru = (i === 2 || i === 6) ? 'B' : 'T';
-  return {
-    oge: null, tip: 'secim',
-    soru: { metin: a + ' – ' + b }, alt: 'İşaretsiz bu iki komşu harf arasındaki doğal aralık?',
-    siklar: ['T', 'B', 'K', 'S'].map(function (h_) { return { key: h_, metin: h_ + ' · ' + ADIM_AD[h_] + ' (' + ADIM_HARF[h_] + ')' }; }),
-    dogru: dogru, dogruMetin: dogru + ' · ' + ADIM_AD[dogru],
-    ipucu: 'Sadece iki çift bakiyedir: Mi–Fa ve Si–Do.',
-    aciklama: '<b>' + a + '–' + b + '</b> doğal olarak <b>' + ADIM_AD[dogru] + '</b> (' + ADIM_HARF[dogru] + ' koma). Komşu harfler arası hep tanini (9); yalnızca <b>Mi–Fa</b> ve <b>Si–Do</b> bakiye (4).'
-  };
-}
-
-function adimUretici(tipler, baslangiclar, harfler, dogalOran) {
+function gocurmeSeviyeUretici(asama, tipler, perdesiz) {
   return function (n) {
     const L = [];
-    for (let i = 0; i < n; i++) {
-      if (dogalOran && Math.random() < dogalOran) { L.push(dogalAralikSorusu()); continue; }
-      L.push(adimSorusu(tipler[i % tipler.length], baslangiclar, harfler));
-    }
+    for (let i = 0; i < n; i++) L.push(gocurmeSorusu(asama, tipler[i % tipler.length], perdesiz));
     return karistir(L);
   };
 }
-function gocurmeSeviyeUretici(asama, tipler) {
-  return function (n) {
-    const L = [];
-    for (let i = 0; i < n; i++) L.push(gocurmeSorusu(asama, tipler[i % tipler.length]));
-    return karistir(L);
-  };
-}
-
-const TUM_HARF = ['T', 'K', 'S', 'B'];
-const ADIM_TUM = ADIM_BASLANGIC_TAM.concat(ADIM_BASLANGIC_ISARETLI);
 
 function gUnite(id, no, ad, kisa, seviyeler) { return { id: id, dal: 'gocurme', no: no, ad: ad, kisa: kisa, ogeler: [], seviyeler: seviyeler }; }
 const GOCURME_UNITELER = [
-  gUnite('g1', 1, 'Aralık adımları', 'Bir perdeden T, K, S, B ile bir adım', [
-    { id: 'g1-1', tip: 'seviye', ad: 'Harfler arası doğal aralıklar', soruSay: 7, uret: adimUretici(['adimPerde'], ADIM_BASLANGIC_TAM, ['T', 'B'], 0.7) },
-    { id: 'g1-2', tip: 'seviye', ad: 'Bir adım yukarı: hangi perde?', soruSay: 8, uret: adimUretici(['adimPerde'], ADIM_BASLANGIC_TAM, TUM_HARF) },
-    { id: 'g1-3', tip: 'seviye', ad: 'İki perde arası hangi aralık?', soruSay: 8, uret: adimUretici(['adimAralik'], ADIM_BASLANGIC_TAM, TUM_HARF) },
-    { id: 'g1-yer', tip: 'yer', ad: 'Bir adımı porteye yaz', soruSay: 6, uret: adimUretici(['adimYaz'], ADIM_BASLANGIC_TAM, TUM_HARF) },
-    { id: 'g1-boss', tip: 'boss', ad: 'Aralık adımları finali', soruSay: 10, uret: adimUretici(['adimPerde', 'adimAralik', 'adimYaz'], ADIM_BASLANGIC_TAM, TUM_HARF, 0.15) }
+  gUnite('gc1', 1, 'Dörtlüleri göçür', 'Aralıklarla hesap: perde adı bilmeden', [
+    { id: 'gc1-1', tip: 'seviye', ad: 'Doğru yazım hangisi?', soruSay: 6, uret: gocurmeSeviyeUretici('dortlu', ['porte'], true) },
+    { id: 'gc1-yer', tip: 'yer', ad: 'Dörtlüyü porteye kur', soruSay: 5, uret: gocurmeSeviyeUretici('dortlu', ['kur'], true) },
+    { id: 'gc1-boss', tip: 'boss', ad: 'Dörtlü göçürme finali', soruSay: 8, uret: gocurmeSeviyeUretici('dortlu', ['porte', 'kur'], true) }
   ]),
-  gUnite('g2', 2, 'İşaretli seslerden adım', 'Önceki ses işaretliyse aralık nasıl değişir?', [
-    { id: 'g2-1', tip: 'seviye', ad: 'İşaretli perdeden bir adım', soruSay: 8, uret: adimUretici(['adimPerde'], ADIM_BASLANGIC_ISARETLI, TUM_HARF) },
-    { id: 'g2-2', tip: 'seviye', ad: 'Aralığı bul', soruSay: 8, uret: adimUretici(['adimAralik'], ADIM_BASLANGIC_ISARETLI, TUM_HARF) },
-    { id: 'g2-yer', tip: 'yer', ad: 'İşaretli adımı porteye yaz', soruSay: 6, uret: adimUretici(['adimYaz'], ADIM_BASLANGIC_ISARETLI, TUM_HARF) },
-    { id: 'g2-boss', tip: 'boss', ad: 'Adımlar finali', soruSay: 10, uret: adimUretici(['adimPerde', 'adimAralik', 'adimYaz'], ADIM_TUM, TUM_HARF) }
+  gUnite('gc2', 2, 'Beşlileri göçür', 'Bir adım daha: beşliler', [
+    { id: 'gc2-1', tip: 'seviye', ad: 'Doğru yazım hangisi?', soruSay: 6, uret: gocurmeSeviyeUretici('besli', ['porte'], true) },
+    { id: 'gc2-yer', tip: 'yer', ad: 'Beşliyi porteye kur', soruSay: 5, uret: gocurmeSeviyeUretici('besli', ['kur'], true) },
+    { id: 'gc2-boss', tip: 'boss', ad: 'Beşli göçürme finali', soruSay: 8, uret: gocurmeSeviyeUretici('besli', ['porte', 'kur'], true) }
   ]),
-  gUnite('g3', 3, 'Dörtlüleri göçür', 'Temel dörtlüleri başka perdelere taşı', [
-    { id: 'g3-1', tip: 'seviye', ad: 'Göçürülünce hangi perde?', soruSay: 8, uret: gocurmeSeviyeUretici('dortlu', ['perde']) },
-    { id: 'g3-2', tip: 'seviye', ad: 'Doğru yazım hangisi?', soruSay: 7, uret: gocurmeSeviyeUretici('dortlu', ['porte']) },
-    { id: 'g3-yer', tip: 'yer', ad: 'Göçürülmüş dörtlüyü kur', soruSay: 6, uret: gocurmeSeviyeUretici('dortlu', ['kur']) },
-    { id: 'g3-boss', tip: 'boss', ad: 'Dörtlü göçürme finali', soruSay: 10, uret: gocurmeSeviyeUretici('dortlu', ['perde', 'porte', 'kur']) }
+  gUnite('gc3', 3, 'Makam dizilerini göçür', 'Bütün diziyi başka sesten kur', [
+    { id: 'gc3-1', tip: 'seviye', ad: 'Doğru dizi hangisi?', soruSay: 6, uret: gocurmeSeviyeUretici('makam', ['porte'], true) },
+    { id: 'gc3-yer', tip: 'yer', ad: 'Diziyi porteye kur', soruSay: 4, uret: gocurmeSeviyeUretici('makam', ['kur'], true) },
+    { id: 'gc3-boss', tip: 'boss', ad: 'Dizi göçürme finali', soruSay: 8, uret: gocurmeSeviyeUretici('makam', ['porte', 'kur'], true) }
   ]),
-  gUnite('g4', 4, 'Beşlileri göçür', 'Temel beşlileri başka perdelere taşı', [
-    { id: 'g4-1', tip: 'seviye', ad: 'Göçürülünce hangi perde?', soruSay: 8, uret: gocurmeSeviyeUretici('besli', ['perde']) },
-    { id: 'g4-2', tip: 'seviye', ad: 'Doğru yazım hangisi?', soruSay: 7, uret: gocurmeSeviyeUretici('besli', ['porte']) },
-    { id: 'g4-yer', tip: 'yer', ad: 'Göçürülmüş beşliyi kur', soruSay: 6, uret: gocurmeSeviyeUretici('besli', ['kur']) },
-    { id: 'g4-boss', tip: 'boss', ad: 'Beşli göçürme finali', soruSay: 10, uret: gocurmeSeviyeUretici('besli', ['perde', 'porte', 'kur']) }
-  ]),
-  gUnite('g5', 5, 'Makam dizilerini göçür', 'Bütün diziyi başka perdeye taşı', [
-    { id: 'g5-1', tip: 'seviye', ad: 'Güçlü ve diğer sesler', soruSay: 8, uret: gocurmeSeviyeUretici('makam', ['perde']) },
-    { id: 'g5-2', tip: 'seviye', ad: 'Doğru dizi hangisi?', soruSay: 7, uret: gocurmeSeviyeUretici('makam', ['porte']) },
-    { id: 'g5-yer', tip: 'yer', ad: 'Göçürülmüş diziyi kur', soruSay: 5, uret: gocurmeSeviyeUretici('makam', ['kur']) },
-    { id: 'g5-boss', tip: 'boss', ad: 'Göçürme büyük finali', soruSay: 10, uret: gocurmeSeviyeUretici('makam', ['perde', 'porte', 'kur']) }
+  gUnite('gc4', 4, 'Perde adlarıyla göçürme', 'Göçürülen seslerin perde adlarını bul', [
+    { id: 'gc4-1', tip: 'seviye', ad: 'Dörtlü ve beşlide hangi perde?', soruSay: 8, uret: gocurmeSeviyeUretici(['dortlu', 'besli'], ['perde']) },
+    { id: 'gc4-2', tip: 'seviye', ad: 'Makam dizisinde hangi perde?', soruSay: 8, uret: gocurmeSeviyeUretici('makam', ['perde']) },
+    { id: 'gc4-boss', tip: 'boss', ad: 'Göçürme büyük finali', soruSay: 10, uret: gocurmeSeviyeUretici(['dortlu', 'besli', 'makam'], ['perde', 'porte', 'kur', 'perde']) }
   ])
 ];
 
-// ---- Dersler ----
-function adimOrnekKarti(baslik, bas, harf, metin) {
-  const L = gocurPerde([ADIM_HARF[harf]], PERDE[bas]);
-  const hedef = KOMADAN_PERDE[komaOf(L[1])];
-  return {
-    baslik: baslik,
-    cizim: function () { return h('div', { class: 'kartPorte' }, porteSVG({ notalar: L, aralik: 60, etiketler: [bas, hedef.ad] })); },
-    metin: gocurmeAdimlari(L) + (metin || '')
-  };
-}
-function ornekGocurme(baslik, yapiAd, araliklar, yer, etiket) {
-  const L = gocurPerde(araliklar, PERDE[yer]);
-  if (!L) return null;
-  const et = L.map(function (n, i) { return i === 0 ? yer : ''; });
-  return {
-    baslik: baslik,
-    cizim: function () { return h('div', { class: 'kartPorte' }, porteSVG({ notalar: L, aralik: L.length > 5 ? 33 : 38, enAz: L.length > 5 ? 320 : 250, etiketler: et })); },
-    metin: '<p><b>' + yapiAd + '</b> ' + yer + ' perdesinde: <b>' + L.map(perdeAdiNota).join(' – ') + '</b></p>' + gocurmeAdimlari(L) + (etiket || '')
-  };
-}
-const G_DERS = gocurmeDersi();   // [nedir, koma değerleri, harfler arası, Rast yerinde, Dügâh'ta, kural]
+// 2.5 · Göçürülmüş (şed) makamlar: kuralı öğrenmiş olan öğrenci, göçürmenin müzikteki karşılığını tanır
+GOCURME_UNITELER.push(gUnite('gc5', 5, 'Göçürülmüş (şed) makamlar', 'Mahur, Hicazkâr, Kürdîlihicazkâr, Nihâvend, Sultânîyegâh', [
+  { id: 'gc5-1', tip: 'seviye', ad: 'Hangi makamın göçürülmüşü?', soruSay: 8, uret: sedUretici(['kaynak', 'perde']) },
+  { id: 'gc5-2', tip: 'seviye', ad: 'Karar, güçlü ve yeden', soruSay: 8, uret: sedUretici(['karar', 'guclu', 'yeden']) },
+  { id: 'gc5-3', tip: 'seviye', ad: 'Donanım', soruSay: 8, uret: sedUretici(['donanimMakam', 'makamDonanim']) },
+  { id: 'gc5-4', tip: 'seviye', ad: 'Doğru dizi hangisi?', soruSay: 6, uret: sedUretici(['diziDogru']) },
+  { id: 'gc5-boss', tip: 'boss', ad: 'Şed makamlar finali', soruSay: 10, uret: sedUretici(['kaynak', 'perde', 'guclu', 'donanimMakam', 'diziDogru', 'benKimim', 'yeden']) }
+]));
+GOCURME_UNITELER[4].ogeler = SEDLER.map(function (m) { return m.oge; });
 
-GOCURME_UNITELER[0].ders = function () {
+// ---- Dersler (perde adı kullanmadan) ----
+// Porte üzerinde örnek: alttaki etiketler yalnızca harf adları
+function gocurmeOrnegi(baslik, yapiAd, araliklar, baslangicPerde, onMetin) {
+  const L = gocurPerde(araliklar, PERDE[baslangicPerde]);
+  if (!L) return null;
+  return {
+    baslik: baslik,
+    cizim: function () {
+      return h('div', { class: 'kartPorte' }, porteSVG({ notalar: L, aralik: L.length > 5 ? 33 : (L.length > 2 ? 38 : 60), enAz: L.length > 5 ? 320 : 250,
+        etiketler: L.map(function (n) { return HARF_AD[n.h]; }) }));
+    },
+    metin: (onMetin || '') + (yapiAd ? '<p><b>' + yapiAd + '</b> (' + formulMetni(araliklar) + '), ' + HARF_AD[L[0].h] + ayrilmaEki(HARF_AD[L[0].h]) + ' başlayınca: <b>' + L.map(notaKisa).join(' – ') + '</b></p>' : '') +
+      gocurmeAdimlari(L, true) + arizaDipnotu(L)
+  };
+}
+function gocurmeTemelDersi() {
+  const G = gocurmeDersi();   // [nedir, koma değerleri, harfler arası, Rast yerinde, Dügâh'ta, kural]
   return [
-    { baslik: 'Önce tek adım', metin: '<p>Göçürmenin temeli tek bir adımdır: bir perdeden belli bir aralık kadar yukarı çıkmak.</p><p>Bu ünitede bir perdeden <b>T, K, S</b> ya da <b>B</b> kadar çıkınca hangi perdeye vardığını ve o sesin nasıl yazıldığını öğreneceksin.</p>' },
-    G_DERS[1], G_DERS[2],
-    adimOrnekKarti('Örnek: Dügâh + K', 'Dügâh', 'K', '<p>La–Si doğal olarak tanini (9). K (8) için bir koma eksik: Si’ye koma bemolü → <b>Segâh</b>.</p>'),
-    adimOrnekKarti('Örnek: Bûselik + K', 'Bûselik', 'K', '<p>Si–Do doğal olarak bakiye (4). K (8) için 4 koma daha gerek: Do’ya bakiye diyezi → <b>Nim Hicaz</b>.</p>')
-  ];
-};
+    { baslik: 'Göçürme nedir?', metin:
+      '<p><b>Göçürme</b>, bir dörtlüyü, beşliyi ya da makam dizisini <b>başka bir sesten</b> başlatmaktır. <b>Aralıklar aynı kalır</b>; notalar ve işaretleri değişir.</p>' +
+      '<p>Bunun için perde adlarını bilmen gerekmez. İki şey yeter: aralıkların kaç koma olduğu ve yan yana iki harf arasındaki doğal aralık.</p>' },
+    G[1], G[2],
+    gocurmeOrnegi('Tek adım: La’dan K', null, [8], 'Dügâh',
+      '<p>La’dan büyük mücenneb (K, 8 koma) yukarı çık. Bir sonraki harf Si. La–Si doğal olarak tanini (9); 8 için bir koma fazla: Si’ye <b>koma bemolü</b>.</p>'),
+    gocurmeOrnegi('Önceki ses işaretliyse', null, [5], 'Nim Hicaz',
+      '<p>Başladığın ses işaretliyse doğal aralık değişir: <b>diyezli</b> sesten sonraki harfe mesafe o kadar <b>daralır</b>, <b>bemollü</b> sesten sonra <b>genişler</b>.</p>' +
+      '<p>Örnek: Do bakiye diyezinden küçük mücenneb (S, 5) yukarı. Do–Re doğal 9, ama Do 4 koma yükselmiş: arada 5 kalıyor. Re işaretsiz.</p>'),
+    gocurmeOrnegi('Örnek: Rast dörtlüsü La’dan', 'Rast dörtlüsü', CESNI['d-rast'].araliklar, 'Dügâh',
+      '<p>Rast dörtlüsünü La’dan başlat. Her adımda aynı hesap:</p>'),
+    G[5]
+  ].filter(Boolean);
+}
+
+GOCURME_UNITELER[0].ders = gocurmeTemelDersi;
 GOCURME_UNITELER[1].ders = function () {
-  return [
-    { baslik: 'Başlangıç işaretliyse', metin: '<p>Başladığın ses işaretliyse, harfler arası doğal aralık değişir:</p><p><b>Diyezli</b> sesten sonraki harfe mesafe o kadar <b>daralır</b>.<br><b>Bemollü</b> sesten sonraki harfe mesafe o kadar <b>genişler</b>.</p>' },
-    adimOrnekKarti('Örnek: Nim Hicaz + S', 'Nim Hicaz', 'S', '<p>Do–Re doğal olarak 9, ama Do 4 koma yükseltilmiş: arada 5 kalıyor. S (5) istendiği için Re işaretsiz → <b>Neva</b>.</p>'),
-    adimOrnekKarti('Örnek: Segâh + T', 'Segâh', 'T', '<p>Si–Do doğal olarak 4, ama Si 1 koma alçaltılmış: arada 5 var. T (9) için 4 koma daha gerek: Do’ya bakiye diyezi → <b>Nim Hicaz</b>.</p>'),
-    G_DERS[5]
-  ];
+  const k = gocurmeOrnegi('Örnek: Bûselik beşlisi Sol’den', 'Bûselik beşlisi', CESNI['b-buselik'].araliklar, 'Rast');
+  return [{ baslik: 'Beşliyi göçürmek', metin: '<p>Beşlide bir adım fazlası var, kural aynı: her seste sonraki harfi yaz, doğal aralığı bul, gereken aralıkla karşılaştır.</p><p>Cevaptan sonra arızalı seslerin perde adlarını <b>dipnotta</b> göreceksin; ezberlemek zorunda değilsin.</p>' }]
+    .concat(k ? [k] : []).concat([gocurmeDersi()[5]]);
 };
 GOCURME_UNITELER[2].ders = function () {
-  return [G_DERS[0], G_DERS[3], G_DERS[4], G_DERS[5]];
+  const m = MAKAM.ussak;
+  const k = gocurmeOrnegi('Örnek: Uşşak dizisi Re’den', 'Uşşak makamı dizisi', m.altC.araliklar.concat(m.ustC.araliklar), 'Neva');
+  return [{ baslik: 'Makam dizisini göçürmek', metin: '<p>Makam dizisi bir dörtlü ile bir beşlinin birleşimi olduğu için göçürme yine aynı kuralla yapılır; sadece adım sayısı 7’ye çıkar.</p>' }]
+    .concat(k ? [k] : []).concat([gocurmeDersi()[5]]);
 };
 GOCURME_UNITELER[3].ders = function () {
-  const k = ornekGocurme('Örnek: Bûselik beşlisi Rast’ta', 'Bûselik beşlisi (T B T T)', CESNI['b-buselik'].araliklar, 'Rast');
-  return [{ baslik: 'Beşliyi göçürmek', metin: '<p>Beşlide bir adım fazlası var, kural aynı: her seste sonraki harfi yaz, doğal aralığı bul, gereken aralıkla karşılaştır.</p>' }]
-    .concat(k ? [k] : []).concat([G_DERS[5]]);
+  const G = gocurmeDersi();
+  return [
+    { baslik: 'Şimdi perde adlarıyla', metin:
+      '<p>Hesap aynı. Bu ünitede bir adım daha atıyoruz: göçürdüğün seslerin <b>hangi perde</b> olduğunu da bulacaksın.</p>' +
+      '<p>İpucu: önceki ünitelerin dipnotlarında gördüğün arızalı sesler burada işine yarayacak. Perde adlarına takılırsan <b>Perde</b> dalına dön.</p>' },
+    G[3], G[4]
+  ];
 };
+
 GOCURME_UNITELER[4].ders = function () {
-  const m = MAKAM.ussak;
-  const k = ornekGocurme('Örnek: Uşşak dizisi Neva’da', 'Uşşak makamı dizisi', m.altC.araliklar.concat(m.ustC.araliklar), 'Neva');
-  return [{ baslik: 'Makam dizisini göçürmek', metin: '<p>Makam dizisi bir dörtlü ile bir beşlinin birleşimi olduğu için göçürme yine aynı kuralla yapılır; sadece adım sayısı 7’ye çıkar.</p><p>Güçlü perdesi de diziyle birlikte taşınır: alt parçanın son sesi.</p>' }]
-    .concat(k ? [k] : []).concat([G_DERS[5]]);
+  return [
+    { baslik: 'Şed nedir?', metin:
+      '<p>Bir makamın dizisi başka bir perdeye göçürülünce ortaya yeni bir makam çıkabilir. Böyle makamlara <b>şed</b> (göçürülmüş makam) denir.</p>' +
+      '<p>Aralıklar kaynak makamla aynıdır; ama <b>karar perdesi</b>, güçlüsü ve çoğu zaman seyri değiştiği için ayrı bir makam sayılır.</p>' +
+      '<p>Bu ünitede beş şed makamı tanıyacaksın. Hepsi bildiğin makamlardan türüyor.</p>' },
+    { baslik: 'Hangisi neyin şeddi?', metin:
+      '<p><b>Mahur</b> = Çargâh → Rast<br><b>Hicazkâr</b> = Zirgüleli Hicaz → Rast<br><b>Kürdîlihicazkâr</b> = Kürdi → Rast<br><b>Nihâvend</b> = Bûselik → Rast<br><b>Sultânîyegâh</b> = Bûselik → Yegâh</p>' +
+      '<p>Dördü <b>Rast</b>’ta karar verir; Sultânîyegâh ise <b>Yegâh</b>’ta.</p>' }
+  ].concat(SEDLER.map(makamKarti));
 };
+
+// ---- Eski göçürme ilerlemesini yeni üniteye taşı (2.2 → 2.3) ----
+// Eski: g1–g2 tek adım (kaldırıldı), g3 dörtlü, g4 beşli, g5 makam dizisi
+function gocurmeTasi() {
+  if (!DURUM || DURUM.gocV2) return;
+  const y = DURUM.yildiz || {};
+  const eskiVar = Object.keys(y).some(function (k) { return /^g[1-5]-/.test(k); }) ||
+    ['g1', 'g2', 'g3', 'g4', 'g5'].some(function (u) { return (DURUM.ders && DURUM.ders[u]) || (DURUM.altin && DURUM.altin[u]) || (DURUM.sandik && DURUM.sandik[u]); });
+  if (eskiVar) {
+    const yildizEsle = { 'g3-2': 'gc1-1', 'g3-yer': 'gc1-yer', 'g3-boss': 'gc1-boss',
+      'g4-2': 'gc2-1', 'g4-yer': 'gc2-yer', 'g4-boss': 'gc2-boss',
+      'g5-2': 'gc3-1', 'g5-yer': 'gc3-yer', 'g5-boss': 'gc3-boss', 'g5-1': 'gc4-2' };
+    Object.keys(yildizEsle).forEach(function (eski) { if (y[eski]) y[yildizEsle[eski]] = Math.max(y[yildizEsle[eski]] || 0, y[eski]); });
+    if (y['g3-1'] && y['g4-1']) y['gc4-1'] = Math.max(y['gc4-1'] || 0, Math.min(y['g3-1'], y['g4-1']));
+    const uniteEsle = { g3: 'gc1', g4: 'gc2', g5: 'gc3' };
+    ['ders', 'altin', 'sandik'].forEach(function (alan) {
+      const o = DURUM[alan]; if (!o) return;
+      Object.keys(uniteEsle).forEach(function (u) { if (o[u]) o[uniteEsle[u]] = o[u]; });
+      ['g1', 'g2', 'g3', 'g4', 'g5'].forEach(function (u) { delete o[u]; });
+    });
+    Object.keys(y).forEach(function (k) { if (/^g[1-5]-/.test(k)) delete y[k]; });
+  }
+  DURUM.gocV2 = true;
+  kaydet();
+}

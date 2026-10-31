@@ -372,9 +372,9 @@ PERDE_UNITELER[0].ders = function () {
       }, metin: '<p>Dizinin merkezi <b>Rast</b> (Sol) perdesidir. Rast’tan başlayarak: <b>Rast, Dügâh, Bûselik, Çargâh, Neva, Hüseyni, Acem, Gerdâniye, Muhayyer</b>.</p>' +
       '<p>Gerdâniye, Rast’ın bir oktav tizidir; Muhayyer de Dügâh’ın.</p>' },
     { baslik: 'Kaba, Tiz ve Aşiran', metin:
-      '<p><b>Kaba</b> bir oktav pest, <b>Tiz</b> bir oktav tiz demektir: <b>Kaba Çargâh</b> (Do4), <b>Tiz Bûselik</b> (Si5), <b>Tiz Çargâh</b> (Do6).</p>' +
-      '<p>Neva’nın pest oktavının özel bir adı vardır: <b>Yegâh</b> (Re4).</p>' +
-      '<p><b>Aşiran</b> da pest oktav için kullanılır: <b>Hüseyni Aşiran</b> (Mi4) ve <b>Acem Aşiran</b> (Fa4).</p>' }
+      '<p><b>Kaba</b> bir oktav pest, <b>Tiz</b> bir oktav tiz demektir: <b>Kaba Çargâh</b> (Çargâh’ın bir oktav pesti), <b>Tiz Bûselik</b> ve <b>Tiz Çargâh</b> (Bûselik ve Çargâh’ın bir oktav tizi).</p>' +
+      '<p>Neva’nın pest oktavının özel bir adı vardır: <b>Yegâh</b> (porte altındaki Re).</p>' +
+      '<p><b>Aşiran</b> da pest oktav için kullanılır: <b>Hüseyni Aşiran</b> (Hüseyni’nin pesti, alt çizgideki Mi) ve <b>Acem Aşiran</b> (Acem’in pesti, ilk aralıktaki Fa).</p>' }
   ].concat(perdeler(PAKET[0]).map(perdeKarti));
 };
 PERDE_UNITELER[1].ders = function () {
@@ -406,6 +406,181 @@ PERDE_UNITELER[4].ders = function () {
   return [{ baslik: 'Nadir perdeler', metin:
     '<p>Bu perdeler eserlerde çok az geçer ama 24 perdelik sistemi tamamlarlar. <b>Dik Bûselik</b> Çargâh’tan 1 koma pesttir; diğerleri bildiğin <b>Dik</b> kuralına uyar.</p>' }]
     .concat(perdeler(PAKET[4]).map(perdeKarti));
+};
+
+// =====================================================
+// ORTA-İLERİ: OKTAV KARDEŞLERİ, KOMŞU PERDELER, İKİ YAZIM
+// =====================================================
+function oktavKardes(p, yon) { return KOMADAN_PERDE[p.koma + 53 * yon] || null; }
+const P_OKTAV_HAVUZ = paketeKadar(2).filter(function (a) { const p = PERDE[a]; return oktavKardes(p, 1) || oktavKardes(p, -1); });
+function perdeAdSiklari(dogru, sayi, zor) {
+  const cel = celdiriciSec(dogru, PERDELER, zor || 0.6, (sayi || 4) - 1);
+  return [dogru].concat(cel).map(function (x) { return { key: x.id, metin: x.ad }; });
+}
+function soruOktav(p, yon) {
+  const k = oktavKardes(p, yon);
+  const yonAd = yon > 0 ? 'tizi' : 'pesti';
+  return {
+    oge: p.oge, tip: 'secim',
+    soru: { metin: p.ad }, alt: 'Bir oktav ' + yonAd + ' hangi perde?',
+    siklar: perdeAdSiklari(k, 4, 0.55), dogru: k.id, dogruMetin: k.ad,
+    ipucu: 'Oktav = 53 koma. Aynı harf, bir oktav ' + (yon > 0 ? 'yukarıda' : 'aşağıda') + '.',
+    aciklama: '<b>' + p.ad + '</b> (' + kacis(perdeYazimMetni(p)) + ') → bir oktav ' + yonAd + ': <b>' + k.ad + '</b> (' + kacis(perdeYazimMetni(k)) + ')'
+  };
+}
+function soruOktavPorte(p, yon) {
+  const k = oktavKardes(p, yon);
+  return {
+    oge: p.oge, tip: 'secim',
+    soru: { porte: perdePorte(p) }, alt: 'Bu perdenin bir oktav ' + (yon > 0 ? 'tizi' : 'pesti') + ' hangi perde?',
+    siklar: perdeAdSiklari(k, 4, 0.6), dogru: k.id, dogruMetin: k.ad,
+    ipucu: 'Önce porteki perdeyi bul: ' + p.ad + '.',
+    aciklama: '<b>' + p.ad + '</b> → <b>' + k.ad + '</b> (' + kacis(perdeYazimMetni(k)) + ')'
+  };
+}
+function soruOktavYaz(p, yon) {
+  const k = oktavKardes(p, yon);
+  return {
+    oge: p.oge, tip: 'yer', soru: { metin: p.ad },
+    alt: 'Bir oktav ' + (yon > 0 ? 'tizini' : 'pestini') + ' porteye yaz' + (k.tam ? '' : ' (iki yazımdan biri yeterli)'),
+    yer: { slotlar: [{}], palet: k.tam ? null : 'aeu', beklenen: [k.parcalar[0]], kabul: k.parcalar.map(function (x) { return [x]; }) },
+    dogruMetin: k.ad + ': ' + perdeYazimMetni(k), ipucu: 'Aynı harf ve aynı işaret, bir oktav ' + (yon > 0 ? 'yukarıda' : 'aşağıda') + '.',
+    aciklama: '<b>' + p.ad + '</b> → <b>' + k.ad + '</b>: ' + kacis(perdeYazimMetni(k))
+  };
+}
+function oktavUretici(tipler) {
+  return function (n) {
+    const L = [];
+    for (let i = 0; i < n; i++) {
+      const tip = tipler[i % tipler.length];
+      let p, yon;
+      for (let d = 0; d < 40; d++) {
+        p = PERDE[rastgele(P_OKTAV_HAVUZ)]; yon = Math.random() < 0.5 ? 1 : -1;
+        if (!oktavKardes(p, yon)) yon = -yon;
+        if (oktavKardes(p, yon)) break;
+      }
+      L.push(tip === 'ad' ? soruOktav(p, yon) : tip === 'porte' ? soruOktavPorte(p, yon) : soruOktavYaz(p, yon));
+    }
+    return karistir(L);
+  };
+}
+
+// Komşu perdeler: perdeler koma sırasıyla dizilir
+function komsuPerde(p, yon) { const i = PERDELER.indexOf(p) + yon; return PERDELER[i] || null; }
+function soruKomsu(p, yon) {
+  const k = komsuPerde(p, yon);
+  return {
+    oge: p.oge, tip: 'secim',
+    soru: { metin: p.ad }, alt: yon > 0 ? 'Hemen üstündeki (bir sonraki tiz) perde hangisi?' : 'Hemen altındaki (bir önceki pest) perde hangisi?',
+    siklar: perdeAdSiklari(k, 4, 0.75), dogru: k.id, dogruMetin: k.ad,
+    ipucu: 'Aradaki fark ' + Math.abs(k.koma - p.koma) + ' koma.',
+    aciklama: '<b>' + p.ad + '</b> → <b>' + k.ad + '</b>: ' + Math.abs(k.koma - p.koma) + ' koma ' + (yon > 0 ? 'tiz' : 'pest') + ' (' + kacis(perdeYazimMetni(k)) + ')'
+  };
+}
+// Tam perdeden aralık ekle/çıkar: "Neva + bakiye"
+const P_ARALIK_AD = { 4: 'bakiye', 5: 'küçük mücenneb', 8: 'büyük mücenneb' };
+function soruTamdanAralik() {
+  for (let d = 0; d < 60; d++) {
+    const t = PERDE[rastgele(P_ANA.concat(P_TAM_DIGER))];
+    const fark = rastgele([4, 5, 8]) * (Math.random() < 0.6 ? 1 : -1);
+    const k = KOMADAN_PERDE[t.koma + fark];
+    if (!k) continue;
+    return {
+      oge: k.oge, tip: 'secim',
+      soru: { metin: t.ad + (fark > 0 ? ' + ' : ' − ') + P_ARALIK_AD[Math.abs(fark)], kucuk: true },
+      alt: 'Hangi perde olur?',
+      siklar: perdeAdSiklari(k, 4, 0.8), dogru: k.id, dogruMetin: k.ad,
+      ipucu: Math.abs(fark) + ' koma ' + (fark > 0 ? 'tiz' : 'pest') + '.',
+      aciklama: '<b>' + t.ad + '</b> ' + (fark > 0 ? '+' : '−') + ' ' + P_ARALIK_AD[Math.abs(fark)] + ' (' + Math.abs(fark) + ' koma) = <b>' + k.ad + '</b> (' + kacis(perdeYazimMetni(k)) + ')'
+    };
+  }
+}
+// İki yazım: bir yazımı ver, ötekini bul
+function soruIkiYazim(p) {
+  const i = Math.random() < 0.5 ? 0 : 1, ver = p.parcalar[i], dogru = p.parcalar[1 - i];
+  const yanlis = [null, '+k', '+bk', '+km', '+bm', '-k', '-bk', '-km', '-bm']
+    .filter(function (a) { return (a || null) !== (dogru.a || null); })
+    .map(function (a) { return { h: dogru.h, o: dogru.o, a: a }; })
+    .filter(function (n) { return komaOf(n) !== p.koma; })
+    .sort(function (a, b) { return Math.abs(komaOf(a) - p.koma) - Math.abs(komaOf(b) - p.koma); }).slice(0, 5);
+  const secilen = karistir(yanlis).slice(0, 3);
+  return {
+    oge: p.oge, tip: 'secim',
+    soru: { porte: { notalar: [ver], aralik: 48 } }, alt: 'Aynı perdenin öteki yazımı hangisi?',
+    siklar: [{ key: 'd', porte: { notalar: [dogru], aralik: 48 } }].concat(secilen.map(function (n, j) { return { key: 'y' + j, porte: { notalar: [n], aralik: 48 } }; })),
+    dogru: 'd', dogruMetin: notaMetni(dogru),
+    ipucu: 'İkisi de ' + p.ad + ' perdesi: aynı ses, komşu harf.',
+    aciklama: '<b>' + p.ad + '</b>: ' + kacis(perdeYazimMetni(p)) + '<br><span class="soluk">' + kacis(perdeKural(p)) + '</span>'
+  };
+}
+const P_IKI_HAVUZ = paketeKadar(2).filter(function (a) { return PERDE[a].parcalar.length === 2; });
+function komsuUretici(tipler, sure) {
+  return function (n) {
+    const L = [];
+    for (let i = 0; i < n; i++) {
+      const tip = tipler[i % tipler.length];
+      if (tip === 'aralik') { L.push(soruTamdanAralik()); continue; }
+      if (tip === 'iki') { L.push(soruIkiYazim(PERDE[rastgele(P_IKI_HAVUZ)])); continue; }
+      if (tip === 'ikiYaz') { L.push(soruPerdeYaz(PERDE[rastgele(P_IKI_HAVUZ)], 'iki')); continue; }
+      if (tip === 'portead' || tip === 'adporte') {
+        const p = PERDE[rastgele(paketeKadar(4))];
+        L.push(tip === 'portead' ? soruPorteAd(p, PERDELER, 0.8) : soruAdPorte(p, PERDELER, 0.8));
+        continue;
+      }
+      const yon = tip === 'ust' ? 1 : -1;
+      let p;
+      for (let d = 0; d < 20; d++) { p = PERDE[rastgele(paketeKadar(2))]; if (komsuPerde(p, yon)) break; }
+      L.push(soruKomsu(p, yon));
+    }
+    return karistir(L);
+  };
+}
+
+PERDE_UNITELER.push({
+  id: 'p6', dal: 'perde', no: 6, ad: 'Oktav kardeşleri',
+  kisa: 'Rast–Gerdâniye, Irak–Evç, Kürdi–Sünbüle…',
+  ogeler: [],
+  seviyeler: [
+    { id: 'p6-1', tip: 'seviye', ad: 'Bir oktav tiz, bir oktav pest', soruSay: 8, uret: oktavUretici(['ad']) },
+    { id: 'p6-2', tip: 'seviye', ad: 'Porteden oktav kardeşine', soruSay: 8, uret: oktavUretici(['porte', 'ad']) },
+    { id: 'p6-yer', tip: 'yer', ad: 'Oktavını porteye yaz', soruSay: 8, uret: oktavUretici(['yaz']) },
+    { id: 'p6-boss', tip: 'boss', ad: 'Oktav finali', soruSay: 12, uret: oktavUretici(['ad', 'porte', 'yaz', 'ad']) }
+  ]
+});
+PERDE_UNITELER.push({
+  id: 'p7', dal: 'perde', no: 7, ad: 'Komşu perdeler ve iki yazım',
+  kisa: 'Perdeler arası koma farkı, aynı perdenin iki yazımı',
+  ogeler: [],
+  seviyeler: [
+    { id: 'p7-1', tip: 'seviye', ad: 'Hemen üstteki, hemen alttaki', soruSay: 8, uret: komsuUretici(['ust', 'alt']) },
+    { id: 'p7-2', tip: 'seviye', ad: 'Tam perdeden aralık ekle', soruSay: 8, uret: komsuUretici(['aralik']) },
+    { id: 'p7-3', tip: 'seviye', ad: 'Aynı ses, öteki yazım', soruSay: 8, uret: komsuUretici(['iki']) },
+    { id: 'p7-yer', tip: 'yer', ad: 'İki yazımı da kur', soruSay: 6, uret: komsuUretici(['ikiYaz']) },
+    { id: 'p7-boss', tip: 'boss', ad: '⏱️ Perde avı: süreli final', soruSay: 14, sure: 12, uret: komsuUretici(['portead', 'adporte', 'ust', 'aralik', 'iki', 'alt', 'portead']) }
+  ]
+});
+PERDE_UNITELER[5].ders = function () {
+  return [
+    { baslik: 'Oktav nedir?', metin:
+      '<p>Bir perdenin <b>53 koma</b> yukarısı aynı sesin tiz oktavı, 53 koma aşağısı pest oktavıdır. Notada aynı harf, aynı işaret; sadece bir oktav yukarıda ya da aşağıda.</p>' +
+      '<p>Bazı perdelerin oktavları <b>kendi adını</b> taşır, bazıları <b>Kaba</b> ve <b>Tiz</b> önekiyle anılır.</p>' },
+    { baslik: 'Kendi adı olan kardeşler', metin:
+      '<p><b>Rast</b> ↔ <b>Gerdâniye</b><br><b>Dügâh</b> ↔ <b>Muhayyer</b><br><b>Yegâh</b> ↔ <b>Neva</b><br><b>Hüseyni Aşiran</b> ↔ <b>Hüseyni</b><br><b>Acem Aşiran</b> ↔ <b>Acem</b><br><b>Irak</b> ↔ <b>Evç</b><br><b>Geveşt</b> ↔ <b>Mahur</b><br><b>Kürdi</b> ↔ <b>Sünbüle</b><br><b>Zirgüle</b> ↔ <b>Şehnaz</b> · <b>Nim Zirgüle</b> ↔ <b>Nim Şehnaz</b></p>' },
+    { baslik: 'Önekli kardeşler', metin:
+      '<p><b>Segâh</b> ↔ <b>Tiz Segâh</b> · <b>Bûselik</b> ↔ <b>Tiz Bûselik</b> · <b>Çargâh</b> ↔ <b>Tiz Çargâh</b><br><b>Kaba Çargâh</b> ↔ <b>Çargâh</b> · <b>Kaba Nim Hicaz</b> ↔ <b>Nim Hicaz</b> · <b>Kaba Hisar</b> ↔ <b>Hisar</b></p>' +
+      '<p>İpucu: önce harfi bul, sonra aynı işareti koru.</p>' }
+  ];
+};
+PERDE_UNITELER[6].ders = function () {
+  return [
+    { baslik: 'Perdeler arası mesafe', cizim: function () { return h('div', { class: 'kartCetvel' }, cetvelSVG(PERDE['Segâh'])); }, metin:
+      '<p>Perdeler koma sırasıyla dizilir. İki tam ses arasında (9 koma) <b>+4</b> (Nim…), <b>+5</b> (yalın ad), <b>+8</b> (Dik…) yerlerinde ara perdeler vardır.</p>' +
+      '<p>Örnek: <b>Neva</b> + bakiye = <b>Nim Hisar</b> · Neva + küçük mücenneb = <b>Hisar</b> · Neva + büyük mücenneb = <b>Dik Hisar</b>.</p>' },
+    { baslik: 'Aynı ses, iki yazım', cizim: function () { return h('div', { class: 'kartPorte' }, porteSVG({ notalar: PERDE['Segâh'].parcalar, aralik: 48, etiketler: ['La + b. müc.', 'Si − koma'] })); }, metin:
+      '<p>Ara perdeler iki komşu harfle yazılabilir: <b>Segâh</b> = La büyük mücenneb diyezi = Si koma bemolü.</p>' +
+      '<p>Hesap: iki harf arası 9 koma (Mi–Fa ve Si–Do’da 4). Diyez ile bemolün toplamı bu aralığa eşittir: 8 + 1 = 9.</p>' },
+    { baslik: '⏱️ Perde avı', metin: '<p>Finalde her soru için süre var. Gördüğün anda tanımak, perdeleri gerçekten öğrendiğini gösterir.</p>' }
+  ];
 };
 
 // Tekrar (Leitner) için tek öğe sorusu
