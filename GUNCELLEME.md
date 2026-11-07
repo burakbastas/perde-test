@@ -1,4 +1,8 @@
-# Seyir 3.2.0 – yükleme notu
+# Seyir 3.2.1 – yükleme notu
+
+3.2.0’ı yüklediysen yalnız `js/motor.js`, `index.html`, `sw.js`, `manifest.webmanifest`, `js/cekirdek.js` ve `GUNCELLEME.md` değişti. Düzeltme: sırala-sınıflandır ya da dizme sorusundan sonra kavram kartında/açık soruda “Tanımı göster” düğmesi kilitli kalıyordu.
+
+## 3.2.0
 
 Yeni dosyalar: `js/yazili.js` (yazılı sınava hazırlık: açık uçlu soru, kavram kartı, soru bankası), `js/ortak/tmk.js` (Türk Müziği Kültürü), `js/ortak/thm.js` (Türk Halk Müziği Bilgisi). Değişenler: `index.html`, `sw.js`, `manifest.webmanifest`, `css/stil.css`, `js/cekirdek.js`, `js/motor.js`, `js/ortak.js`, `js/arayuz.js`, `GUNCELLEME.md`. Paketi açıp **bütün dosyaları** yükle; `js/yazili.js` ve `js/ortak/` içindeki iki yeni dosyanın da yüklendiğinden emin ol.
 

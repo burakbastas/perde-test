@@ -3,7 +3,7 @@
 // =====================================================
 'use strict';
 
-const SURUM = '3.2.0';
+const SURUM = '3.2.1';
 const WHATSAPP_NO = '905307302798';
 const UYGULAMA_ADRESI = 'https://burakbastas.github.io/perde-test/';
 const ANAHTAR = 'perdeTestV2';

@@ -398,6 +398,7 @@ function soruGoster() {
   g.appendChild(alan);
   const kontrol = $('oyKontrol');
   kontrol.hidden = true;
+  kontrol.disabled = false;   // 3.2.1: önceki sorudan (sınıflandır/diz) kilitli kalmasın
 
   if (veri.tip === 'secim') {
     secimCiz(alan, veri, q);
