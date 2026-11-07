@@ -645,6 +645,7 @@ function tartimKarti(t) {
 // SORU EKRANI: DİNLE DÜĞMESİ ve VUR (ekrana vurma) SORUSU
 // =====================================================
 function dinleDugmesi(d, otomatik) {
+  if (d && d.kulak && typeof kulakDugmeler === 'function') return kulakDugmeler(d, otomatik);   // 3.1: perde ve ezgi dinleme
   const b = h('button', { class: 'dugme ince dinleDugme', type: 'button' }, otomatik ? '🔊 Tekrar dinle' : '🔊 Dinle');
   const cal = function () {
     b.classList.add('caliyor');

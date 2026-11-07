@@ -928,3 +928,33 @@ details.hesapKatla summary { cursor: pointer; font-weight: 800; color: var(--kob
 .oIzgara.kucuk .oKutu b { font-size: 14px; line-height: 1.15; }
 .oIzgara.kucuk .oKutu small { display: none; }
 @media (min-width: 700px) { .oIzgara.kucuk { grid-template-columns: repeat(5, 1fr); } }
+
+/* ---------- 3.1: Kulak eğitimi ---------- */
+.kulakDugmeler { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 6px; }
+.kulakSatir { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.kulakDugmeler .dugme.ince, .soruKutu .kulakDugmeler .dinleDugme { margin: 0; display: inline-flex; width: auto; padding: 8px 16px; }
+.kulakDugmeler .dugme:disabled { opacity: .45; }
+.kulakParca { min-width: 56px; }
+.kulakParca.caliyor, .kararDugme.caliyor, .kaCal.caliyor { background: var(--mercan); border-color: var(--mercan); color: #fff; }
+.kulakBilgi { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; font-size: 12px; font-weight: 700; color: var(--soluk); }
+.kulakBilgi small:empty { display: none; }
+.kulakGeri { margin-top: 8px; }
+.kulakGeri .kulakSatir { margin-top: 6px; justify-content: flex-start; }
+.kulakArac h3 { margin: 14px 0 6px; }
+.kaKart { background: var(--zemin); border: 1.5px solid var(--cizgi); border-radius: 16px; padding: 10px 12px; margin: 6px 0 10px; }
+.kaBaslik { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; justify-content: space-between; }
+.kaBaslik b { font: 800 18px "Baloo 2", sans-serif; }
+.kaBaslik span { font-size: 13px; font-weight: 700; color: var(--soluk); }
+.kaKart .kulakSatir { justify-content: flex-start; margin: 6px 0; }
+.kaKart .kartPorte { background: var(--kart); }
+.kaYavas { font-size: 14px; margin: 4px 0; }
+.kaKarsi { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; font-size: 14px; font-weight: 700; }
+.kaKarsi .mkSec { flex: 1 1 150px; }
+.kaKaynak { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: space-between; margin-top: 4px; }
+.kaGrupAd { font-size: 12px; font-weight: 800; color: var(--soluk); text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; }
+.kaIzgara .pbIzgara { margin: 4px 0 6px; }
+.kaAntrenman { background: var(--kart); border: 1.5px solid var(--cizgi); border-radius: 16px; padding: 4px 12px 10px; margin: 10px 0; }
+.kaAyarlar { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.kaAyarlar .mkSec { width: 100%; }
+@media (max-width: 420px) { .kaAyarlar { grid-template-columns: 1fr; } }
+.kaAntrenman .dugme { margin-top: 8px; }

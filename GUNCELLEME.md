@@ -1,3 +1,15 @@
+# Seyir 3.1 – yükleme notu
+
+Yeni dosyalar: `js/kulak.js` (kulak eğitimi), `js/kulak-seyir.js` (SymbTr seyir parçaları) ve **`ses/gitar/` klasörü** (27 gitar örneği, `g48.mp3` … `g74.mp3`, toplam ~300 KB). Paketi açıp **bütün dosya ve klasörleri** GitHub'a yükle; `ses/gitar` klasörünün de yüklendiğinden emin ol.
+
+Değişenler: Dörtlü-Beşli, Göçürme ve Makam ünitelerine 18 adet 👂 seviyesi (finalden önce; bitmiş ünitelerde isteğe bağlı), Öğren → Araçlar → Kulak eğitimi (Dinle, Karşılaştır, Göçür, Antrenman), Sonsuz Meşk'te sesli sorular (Usta katında 3, Pîr katında 2 dinleme hakkı), Ayarlar'da "Sesli sorular" anahtarı, Kaynaklar'da SymbTr. Kayıt taşıması yok.
+
+Sesler Kız ahenginde (Rast = La, 220 Hz); en pest ezgiler Sipürde ya da Bolâhenk'te çalar.
+
+**Önce test:** `seyir-3.1.0-test.zip` paketini perde-test deposuna yükle. Test sürümü kendi kayıt anahtarını (`perdeTestV2`) ve önbellek önekini (`perdetest-`) kullanır.
+
+**Lisans notu:** `js/kulak-seyir.js` SymbTr'den türetildiği için CC BY-NC-SA 4.0 ile paylaşılır (dosyanın başında yazıyor). Depodaki LICENSE dosyasına bu dosya için bir istisna satırı eklemek iyi olur.
+
 # Seyir 3.0 – yükleme notu
 
 Yeni dosyalar: `js/yeni.js` (yeni soru tipleri ve seviyeler), `js/ogren2.js` (Öğren ekleri), `js/hatakart.js` (2.9). Paketi açıp **bütün dosya ve klasörleri** GitHub'a yükle.

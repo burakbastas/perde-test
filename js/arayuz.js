@@ -401,6 +401,7 @@ function ogrenCiz(g) {
     return h('button', { class: 'oKutu', type: 'button', style: '--r:' + renk, onclick: f, title: alt, 'aria-label': ad + ': ' + alt }, h('span', { class: 'ik' }, ik), h('b', null, ad), h('small', null, alt));
   };
   g.appendChild(h('div', { class: 'oIzgara kucuk' },
+    kutu('var(--zumrut)', '👂', 'Kulak eğitimi', 'Dörtlü-beşli, makam ve göçürme: dinle ve çalış', kulakAraci),
     kutu('var(--kobalt)', '🧠', 'Perde ezber', 'Günün 5 perdesi, eşleştir, çağrışım', perdeEzberAraci),
     kutu('var(--turkuaz)', '🪜', 'Perde bul', 'Bir perdenin merdiveni ve yazımı', perdeBulAraci),
     kutu('var(--mercan)', '⭕', 'Koma dairesi', 'Makam dizileri çember üzerinde', komaDairesiAraci),
@@ -651,6 +652,13 @@ function hakkinda() {
 }
 function yenilikler() {
   sayfa('🆕 Yenilikler', h('div', { class: 'metinSayfa', html:
+    '<h3>Sürüm 3.1</h3><ul>' +
+    '<li>👂 <b>Kulak eğitimi</b>: dörtlü-beşliler, göçürmeler ve makamlar artık duyuluyor. Gitar sesi, 53 komalı perdeler; sesler Kız ahenginde (Rast perdesi La sesinden).</li>' +
+    '<li>🧭 Meşk Yolu’nda Dörtlü-Beşli, Göçürme ve Makam ünitelerine 👂 seviyeleri: hangisi, isteneni bul, aynı mı, farklı olanı bul, hangi ses değişti, eksik perde, aralıkları diz, duyduğunu porteye yaz, hangi perdeden, diziden ve seyirden makam. 1 komalık ayrımlar ayrı bir “İnce ayrım” seviyesinde.</li>' +
+    '<li>🎼 <b>Seyirden makam</b>: SymbTr derlemindeki Rauf Yekta, Erol Bingöl ve Şefik Gürmeriç seyir örneklerinden kısa cümleler.</li>' +
+    '<li>🛠️ Öğren → Araçlar’da <b>Kulak eğitimi</b>: dinle, karşılaştır, göçür ve zorluğu kendini ayarlayan antrenman turları.</li>' +
+    '<li>🎯 Her sesli soruda tek vuruşluk <b>Karar</b> düğmesi. Dinleme sınırsız; Sonsuz Meşk’te Usta katında 3, Pîr katında 2 dinleme hakkı.</li>' +
+    '<li>Bitirdiğin ünitelere eklenen 👂 seviyeleri isteğe bağlıdır; ünvanın ve ilerlemen korunur. Sesli soruları Ayarlar’dan kapatabilirsin.</li></ul>' +
     '<h3>Sürüm 3.0</h3><ul>' +
     '<li>🏵️ <b>Yedi yeni makam</b>: Acemaşiran, Muhayyer, Muhayyerkürdi, Acemkürdi, Saba, Segâh ve Hüzzam (Makam dalında 6. ünite). Aynı diziyi paylaşan makamlar seyir ve güçlüleriyle ayrılır.</li>' +
     '<li>🧭 <b>Seyir</b>: her makamın seyir türü (çıkıcı, inici, inici-çıkıcı) ve yeni “Seyri sırala” soruları.</li>' +
@@ -788,6 +796,9 @@ function ayarlar() {
   const oto = h('label', { class: 'anahtar' },
     h('input', { type: 'checkbox', checked: DURUM.ayar.otoGec !== false, onchange: function (e) { DURUM.ayar.otoGec = e.target.checked; kaydet(); } }),
     h('span', null, '⏩ Doğru cevaplarda otomatik geç'));
+  const kulak = h('label', { class: 'anahtar' },
+    h('input', { type: 'checkbox', checked: DURUM.ayar.kulak !== false, onchange: function (e) { DURUM.ayar.kulak = e.target.checked; kaydet(); } }),
+    h('span', null, '👂 Sesli sorular (kulak eğitimi)'));
   const ortak = h('label', { class: 'anahtar' },
     h('input', { type: 'checkbox', checked: !DURUM.ayar.ortakGizli, onchange: function (e) { DURUM.ayar.ortakGizli = !e.target.checked; if (!e.target.checked) ORTAK_ACIK = null; kaydet(); } }),
     h('span', null, '🎓 Ortak dersleri Öğren sekmesinde göster'));
@@ -797,6 +808,8 @@ function ayarlar() {
     h('h3', null, 'Tema'), tema,
     h('h3', null, 'Oyun'), oto,
     h('p', { class: 'kucukNot' }, 'Doğru cevaptan sonra kısa bir süre bekleyip sonraki soruya geçer. Yanlış cevapta açıklama her zaman bekler; ekranın herhangi bir yerine dokunarak geçebilirsin.'),
+    kulak,
+    h('p', { class: 'kucukNot' }, 'Kapatırsan Meşk Yolu’ndaki 👂 seviyeleri isteğe bağlı olur ve Sonsuz Meşk’te sesli soru gelmez. Ses çıkaramadığın bir yerdeysen ya da işitme engelin varsa kapatabilirsin.'),
     h('h3', null, 'Meşk Yolu'), bati,
     h('h3', null, 'Ortak dersler'), ortak,
     h('p', { class: 'kucukNot' }, 'Konservatuvar 1. sınıf ortak dersleri (Türk Dili 1, Atatürk İlkeleri ve İnkılap Tarihi 1, İngilizce 1) için özetler, ünite testleri ve sınav denemeleri. İşareti kaldırırsan bölüm Öğren’den gizlenir; ilerlemen silinmez. Meşk Yolu’nu ve ünvanları etkilemez.'),

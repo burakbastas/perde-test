@@ -233,11 +233,15 @@ function kaynaklarSayfasi() {
     '<li>MEB müzik okulları Türk müziği nazariyatı programı.</li>' +
     '<li>Usul sayfaları: Adana Musiki Derneği.</li>' +
     '<li>Perde sıklıkları: SymbTr derlemi (CompMusic).</li></ul>' +
+    '<h3>Kulak eğitimi</h3><ul>' +
+    '<li>Seyir ezgileri: <b>SymbTr</b>, M. Kemal Karaosmanoğlu (2012), Türk makam müziği sembolik veri derlemi; Rauf Yekta, Erol Bingöl ve Şefik Gürmeriç’in seyir örnekleri. Lisans: CC BY-NC-SA 4.0. Parçalar kısaltıldı ve AEU perdelerine yuvarlandı; bu veri dosyası (js/kulak-seyir.js) da aynı lisansla paylaşılır. <a href="https://github.com/MTG/SymbTr" target="_blank" rel="noopener">github.com/MTG/SymbTr</a></li>' +
+    '<li>Perde frekansları: 53 koma, Kız ahengi (Rast = 220 Hz).</li></ul>' +
     '<h3>Yazı tipleri</h3><ul>' +
     '<li>Nota simgeleri: <b>Bravura</b> (Steinberg), SIL Open Font License.</li>' +
     '<li><b>Nunito</b> ve <b>Baloo 2</b>, SIL Open Font License.</li></ul>' +
     '<h3>Sesler</h3><ul>' +
-    '<li>Bendir vuruşları: Freesound #140548 “aksaksemai_bendir” (barisbozkurt), çalan Eren Ergen; CompMusic projesi (Universitat Pompeu Fabra) kaydı.</li></ul>' +
+    '<li>Bendir vuruşları: Freesound #140548 “aksaksemai_bendir” (barisbozkurt), çalan Eren Ergen; CompMusic projesi (Universitat Pompeu Fabra) kaydı.</li>' +
+    '<li>Gitar örnekleri (kulak eğitimi): Seyir için hazırlanan gitar ses örnekleri; her perde en yakın örnekten 53 komaya göre kaydırılarak çalınır.</li></ul>' +
     '<p class="kucukNot">Uygulamadaki bilgiler bu kaynaklara dayanır; bir hata görürsen Profil’deki geri bildirim bağlantısından yaz.</p>' }));
 }
 
