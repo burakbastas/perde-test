@@ -1,4 +1,10 @@
-# Seyir 3.2.1 – yükleme notu
+# Seyir 3.2.2 – yükleme notu
+
+Yeni dosya: `js/ortak/anlama.js` (ünite “Anladım mı?” testleri). 3.2.1’i yüklediysen değişenler: `js/ortak/anlama.js` (yeni), `js/yazili.js`, `js/ortak.js`, `js/arayuz.js`, `index.html`, `sw.js`, `manifest.webmanifest`, `js/cekirdek.js`, `GUNCELLEME.md`.
+
+TMK ve THM ders sayfasından Yazılı provası, Hocanın vurguladıkları, Sırala ve sınıflandır, Yazılıda iyi cevap kutuları kaldırıldı. Her üniteye 5–7 soruluk “Anladım mı?” testi eklendi; ünitenin tamam sayılması bu testte %70.
+
+## 3.2.1
 
 3.2.0’ı yüklediysen yalnız `js/motor.js`, `index.html`, `sw.js`, `manifest.webmanifest`, `js/cekirdek.js` ve `GUNCELLEME.md` değişti. Düzeltme: sırala-sınıflandır ya da dizme sorusundan sonra kavram kartında/açık soruda “Tanımı göster” düğmesi kilitli kalıyordu.
 

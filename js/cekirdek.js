@@ -3,12 +3,12 @@
 // =====================================================
 'use strict';
 
-const SURUM = '3.2.1';
+const SURUM = '3.2.2';
 const WHATSAPP_NO = '905307302798';
-const UYGULAMA_ADRESI = 'https://burakbastas.github.io/perde-test/';
-const ANAHTAR = 'perdeTestV2';
+const UYGULAMA_ADRESI = 'https://burakbastas.github.io/perde-oyunu/';
+const ANAHTAR = 'perdeMacerasiV2';
 // Test sürümünde ayrı anahtar kullanılır; ilk açılışta asıl kaydın KOPYASI alınır (asıl kayda yazılmaz)
-const KOPYA_KAYNAGI = 'perdeMacerasiV2';
+const KOPYA_KAYNAGI = null;
 
 // ---------- DOM ----------
 const $ = function (id) { return document.getElementById(id); };

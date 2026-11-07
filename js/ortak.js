@@ -28,7 +28,8 @@ function ortakKayit(d) {
 function ortakUnite(d, no) { const k = ortakKayit(d); return k.u[no] = k.u[no] || {}; }
 function ortakBitenSay(d) {
   const k = ortakKayit(d);
-  return d.uniteler.filter(function (u) { return (k.u[u.no] || {}).en >= 70; }).length;
+  const alan = d.yazili ? 'ts' : 'en';   // 3.2.2: yazılı derslerde “Anladım mı?” testi
+  return d.uniteler.filter(function (u) { return (k.u[u.no] || {})[alan] >= 70; }).length;
 }
 
 // ---------- Soru üretimi ----------
@@ -154,8 +155,8 @@ function ortakOzet(u, sonra) {
     if (sonra !== false && d.yazili) modalAc(h('div', { class: 'sonuc' },
       h('div', { class: 'sonucMaskot', html: bulbulSVG('mutlu') }),
       h('h2', null, 'Konu anlatımı bitti'),
-      h('p', null, 'Şimdi açık uçlu sorularla yazılıya çalış: cevabını kur, örnek cevapla karşılaştır.'),
-      dugme('✍️ Yazılıya çalış', function () { modalKapat(); yaziliUniteCalis(u); }),
+      h('p', null, 'Konuyu anladın mı? ' + (u.test || []).length + ' soruluk kısa bir testle bak.'),
+      dugme('✏️ Anladım mı?', function () { modalKapat(); yaziliAnlamaTesti(u); }),
       dugme('Sonra', modalKapat, 'gri')));
     else if (sonra !== false) modalAc(h('div', { class: 'sonuc' },
       h('div', { class: 'sonucMaskot', html: bulbulSVG('mutlu') }),

@@ -239,6 +239,24 @@ function yaziliEslestir(d) {
   ortakTur(d, 'Sırala ve sınıflandır', L, 0, function (y) { const k = ortakKayit(d), eski = k.es; k.es = Math.max(k.es || 0, y); return eski; });
 }
 
+// ---------- 3.2.2: Ünite “Anladım mı?” testi (genel çıkarım soruları, js/ortak/anlama.js) ----------
+function yaziliAnlamaTesti(u) {
+  const d = u.ders;
+  const uret = function () {
+    return karistir(u.test.slice()).map(function (s) {
+      const q = ortakSecimSorusu(u, s);
+      if (s[3]) q.aciklama = s[3];
+      return q;
+    });
+  };
+  const L = uret(); L.yenile = uret;
+  ortakTur(d, 'Ünite ' + u.no + ' · Anladım mı?', L, 0, function (y) {
+    const k = ortakUnite(d, u.no), eski = k.ts;
+    k.ts = Math.max(k.ts || 0, y);
+    return eski;
+  });
+}
+
 // ---------- Soru bankası: bütün sorular ve örnek cevaplar ----------
 function yaziliBanka(d) {
   let filtre = 'hepsi';
@@ -298,29 +316,25 @@ function yaziliDersCiz(g, d) {
   g.appendChild(h('div', { class: 'ortakBas', style: '--r:' + d.renk },
     h('button', { class: 'geriOk', type: 'button', 'aria-label': 'Öğren’e dön', onclick: function () { ORTAK_ACIK = null; sekmeAc('ogren'); } }, '‹'),
     h('span', { class: 'ik' }, d.ikon),
-    h('div', null, h('h2', null, d.ad), h('p', null, 'Yazılı sınav · hazırlık %' + yaziliGenelYuzde(d) + ' · ' + ortakBitenSay(d) + '/' + d.uniteler.length + ' ünite hazır'))));
+    h('div', null, h('h2', null, d.ad), h('p', null, d.kisa + ' · yazılı sınav · ' + ortakBitenSay(d) + '/' + d.uniteler.length + ' ünite anlaşıldı'))));
   const kutu = function (renk, ik, ad, alt, skor, f) {
     return h('button', { class: 'oKutu', type: 'button', style: '--r:' + renk, onclick: f }, h('span', { class: 'ik' }, ik), h('b', null, ad), h('small', null, alt), skor ? h('small', { class: 'skor' }, skor) : null);
   };
   const es = (d.siniflar || []).length + (d.siralar || []).length;
   const izgara = h('div', { class: 'oIzgara' },
-    kutu('var(--kobalt)', '✍️', 'Yazılı provası', YAZILI_PROVA + ' açık uçlu soru · önce zayıfların', k.prova != null ? 'En iyi %' + k.prova : 'Henüz yok', function () { yaziliProva(d); }),
-    say.vurgu ? kutu('var(--mercan)', '📌', 'Hocanın vurguladıkları', say.vurgu + ' soru · sınavda çıkabilir', null, function () { yaziliProva(d, true); }) : null,
     say.kavram ? kutu('var(--turkuaz)', '🃏', 'Kavram kartları', say.kavram + ' kavram · önce sen tanımla', kv.b + '/' + kv.n + ' biliniyor', function () { yaziliKavramlar(d); }) : null,
-    es ? kutu('var(--mor)', '🧩', 'Sırala ve sınıflandır', 'Gruplandır, sıraya diz', k.es != null ? 'En iyi %' + k.es : 'Henüz yok', function () { yaziliEslestir(d); }) : null,
-    kutu('var(--zumrut)', '📋', 'Soru bankası', say.acik + ' soru ve örnek cevap', null, function () { yaziliBanka(d); }),
-    kutu('var(--safran)', '💡', 'Yazılıda iyi cevap', 'Tanımla, açıkla, örnekle, bağla', null, function () { yaziliTaktik(d); }));
+    kutu('var(--zumrut)', '📋', 'Soru bankası', say.acik + ' soru ve örnek cevap', null, function () { yaziliBanka(d); }));
   g.appendChild(izgara);
   if (d.kaynak) g.appendChild(h('p', { class: 'kucukNot', html: d.kaynak }));
   g.appendChild(h('div', { class: 'oBolum' }, 'Üniteler'));
   const liste = h('div', { class: 'oOrtak' });
   d.uniteler.forEach(function (u) {
     const x = k.u[u.no] || {};
-    const durum = x.en >= 70 ? 'b' : x.oz || x.en ? 's' : '';
+    const durum = x.ts >= 70 ? 'b' : x.oz || x.ts != null ? 's' : '';
     liste.appendChild(h('button', { class: 'oUnite ' + durum, type: 'button', style: '--r:' + d.renk, onclick: function () { ortakUniteMenu(u); } },
-      h('i', null, x.en >= 70 ? '✓' : String(u.no)),
-      h('span', { class: 'm' }, h('b', null, u.ad), h('small', null, u.ozet.length + ' kart · ' + (u.acik || []).length + ' soru · ' + (u.kavram || []).length + ' kavram')),
-      h('small', { class: 'yuzde' }, x.en ? '%' + x.en : '›')));
+      h('i', null, x.ts >= 70 ? '✓' : String(u.no)),
+      h('span', { class: 'm' }, h('b', null, u.ad), h('small', null, u.ozet.length + ' kart · ' + (u.test || []).length + ' test sorusu')),
+      h('small', { class: 'yuzde' }, x.ts != null ? '%' + x.ts : '›')));
   });
   g.appendChild(liste);
 }
@@ -331,9 +345,10 @@ function yaziliUniteMenu(u) {
   modalAc(h('div', null,
     h('p', { class: 'kucukNot' }, d.ikon + ' ' + d.kisa + ' · Ünite ' + u.no),
     h('h2', null, u.ad),
-    h('p', null, (x.oz ? '✓ Konu anlatımını okudun. ' : '') + (cevaplanan ? 'Hazırlık %' + yaziliUniteYuzde(d, u) + ' (' + cevaplanan + '/' + u.acik.length + ' soru denendi)' : 'Henüz soru çözmedin.')),
+    h('p', null, (x.oz ? '✓ Konu anlatımını okudun. ' : '') + (x.ts != null ? 'Test rekorun: %' + x.ts : 'Henüz test çözmedin.')),
     dugme('📖 Konu anlatımı (' + u.ozet.length + ' kart)', function () { modalKapat(); ortakOzet(u); }),
-    u.acik && u.acik.length ? dugme('✍️ Yazılıya çalış (' + Math.min(YAZILI_UNITE, u.acik.length) + ' soru)', function () { modalKapat(); yaziliUniteCalis(u); }) : null,
+    u.test && u.test.length ? dugme('✏️ Anladım mı? (' + u.test.length + ' soru)', function () { modalKapat(); yaziliAnlamaTesti(u); }) : null,
+    u.acik && u.acik.length ? dugme('✍️ Yazılıya çalış (' + Math.min(YAZILI_UNITE, u.acik.length) + ' açık soru)', function () { modalKapat(); yaziliUniteCalis(u); }, 'ikincil') : null,
     u.kavram && u.kavram.length ? dugme('🃏 Kavramlar (' + u.kavram.length + ')', function () { modalKapat(); yaziliUniteKavram(u); }, 'ikincil') : null,
     dugme('Kapat', modalKapat, 'gri')));
 }

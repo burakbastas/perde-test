@@ -644,6 +644,7 @@ svg.cember { width: 100%; max-width: 300px; height: auto; display: block; margin
   }
   .siklar .sik:nth-child(n+10)::before { display: none; }
   .siklar.glifler .sik::before { font-size: 12px; }
+  .siklar.adlar .sik { padding-left: 36px; padding-right: 36px; }   /* 3.2.2: uzun şıkta numara metnin üstüne binmesin */
   .tusIpucu { display: block; }
 }
 

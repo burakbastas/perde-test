@@ -654,8 +654,8 @@ function yenilikler() {
   sayfa('🆕 Yenilikler', h('div', { class: 'metinSayfa', html:
     '<h3>Sürüm 3.2</h3><ul>' +
     '<li>🏛️ Ortak dersler’e iki yeni ders: <b>Türk Müziği Kültürü</b> (5 konu) ve <b>Türk Halk Müziği Bilgisi</b> (6 konu). Her konu için kısa konu anlatımı.</li>' +
-    '<li>✍️ Sınavları yazılı olduğu için test yerine <b>yazılı provası</b>: açık uçlu soruya cevabını kur (istersen yaz), örnek cevabı aç, ana noktalardan hangilerini söylediğini işaretle. Zayıf kalan sorular sonraki turda önce gelir.</li>' +
-    '<li>📌 Derste “çıkabilir” denen noktalar ayrı bir turda; 🃏 kavram kartları, 🧩 sırala ve sınıflandır, 📋 soru bankası ve 💡 “yazılıda iyi cevap” rehberi.</li></ul>' +
+    '<li>✏️ Her ünitede kısa bir <b>Anladım mı?</b> testi: ayrıntı değil, ünitenin genel çıkarımını yoklayan sorular.</li>' +
+    '<li>✍️ Sınav yazılı olduğu için ünitelerde açık uçlu sorular da var: cevabını kur, örnek cevabı aç, söylediğin ana noktaları işaretle. 📋 Soru bankasında bütün sorular ve örnek cevaplar (📌 derste vurgulananlar işaretli).</li></ul>' +
     '<h3>Sürüm 3.1</h3><ul>' +
     '<li>👂 <b>Kulak eğitimi</b>: dörtlü-beşliler, göçürmeler ve makamlar artık duyuluyor. Gitar sesi, 53 komalı perdeler; sesler Kız ahenginde (Rast perdesi La sesinden).</li>' +
     '<li>🧭 Meşk Yolu’nda Dörtlü-Beşli, Göçürme ve Makam ünitelerine 👂 seviyeleri: hangisi, isteneni bul, aynı mı, farklı olanı bul, hangi ses değişti, eksik perde, aralıkları diz, duyduğunu porteye yaz, hangi perdeden, diziden ve seyirden makam. 1 komalık ayrımlar ayrı bir “İnce ayrım” seviyesinde.</li>' +
