@@ -241,7 +241,7 @@ function kaynaklarSayfasi() {
     '<li><b>Nunito</b> ve <b>Baloo 2</b>, SIL Open Font License.</li></ul>' +
     '<h3>Sesler</h3><ul>' +
     '<li>Bendir vuruşları: Freesound #140548 “aksaksemai_bendir” (barisbozkurt), çalan Eren Ergen; CompMusic projesi (Universitat Pompeu Fabra) kaydı.</li>' +
-    '<li>Gitar örnekleri (kulak eğitimi): Seyir için hazırlanan gitar ses örnekleri; her perde en yakın örnekten 53 komaya göre kaydırılarak çalınır.</li></ul>' +
+    '<li>Gitar örnekleri (kulak eğitimi): University of Iowa Electronic Music Studios, <i>Musical Instrument Samples</i> (gitar; yönetici Lawrence Fritts), “herhangi bir projede kısıtlamasız” kullanım; <a href="https://github.com/nbrosowsky/tonejs-instruments" target="_blank" rel="noopener">tonejs-instruments</a> “guitar-acoustic” düzenlemesi (Nicholaus P. Brosowsky, CC BY 3.0). Seyir için kısaltıldı, ses düzeyi eşitlendi; her perde en yakın örnekten 53 komaya göre kaydırılarak çalınır.</li></ul>' +
     '<p class="kucukNot">Uygulamadaki bilgiler bu kaynaklara dayanır; bir hata görürsen Profil’deki geri bildirim bağlantısından yaz.</p>' }));
 }
 

@@ -652,11 +652,16 @@ function hakkinda() {
 }
 function yenilikler() {
   sayfa('🆕 Yenilikler', h('div', { class: 'metinSayfa', html:
+    '<h3>Sürüm 3.2</h3><ul>' +
+    '<li>🏛️ Ortak dersler’e iki yeni ders: <b>Türk Müziği Kültürü</b> (5 konu) ve <b>Türk Halk Müziği Bilgisi</b> (6 konu). Her konu için kısa konu anlatımı.</li>' +
+    '<li>✍️ Sınavları yazılı olduğu için test yerine <b>yazılı provası</b>: açık uçlu soruya cevabını kur (istersen yaz), örnek cevabı aç, ana noktalardan hangilerini söylediğini işaretle. Zayıf kalan sorular sonraki turda önce gelir.</li>' +
+    '<li>📌 Derste “çıkabilir” denen noktalar ayrı bir turda; 🃏 kavram kartları, 🧩 sırala ve sınıflandır, 📋 soru bankası ve 💡 “yazılıda iyi cevap” rehberi.</li></ul>' +
     '<h3>Sürüm 3.1</h3><ul>' +
     '<li>👂 <b>Kulak eğitimi</b>: dörtlü-beşliler, göçürmeler ve makamlar artık duyuluyor. Gitar sesi, 53 komalı perdeler; sesler Kız ahenginde (Rast perdesi La sesinden).</li>' +
     '<li>🧭 Meşk Yolu’nda Dörtlü-Beşli, Göçürme ve Makam ünitelerine 👂 seviyeleri: hangisi, isteneni bul, aynı mı, farklı olanı bul, hangi ses değişti, eksik perde, aralıkları diz, duyduğunu porteye yaz, hangi perdeden, diziden ve seyirden makam. 1 komalık ayrımlar ayrı bir “İnce ayrım” seviyesinde.</li>' +
     '<li>🎼 <b>Seyirden makam</b>: SymbTr derlemindeki Rauf Yekta, Erol Bingöl ve Şefik Gürmeriç seyir örneklerinden kısa cümleler.</li>' +
     '<li>🛠️ Öğren → Araçlar’da <b>Kulak eğitimi</b>: dinle, karşılaştır, göçür ve zorluğu kendini ayarlayan antrenman turları.</li>' +
+    '<li>🔊 Dörtlü-Beşli’nin 1–5. ünitelerinde porte, formül, yer ve kurma sorularına isteğe bağlı <b>Dinle</b> düğmesi; her üniteye “Porte ve ad”dan hemen sonra basit bir <b>Dinleyerek tanış</b> seviyesi (duyduğun porte hangisi, yazılan bu mu, iki addan hangisi, çıkıcı mı inici mi, dörtlü mü beşli mi).</li>' +
     '<li>🎯 Her sesli soruda tek vuruşluk <b>Karar</b> düğmesi. Dinleme sınırsız; Sonsuz Meşk’te Usta katında 3, Pîr katında 2 dinleme hakkı.</li>' +
     '<li>Bitirdiğin ünitelere eklenen 👂 seviyeleri isteğe bağlıdır; ünvanın ve ilerlemen korunur. Sesli soruları Ayarlar’dan kapatabilirsin.</li></ul>' +
     '<h3>Sürüm 3.0</h3><ul>' +
@@ -812,7 +817,7 @@ function ayarlar() {
     h('p', { class: 'kucukNot' }, 'Kapatırsan Meşk Yolu’ndaki 👂 seviyeleri isteğe bağlı olur ve Sonsuz Meşk’te sesli soru gelmez. Ses çıkaramadığın bir yerdeysen ya da işitme engelin varsa kapatabilirsin.'),
     h('h3', null, 'Meşk Yolu'), bati,
     h('h3', null, 'Ortak dersler'), ortak,
-    h('p', { class: 'kucukNot' }, 'Konservatuvar 1. sınıf ortak dersleri (Türk Dili 1, Atatürk İlkeleri ve İnkılap Tarihi 1, İngilizce 1) için özetler, ünite testleri ve sınav denemeleri. İşareti kaldırırsan bölüm Öğren’den gizlenir; ilerlemen silinmez. Meşk Yolu’nu ve ünvanları etkilemez.'),
+    h('p', { class: 'kucukNot' }, 'Konservatuvar 1. sınıf ortak dersleri (Türk Dili 1, Atatürk İlkeleri ve İnkılap Tarihi 1, İngilizce 1, Türk Müziği Kültürü, Türk Halk Müziği Bilgisi) için özetler, ünite testleri, sınav denemeleri ve yazılı provası. İşareti kaldırırsan bölüm Öğren’den gizlenir; ilerlemen silinmez. Meşk Yolu’nu ve ünvanları etkilemez.'),
     h('h3', null, 'İlerleme'),
     h('p', { class: 'kucukNot' }, 'Sıfırlarsan bütün oyunlardaki yıldızlar, kartlar, tekrar listesi ve seri silinir. Önce yedek almanı öneririz.'),
     dugme('İlerlemeyi sıfırla', function () {
@@ -983,7 +988,7 @@ document.addEventListener('keydown', function (e) {
       return;
     }
     if (/^[1-9]$/.test(k) && !geri.classList.contains('acik')) {
-      const siklar = document.querySelectorAll('#oyGovde .siklar .sik');
+      const siklar = document.querySelectorAll('#oyGovde .siklar .sik, #oyGovde .acikNokta');
       tikla(siklar[Number(k) - 1]);
     }
   }

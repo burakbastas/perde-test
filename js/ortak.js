@@ -1,5 +1,6 @@
 // =====================================================
-// ORTAK DERSLER (Türk Dili 1, Atatürk İlkeleri ve İnkılap Tarihi 1, İngilizce 1)
+// ORTAK DERSLER (Türk Dili 1, Atatürk İlkeleri ve İnkılap Tarihi 1, İngilizce 1,
+// 3.2: Türk Müziği Kültürü ve Türk Halk Müziği Bilgisi: yazılı sınavlı, bkz. yazili.js)
 // OMÜ 1. sınıf ortak dersleri için sınav hazırlığı. Meşk Yolu’ndan, ünvanlardan ve
 // Sonsuz Meşk’ten ayrıdır; Öğren sekmesinin altında görünür, Ayarlar’dan gizlenebilir.
 // İlerleme DURUM.ortak[dersId] = { u: { no: { oz: 1, en: 0..100 } }, vize: %, final: %, kron: % }
@@ -150,7 +151,13 @@ function ortakOzet(u, sonra) {
   dersGoster(d.ikon + ' Ünite ' + u.no + ': ' + u.ad, u.ozet.map(function (x) { return { baslik: x[0], metin: x[1] }; }), function () {
     ortakUnite(d, u.no).oz = 1; kaydet();
     ekranAc('ekranAna'); sekmeAc('ogren');
-    if (sonra !== false) modalAc(h('div', { class: 'sonuc' },
+    if (sonra !== false && d.yazili) modalAc(h('div', { class: 'sonuc' },
+      h('div', { class: 'sonucMaskot', html: bulbulSVG('mutlu') }),
+      h('h2', null, 'Konu anlatımı bitti'),
+      h('p', null, 'Şimdi açık uçlu sorularla yazılıya çalış: cevabını kur, örnek cevapla karşılaştır.'),
+      dugme('✍️ Yazılıya çalış', function () { modalKapat(); yaziliUniteCalis(u); }),
+      dugme('Sonra', modalKapat, 'gri')));
+    else if (sonra !== false) modalAc(h('div', { class: 'sonuc' },
       h('div', { class: 'sonucMaskot', html: bulbulSVG('mutlu') }),
       h('h2', null, 'Özet bitti'),
       h('p', null, 'Şimdi 10 soruluk kısa bir testle pekiştir.'),
@@ -186,7 +193,7 @@ function ortakZamanCizelgesi(d) {
 // ---------- Öğren sekmesi: ortak dersler bölümü ve ders sayfası ----------
 function ortakBolumCiz(g) {
   if (!ortakGorunur() || !ORTAK_DERSLER.length) return;
-  g.appendChild(h('div', { class: 'oBolum ortakBaslik' }, h('span', null, 'Ortak dersler'), h('small', null, 'Konservatuvar 1. sınıf ortak dersleri: özet, test ve sınav denemesi')));
+  g.appendChild(h('div', { class: 'oBolum ortakBaslik' }, h('span', null, 'Ortak dersler'), h('small', null, 'Konservatuvar 1. sınıf ortak dersleri: özet, test, sınav denemesi ve yazılı provası')));
   const kap = h('div', { class: 'oOrtak' });
   ORTAK_DERSLER.forEach(function (d) {
     const n = ortakBitenSay(d), top = d.uniteler.length;
@@ -198,6 +205,7 @@ function ortakBolumCiz(g) {
   g.appendChild(kap);
 }
 function ortakDersCiz(g, d) {
+  if (d.yazili) { yaziliDersCiz(g, d); return; }   // 3.2: yazılı sınavlı dersler
   const k = ortakKayit(d);
   g.appendChild(h('div', { class: 'ortakBas', style: '--r:' + d.renk },
     h('button', { class: 'geriOk', type: 'button', 'aria-label': 'Öğren’e dön', onclick: function () { ORTAK_ACIK = null; sekmeAc('ogren'); } }, '‹'),
@@ -230,6 +238,7 @@ function ortakDersCiz(g, d) {
   g.appendChild(liste);
 }
 function ortakUniteMenu(u) {
+  if (u.ders.yazili) { yaziliUniteMenu(u); return; }
   const x = ortakUnite(u.ders, u.no);
   modalAc(h('div', null,
     h('p', { class: 'kucukNot' }, u.ders.ikon + ' ' + u.ders.kisa + ' · Ünite ' + u.no),

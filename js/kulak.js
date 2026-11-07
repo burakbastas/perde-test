@@ -6,6 +6,9 @@
 //  · Dinleme hakkı sınırsız; Sonsuz Meşk'te Usta katında 3, Pîr katında 2.
 //  · 1 komalık ayrımlar yolda yalnız "İnce ayrım" seviyesinde; Sonsuz Meşk'in Usta ve Pîr katlarında da gelir.
 //  · Seyir parçaları: SymbTr (CC BY-NC-SA 4.0), js/kulak-seyir.js
+//  · Gitar örnekleri: University of Iowa Electronic Music Studios, Musical Instrument Samples (gitar);
+//    tonejs-instruments "guitar-acoustic" düzenlemesi (N. Brosowsky, CC BY 3.0). Seyir için kısaltıldı ve ses düzeyi eşitlendi.
+//  · 3.1.1: 1–5. Dörtlü-Beşli ünitelerindeki sorulara isteğe bağlı dinleme; her üniteye "Dinleyerek tanış" seviyesi.
 // =====================================================
 'use strict';
 
@@ -213,6 +216,16 @@ function kulakDugmeler(d, otomatik) {
   if (otomatik) setTimeout(function () { if (document.body.contains(ana) && !(TUR && TUR.q && TUR.q.cevaplandi)) cal(ana, butun, true); }, 350);
   return kap;
 }
+// 3.1.1: görsel sorularda isteğe bağlı dinleme (otomatik çalmaz). d: { cesniler: [kimlik] }; iki çeşni aynı perdeden çalar
+function kulakSecenekDugmesi(d) {
+  const L = (d.cesniler || []).map(function (id) { return CESNI[id]; }).filter(Boolean);
+  if (!L.length) return null;
+  const bas = komaOf(L[0].notalar[0]);
+  const parcalar = L.map(function (c, i) { return { etiket: L.length > 1 ? c.ad : null, olaylar: kulakDiziOlay(kCesniKomalar(c, bas), 'ci') }; });
+  const kap = kulakDugmeler(kulakDinle(parcalar, {}), false);
+  kap.classList.add('secimli');
+  return kap;
+}
 // Cevaptan sonra: doğruyu ve seçileni dinleme, çalınanın portesi
 function kulakGeri(o) {
   return function (q, dogru) {
@@ -249,6 +262,11 @@ function kUzak(a, b) {
 }
 function kPerdeAdi(k) { const p = KOMADAN_PERDE[k]; return p ? p.ad : null; }
 function kCesniKomalar(c, bas) { const b = bas == null ? komaOf(c.notalar[0]) : bas; return kKum(c).map(function (x) { return b + x; }); }
+// Soru eki ünlü uyumuna göre: Dörtlüsü mü, Beşlisi mi, Uşşak mı
+function kSoruEki(ad) {
+  const u = (String(ad).toLocaleLowerCase('tr').match(/[aıoueiöüâîû]/g) || ['a']).pop();
+  return { a: 'mı', ı: 'mı', â: 'mı', o: 'mu', u: 'mu', û: 'mu', e: 'mi', i: 'mi', î: 'mi', ö: 'mü', ü: 'mü' }[u] || 'mı';
+}
 function kTur(c) { return c.tur === 'Beşli' ? 'beşli' : 'dörtlü'; }
 function kYon(o) { return o.yon === 'k' ? rastgele(['ci', 'c', 'i']) : (o.yon || 'ci'); }
 function kYonMetni(y) { return y === 'c' ? 'Yalnız çıkış' : y === 'i' ? 'Yalnız iniş' : 'Çıkış ve iniş'; }
@@ -286,6 +304,17 @@ function kCeldir(c, havuz, n, minUzak) {
   const ayni = karistir(havuz.filter(function (x) { return x !== c && x.notalar.length === c.notalar.length && kUzak(c, x) >= minUzak; }));
   const diger = karistir(havuz.filter(function (x) { return x !== c && x.notalar.length !== c.notalar.length; }));
   return ayni.concat(diger).slice(0, Math.max(0, n));
+}
+function kCeldirEsnek(c, havuz, n, minUzak) {
+  let L = kCeldir(c, kAyniBoy(c, havuz), n, minUzak);
+  if (L.length < n && minUzak > 4) L = L.concat(kCeldir(c, kAyniBoy(c, havuz).filter(function (x) { return L.indexOf(x) < 0; }), n - L.length, 4));
+  return L;
+}
+function kEnUzak(c, havuz) {
+  const L = kAyniBoy(c, havuz).filter(function (x) { return x !== c && kUzak(c, x) > 0; });
+  if (!L.length) return null;
+  const en = Math.max.apply(null, L.map(function (x) { return kUzak(c, x); }));
+  return rastgele(L.filter(function (x) { return kUzak(c, x) >= en - 1; }));
 }
 function kAyniBoy(c, havuz) { return havuz.filter(function (x) { return x.notalar.length === c.notalar.length; }); }
 function kSikNo(i) { return (i + 1) + '. çalım'; }
@@ -514,6 +543,73 @@ function kqHangiPerde(c, o) {
     aciklama: cesniAciklama(c) + '<br>Rast ile ' + P.ad + ' arası ' + Math.abs(P.koma - rast) + ' koma.'
   };
 }
+// ---- 3.1.1: Basit dinleme soruları ("Dinleyerek tanış") ----
+function kqDinlePorte(c, o) {
+  const dis = kCeldirEsnek(c, o.havuz, Math.min(2, (o.sik || 3) - 1), o.minUzak || 6);
+  if (!dis.length) return kqDinleEslesme(c, o);
+  const ol = kulakDiziOlay(kCesniKomalar(c), 'ci', o.adim);
+  const q = {
+    oge: null, kulak: true, tip: 'secim',
+    soru: { metin: '👂 Duyduğun hangisi?', kucuk: true }, alt: 'Dinle, sonra portesini seç',
+    dinle: kulakDinle([{ olaylar: ol }], { karar: komaOf(c.notalar[0]) }),
+    siklar: [c].concat(dis).map(function (x) { return { key: x.id, porte: cesniPorte(x), genis: true }; }),
+    dogru: c.id, dogruMetin: c.ad, aciklama: cesniAciklama(c)
+  };
+  q.geriEk = kulakGeri({ kaydir: q.dinle.kaydir, dogru: { etiket: c.ad, olaylar: ol },
+    secenek: dis.reduce(function (m, x) { m[x.id] = { etiket: x.ad, olaylar: kulakDiziOlay(kCesniKomalar(x), 'ci', o.adim) }; return m; }, {}) });
+  return q;
+}
+function kqDinleAd(c, o) {
+  const b = kEnUzak(c, o.havuz);
+  if (!b) return kqDinleEslesme(c, o);
+  const ol = kulakDiziOlay(kCesniKomalar(c), 'ci', o.adim);
+  const q = {
+    oge: null, kulak: true, tip: 'secim',
+    soru: { metin: '👂 ' + c.ad + ' ' + kSoruEki(c.ad) + ', ' + b.ad + ' ' + kSoruEki(b.ad) + '?', kucuk: true }, alt: 'Dinle ve adını seç',
+    dinle: kulakDinle([{ olaylar: ol }], { karar: komaOf(c.notalar[0]) }),
+    siklar: [c, b].map(function (x) { return { key: x.id, metin: x.ad }; }), dogru: c.id, dogruMetin: c.ad,
+    aciklama: '<b>' + c.ad + '</b>: ' + formulGoster(c.formul) + ' · <b>' + b.ad + '</b>: ' + formulGoster(b.formul)
+  };
+  q.geriEk = kulakGeri({ porte: kPorte(c.notalar, c, PERDE[c.yer]), kaydir: q.dinle.kaydir, dogru: { etiket: c.ad, olaylar: ol },
+    secenek: (function () { const m = {}; m[b.id] = { etiket: b.ad, olaylar: kulakDiziOlay(kCesniKomalar(b), 'ci', o.adim) }; return m; })() });
+  return q;
+}
+function kqDinleEslesme(c, o) {
+  const b = Math.random() < 0.5 ? (kCeldirEsnek(c, o.havuz, 1, o.minUzak || 6)[0] || null) : null;
+  const cal = b || c, ol = kulakDiziOlay(kCesniKomalar(cal, komaOf(c.notalar[0])), 'ci', o.adim);
+  const q = {
+    oge: null, kulak: true, tip: 'secim',
+    soru: { porte: cesniPorte(c), metin: c.ad, kucuk: true }, alt: '👂 Duyduğun, yazılan bu dizi mi?',
+    dinle: kulakDinle([{ olaylar: ol }], { karar: komaOf(c.notalar[0]) }),
+    siklar: [{ key: 'E', metin: '✔ Evet, bu' }, { key: 'H', metin: '✘ Hayır, başka' }], sirali: true,
+    dogru: b ? 'H' : 'E', dogruMetin: b ? 'Hayır: çalınan ' + b.ad : 'Evet: ' + c.ad,
+    aciklama: 'Yazılan <b>' + c.ad + '</b> (' + formulGoster(c.formul) + ')' + (b ? ', çalınan <b>' + b.ad + '</b> (' + formulGoster(b.formul) + ').' : '; çalınan da buydu.')
+  };
+  q.geriEk = kulakGeri({ kaydir: q.dinle.kaydir, dogru: { etiket: 'Çalınan', olaylar: ol }, ekler: b ? [{ etiket: c.ad + ' (yazılan)', olaylar: kulakDiziOlay(kCesniKomalar(c), 'ci', o.adim) }] : [] });
+  return q;
+}
+function kqDinleYon(c, o) {
+  const yon = rastgele(['c', 'i']), ol = kulakDiziOlay(kCesniKomalar(c), yon, o.adim);
+  return {
+    oge: null, kulak: true, tip: 'secim',
+    soru: { metin: '👂 Çıkıcı mı, inici mi?', kucuk: true }, alt: 'Sesler pestten tize mi gidiyor, tizden peste mi?',
+    dinle: kulakDinle([{ olaylar: ol }], {}),
+    siklar: [{ key: 'c', metin: '↗ Çıkıcı (pestten tize)' }, { key: 'i', metin: '↘ İnici (tizden peste)' }], sirali: true,
+    dogru: yon, dogruMetin: yon === 'c' ? 'Çıkıcı' : 'İnici',
+    aciklama: 'Çalınan: <b>' + c.ad + '</b>, ' + (yon === 'c' ? 'pestten tize (çıkıcı)' : 'tizden peste (inici)') + '. Bu iki sözcük makamların seyrinde de kullanılır.'
+  };
+}
+function kqDinleBoy(c, o) {
+  const ol = kulakDiziOlay(kCesniKomalar(c), 'c', o.adim), besli = c.notalar.length === 5;
+  return {
+    oge: null, kulak: true, tip: 'secim',
+    soru: { metin: '👂 Dörtlü mü, beşli mi?', kucuk: true }, alt: 'Kaç ses duydun? Dörtlüde 4, beşlide 5 ses var',
+    dinle: kulakDinle([{ olaylar: ol }], { karar: komaOf(c.notalar[0]) }),
+    siklar: [{ key: 'd', metin: 'Dörtlü (4 ses)' }, { key: 'b', metin: 'Beşli (5 ses)' }], sirali: true,
+    dogru: besli ? 'b' : 'd', dogruMetin: besli ? 'Beşli' : 'Dörtlü',
+    aciklama: 'Çalınan: <b>' + c.ad + '</b> (' + formulGoster(c.formul) + ').'
+  };
+}
 // ---- İnce ayrım (1 koma) ----
 const K_INCE_PERDE = [['Segâh', 'Bûselik', 'Dügâh'], ['Kürdi', 'Dik Kürdi', 'Dügâh'], ['Nim Hicaz', 'Hicaz', 'Çargâh'],
   ['Nim Hisar', 'Hisar', 'Neva'], ['Evç', 'Mahur', 'Hüseyni'], ['Nim Zirgüle', 'Zirgüle', 'Rast']];
@@ -559,7 +655,7 @@ function kqInceTek(o) {
   const ol = kulakDiziOlay(kCesniKomalar(c, bas), kYon(o), o.adim);
   return {
     oge: null, kulak: true, tip: 'secim',
-    soru: { metin: '👂 ' + A.ad + ' mı, ' + B.ad + ' mı?', kucuk: true },
+    soru: { metin: '👂 ' + A.ad + ' ' + kSoruEki(A.ad) + ', ' + B.ad + ' ' + kSoruEki(B.ad) + '?', kucuk: true },
     alt: 'Tek çalım; fark 1 koma',
     dinle: kulakDinle([{ olaylar: ol }], { karar: bas }),
     siklar: [A, B].map(function (x) { return { key: x.id, metin: x.ad }; }), dogru: c.id, dogruMetin: c.ad,
@@ -691,6 +787,8 @@ const K_TIPLER = {
   tani: { tur: 'c', f: kqTani }, iste: { tur: 'c', f: kqIste }, ayni: { tur: 'c', f: kqAyni }, farkli: { tur: 'c', f: kqFarkli },
   hangiSes: { tur: 'c', f: kqHangiSes }, hata: { tur: 'c', f: kqHata }, eksik: { tur: 'c', f: kqEksik }, formul: { tur: 'c', f: kqFormul },
   dikte: { tur: 'c', f: kqDikte }, hangiPerde: { tur: 'c', f: kqHangiPerde },
+  dinlePorte: { tur: 'c', f: kqDinlePorte }, dinleAd: { tur: 'c', f: kqDinleAd }, dinleEslesme: { tur: 'c', f: kqDinleEslesme },
+  dinleYon: { tur: 'c', f: kqDinleYon }, dinleBoy: { tur: 'c', f: kqDinleBoy },
   tekPerde: { tur: 'x', f: kqTekPerde }, inceCift: { tur: 'x', f: kqInceCift }, inceTek: { tur: 'x', f: kqInceTek },
   makamDizi: { tur: 'm', f: kqMakamDizi }, parca: { tur: 'm', f: kqParca }, birlesme: { tur: 'm', f: kqBirlesme },
   tekPerdeMakam: { tur: 'm', f: kqTekPerdeMakam }, seyir: { tur: 'm', f: kqSeyir }
@@ -738,6 +836,13 @@ const MK_ILK6 = MK_ILK4.concat(['huseyni', 'buselik']);
 (function () {
   const S = function (id, ad, uret, n) { return { id: id, tip: 'seviye', ad: ad, soruSay: n || 8, uret: uret, yeni: true, kulak: true }; };
   const ince = ['inceCift', 'tekPerde'];
+  // 3.1.1: Dinleyerek tanış (basit): "Porte ve ad" seviyesinden hemen sonra, çok farklı çeşnilerle
+  const basit = ['dinlePorte', 'dinleEslesme', 'dinleAd'];
+  ykEkle(CESNI_UNITELER, 'db1', [S('db1-dinle', '👂 Dinleyerek tanış', kUretici(['dinlePorte', 'dinleYon', 'dinleEslesme', 'dinleAd', 'dinlePorte', 'dinleEslesme'], { havuz: D_TB, sik: 3, minUzak: 6 }), 6)], 'db1-2');
+  ykEkle(CESNI_UNITELER, 'db2', [S('db2-dinle', '👂 Dinleyerek tanış', kUretici(basit, { havuz: D_TB.concat(D_KS), yeni: D_KS, yeniOran: 0.75, sik: 3, minUzak: 6 }), 6)], 'db2-2');
+  ykEkle(CESNI_UNITELER, 'db3', [S('db3-dinle', '👂 Dinleyerek tanış', kUretici(basit, { havuz: D_TEMEL, yeni: ['d-hicaz'], yeniOran: 0.6, sik: 3, minUzak: 6 }), 6)], 'db3-2');
+  ykEkle(CESNI_UNITELER, 'db4', [S('db4-dinle', '👂 Dinleyerek tanış', kUretici(['dinleBoy', 'dinlePorte', 'dinleEslesme', 'dinleAd'], { havuz: B_TEMEL.concat(D_TEMEL), yeni: B_TEMEL, yeniOran: 0.75, sik: 3, minUzak: 6 }), 6)], 'db4-2');
+  ykEkle(CESNI_UNITELER, 'db5', [S('db5-dinle', '👂 Dinleyerek tanış', kUretici(basit, { havuz: C_ILERI, sik: 3, minUzak: 6 }), 6)], 'db5-2');
   // Dörtlü-Beşli: zıt çiftlerden benzerlere; 1 komalık çiftler yalnız İnce ayrım seviyesinde
   ykEkle(CESNI_UNITELER, 'db1', [S('db1-kulak', '👂 Kulaktan: üç dörtlü', kUretici(['tani', 'tani', 'ayni', 'iste'], { havuz: D_TB, sik: 3, minUzak: 4, gocur: 'yok', yon: 'ci', zorTipler: ['farkli'] }))]);
   ykEkle(CESNI_UNITELER, 'db2', [S('db2-kulak', '👂 Kulaktan: Rast ve Uşşak', kUretici(['tani', 'iste', 'hangiSes', 'tani'], { havuz: D_TB.concat(D_KS), yeni: D_KS, sik: 4, minUzak: 4, gocur: 'yok', yon: 'ci', zorTipler: ['inceTek'] }))]);
@@ -777,7 +882,7 @@ const KA_HAVUZ = {
   gocurme: [['dortlu', 'Temel dörtlüler', D_TEMEL], ['besli', 'Temel beşliler', B_TEMEL], ['temel', 'Temel dörtlü ve beşliler', D_TEMEL.concat(B_TEMEL)], ['makam', 'Makam dizileri', MK_ILK10]]
 };
 const KA_TUR = {
-  cesni: [['karisik', 'Karışık', ['tani', 'iste', 'ayni', 'farkli', 'hangiSes', 'eksik']], ['tani', 'Hangisi? (tanı)', ['tani']], ['iste', 'İsteneni bul', ['iste']], ['ayni', 'Aynı mı, farklı mı?', ['ayni']],
+  cesni: [['karisik', 'Karışık', ['tani', 'iste', 'ayni', 'farkli', 'hangiSes', 'eksik']], ['basit', 'Basit: dinle ve seç', ['dinlePorte', 'dinleEslesme', 'dinleAd']], ['tani', 'Hangisi? (tanı)', ['tani']], ['iste', 'İsteneni bul', ['iste']], ['ayni', 'Aynı mı, farklı mı?', ['ayni']],
     ['farkli', 'Farklı olanı bul', ['farkli']], ['hangiSes', 'Hangi ses değişti?', ['hangiSes']], ['hata', 'Hatayı bul (porte)', ['hata']], ['eksik', 'Eksik perde', ['eksik']],
     ['formul', 'Aralıkları diz', ['formul']], ['dikte', 'Porteye yaz', ['dikte']], ['ince', 'İnce ayrım (1 koma)', ['inceCift', 'tekPerde', 'inceTek']]],
   makam: [['karisik', 'Karışık', ['makamDizi', 'seyir', 'parca', 'birlesme', 'tekPerdeMakam']], ['makamDizi', 'Diziden makam', ['makamDizi']], ['seyir', 'Seyirden makam', ['seyir']],

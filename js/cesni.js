@@ -126,6 +126,7 @@ function cesniSoru(tip, c, havuz, sikSay) {
     q.dogruMetin = c.notalar.map(notaMetni).join(', ');
     q.aciklama = cesniAciklama(c) + gocurmeAdimlari(c.notalar);
   }
+  q.dinleSecenek = { cesniler: [c.id] };   // 3.1.1: isteğe bağlı dinleme (otomatik çalmaz)
   return q;
 }
 

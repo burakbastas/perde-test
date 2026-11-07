@@ -350,6 +350,7 @@ function soruGoster() {
   if (s.porte) kutu.appendChild(porteSVG(s.porte));
   if (s.svg) kutu.appendChild(h('div', { class: 'ritimKutu' }, s.svg()));
   if (veri.dinle) kutu.appendChild(dinleDugmesi(veri.dinle, true));
+  else if (veri.dinleSecenek && typeof kulakSecenekDugmesi === 'function' && !TUR.sonsuz && DURUM.ayar.kulak !== false) kutu.appendChild(kulakSecenekDugmesi(veri.dinleSecenek));   // 3.1.1
   g.appendChild(kutu);
   if (veri.alt) g.appendChild(h('div', { class: 'soruAlt' }, veri.alt));
 
@@ -406,6 +407,7 @@ function soruGoster() {
   else if (veri.tip === 'dizi') diziCiz(alan, veri, q, kontrol);
   else if (veri.tip === 'vur') vurCiz(alan, veri, q);
   else if (veri.tip === 'sinif') sinifCiz(alan, veri, q, kontrol);
+  else if (veri.tip === 'acik') acikCiz(alan, veri, q, kontrol);   // 3.2: yazılıya hazırlık (yazili.js)
 
   jokerYaz();
   ustBilgiYaz();
@@ -725,7 +727,7 @@ function cevapla(dogru, ozelMesaj, dogruGorsel, ekAciklama) {
 
   // Doğru cevapta otomatik geçiş (Ayarlar'dan kapatılabilir).
   // Şık sorusu: kısa. Porteye yazma, dizme ve hesaplı açıklamalar: açıklamanın uzunluğuna göre birkaç saniye.
-  if (dogru && !yarim && DURUM.ayar.otoGec !== false) {
+  if (dogru && !yarim && DURUM.ayar.otoGec !== false && !veri.otoYok) {
     const acik = veri.aciklama || '';
     const hesapSatir = (acik.match(/<li/g) || []).length;
     const uzun = veri.tip !== 'secim' || acik.indexOf('class="hesap') >= 0;

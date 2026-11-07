@@ -958,3 +958,42 @@ details.hesapKatla summary { cursor: pointer; font-weight: 800; color: var(--kob
 .kaAyarlar .mkSec { width: 100%; }
 @media (max-width: 420px) { .kaAyarlar { grid-template-columns: 1fr; } }
 .kaAntrenman .dugme { margin-top: 8px; }
+.kulakDugmeler.secimli { margin-top: 4px; }
+.kulakDugmeler.secimli .dinleDugme { padding: 6px 14px; font-size: 13px; }
+
+/* =====================================================
+   3.2 · YAZILI SINAVA HAZIRLIK (açık uçlu, kavram kartı, soru bankası)
+   ===================================================== */
+.acikKap { max-width: 520px; margin: 0 auto; }
+.acikIpucu { text-align: center; color: var(--soluk); font-weight: 700; font-size: 14px; margin: 2px 0 8px; }
+.acikYazi { display: block; width: 100%; box-sizing: border-box; min-height: 92px; border-radius: 14px; border: 1.5px solid var(--cizgi); background: var(--kart);
+  color: var(--metin); padding: 10px 12px; font: 600 15.5px/1.45 Nunito, sans-serif; resize: vertical; }
+.acikYazi:focus { outline: 2px solid var(--kobalt); outline-offset: 1px; }
+.acikYazi[readonly] { background: var(--zemin2); }
+.acikCevap { background: var(--kart); border-radius: 16px; border-left: 5px solid var(--dogru); padding: 10px 14px 6px; margin: 12px 0 8px; box-shadow: var(--golge); scroll-margin-top: 8px; }
+.acikEtiket { font: 900 12px Nunito, sans-serif; text-transform: uppercase; letter-spacing: .05em; color: var(--soluk); margin: 2px 0 2px; }
+.acikCevap .dersMetin { font-size: 15.5px; line-height: 1.5; }
+.acikNoktalar { margin: 12px 0 4px; }
+.acikNokta { display: flex; gap: 10px; align-items: flex-start; width: 100%; text-align: left; padding: 10px 12px; margin: 6px 0 0; border-radius: 14px;
+  border: 1.5px solid var(--cizgi); background: var(--kart); color: var(--metin); font: 700 15px/1.35 Nunito, sans-serif; cursor: pointer; touch-action: manipulation; }
+.acikNokta i { flex: none; width: 22px; height: 22px; border-radius: 7px; border: 2px solid var(--kilitKenar); display: flex; align-items: center; justify-content: center;
+  font-style: normal; font-size: 14px; font-weight: 900; margin-top: 0; box-sizing: border-box; }
+.acikNokta.secili { border-color: var(--dogru); background: var(--dogruZemin); }
+.acikNokta.secili i { background: var(--dogru); border-color: var(--dogru); color: #fff; }
+.acikNokta.secili i::after { content: "✓"; }
+.acikOz { display: flex; gap: 8px; margin: 12px 0 4px; }
+.acikOz .dugme { flex: 1; margin: 0; padding: 12px 6px; font-size: 15px; }
+.dersMetin ul, .dersMetin ol { margin: .4em 0; padding-left: 1.3em; }
+.dersMetin li { margin: .2em 0; }
+.dersMetin .tablo { overflow-x: auto; margin: .5em 0; }
+.dersMetin table { border-collapse: collapse; width: 100%; font-size: .9em; }
+.dersMetin th, .dersMetin td { border: 1px solid var(--cizgi); padding: 5px 7px; text-align: left; vertical-align: top; }
+.dersMetin th { background: var(--zemin2); font-weight: 900; }
+.dersMetin .pin { background: color-mix(in srgb, var(--safran) 16%, transparent); border-left: 4px solid var(--safran); padding: 6px 10px; border-radius: 8px; }
+.dersMetin .ek { background: color-mix(in srgb, var(--turkuaz) 12%, transparent); border-left: 4px solid var(--turkuaz); padding: 6px 10px; border-radius: 8px; font-size: .92em; }
+.yzGovde { margin: 10px 0 12px; max-height: 58vh; overflow: auto; text-align: left; }
+.yzBanka { border-bottom: 1px solid var(--cizgi); padding: 2px 0; }
+.yzBanka summary { cursor: pointer; padding: 8px 2px; font-weight: 800; font-size: 14.5px; line-height: 1.35; }
+.yzBanka .dersMetin { font-size: 14.5px; padding: 0 4px 4px; }
+.yzBanka .kucukNot { margin: 0 4px 8px; }
+.yzTaktik { text-align: left; }

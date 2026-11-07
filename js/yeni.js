@@ -241,8 +241,10 @@ function dbFarkSorusu() {
   const sec = [];
   for (let i = 1; i <= a.araliklar.length; i++) sec.push(i + '. aralıkta');
   if (dogruIdx.length === 2) sec.push('1. ve 3. aralıkta', '2. ve 3. aralıkta');
-  return ykSecim({ oge: a.oge, soru: a.ad + ' ile ' + b.ad, alt: 'Farkı bul: hangi aralıkta ayrılırlar?', dogru: dogru, yanlislar: ykKaristirAl(sec.filter(function (x) { return x !== dogru; }), 3),
+  const q = ykSecim({ oge: a.oge, soru: a.ad + ' ile ' + b.ad, alt: 'Farkı bul: hangi aralıkta ayrılırlar?', dogru: dogru, yanlislar: ykKaristirAl(sec.filter(function (x) { return x !== dogru; }), 3),
     aciklama: '<b>' + a.ad + '</b>: ' + a.formul + '<br><b>' + b.ad + '</b>: ' + b.formul });
+  q.dinleSecenek = { cesniler: [a.id, b.id] };   // 3.1.1: ikisi aynı perdeden, isteğe bağlı
+  return q;
 }
 function dbHataSorusu() {
   const L = ykKaristirAl(CESNILER, 4), bozuk = rastgele(L);
