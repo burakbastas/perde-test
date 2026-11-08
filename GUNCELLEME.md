@@ -1,3 +1,12 @@
+# Seyir 3.3.0 – yükleme notu
+
+Yeni dosyalar: `js/kulak-aralik.js` (Kulak eğitimi → Aralık sekmesi), `js/dikte.js` (Batı Teorisi → Ezgi diktesi). Değişenler: `index.html`, `sw.js`, `manifest.webmanifest`, `css/stil.css`, `js/cekirdek.js`, `js/kulak.js` (Hz ile çalma, sayım tıkı, iki kez otomatik çalma), `js/motor.js` (yeni soru tipi `melodi`, Batı ve Meşk Yolu sırasına `b21`), `js/arayuz.js`, `GUNCELLEME.md`. Paketi açıp bütün dosyaları yükle.
+
+- Aralık sekmesi: 9 kademe, her biri 10 soru; 8/10 sonraki kademeyi açar. İlk 7 kademede aynı soruda 1 koma farklı iki aralık (bakiye–küçük mücenneb, büyük mücenneb–tanini) yok. Otomatik antrenman: 9/10 üst, ≤6/10 alt kademe. Kayıt: `DURUM.kulak.aralik`.
+- Ezgi diktesi (`b21`): Batı dalında “Uzun değerler ve suslar”dan sonra; 7 seviye + final. Tam diktede nota başına kısmi puan (hepsi doğru: tam; %60 ve üstü: yarım kalp).
+
+**Önce test:** `seyir-3.3.0-test.zip` paketini perde-test deposuna yükle.
+
 # Seyir 3.2.2 – yükleme notu
 
 Yeni dosya: `js/ortak/anlama.js` (ünite “Anladım mı?” testleri). 3.2.1’i yüklediysen değişenler: `js/ortak/anlama.js` (yeni), `js/yazili.js`, `js/ortak.js`, `js/arayuz.js`, `index.html`, `sw.js`, `manifest.webmanifest`, `js/cekirdek.js`, `GUNCELLEME.md`.

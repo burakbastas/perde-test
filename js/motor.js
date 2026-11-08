@@ -19,7 +19,7 @@ const DAL_SIRA = ['koma', 'perde', 'usul', 'cesni', 'gocurme', 'makam', 'ahenk',
 const TR_DALLAR = ['koma', 'perde', 'usul', 'cesni', 'gocurme', 'makam', 'ahenk'];
 
 // Batı Teorisi'nin pedagojik sırası: tartımlar aralıkların arasına; tonlar en sona (TSM'de görülmeyebilir)
-const BATI_SIRA = ['b11', 'b1', 'b12', 'b2', 'b3', 'b13', 'b4', 'b14', 'b15', 'b16', 'b17', 'b18', 'b19', 'b20', 'sn-dikte', 'b5', 'b6', 'b7', 'b8', 'b9', 'b10'];
+const BATI_SIRA = ['b11', 'b1', 'b12', 'b2', 'b3', 'b13', 'b21', 'b4', 'b14', 'b15', 'b16', 'b17', 'b18', 'b19', 'b20', 'sn-dikte', 'b5', 'b6', 'b7', 'b8', 'b9', 'b10'];
 (function () {
   const L = BATI_SIRA.map(function (id) { return BATI_UNITELER.find(function (u) { return u.id === id; }); }).filter(Boolean);
   BATI_UNITELER.forEach(function (u) { if (L.indexOf(u) < 0) L.push(u); });
@@ -54,7 +54,7 @@ DAL_SIRA.forEach(function (d) {
 // Önerilen sıra (Meşk Yolu): dallar karışık, pedagojik sırayla. Batı üniteleri (b…) yalnızca
 // Ayarlar'da Batı açıksa görünür; Batı'nın ton konuları en sonda.
 const MESK_SIRA = ['km1', 'b11', 'p1', 'b1', 'km2', 'u1', 'p2', 'km3', 'b12', 'db1', 'u2', 'b2', 'db2', 'p3', 'b3', 'db3', 'b13',
-  'gc1', 'b4', 'db4', 'b14', 'gc2', 'b15', 'b16', 'b17', 'u3', 'mk1', 'p4', 'mk2', 'a1', 'mk3', 'gc3', 'u4', 'b18', 'db5', 'mk4', 'p5', 'gc4',
+  'gc1', 'b21', 'b4', 'db4', 'b14', 'gc2', 'b15', 'b16', 'b17', 'u3', 'mk1', 'p4', 'mk2', 'a1', 'mk3', 'gc3', 'u4', 'b18', 'db5', 'mk4', 'p5', 'gc4',
   'u5', 'b19', 'p6', 'a2', 'db6', 'gc5', 'u6', 'b20', 'mk5', 'p7', 'u7', 'mk6', 'b5', 'b6', 'b7', 'b8', 'b9', 'b10'];
 const MESK_TR = MESK_SIRA.filter(function (id) { return id[0] !== 'b'; });
 function meskSirasi() {
@@ -409,6 +409,7 @@ function soruGoster() {
   else if (veri.tip === 'vur') vurCiz(alan, veri, q);
   else if (veri.tip === 'sinif') sinifCiz(alan, veri, q, kontrol);
   else if (veri.tip === 'acik') acikCiz(alan, veri, q, kontrol);   // 3.2: yazılıya hazırlık (yazili.js)
+  else if (veri.tip === 'melodi') melodiCiz(alan, veri, q, kontrol);   // 3.3: ezgi diktesi (dikte.js)
 
   jokerYaz();
   ustBilgiYaz();

@@ -998,3 +998,30 @@ details.hesapKatla summary { cursor: pointer; font-weight: 800; color: var(--kob
 .yzBanka .dersMetin { font-size: 14.5px; padding: 0 4px 4px; }
 .yzBanka .kucukNot { margin: 0 4px 8px; }
 .yzTaktik { text-align: left; }
+
+/* =====================================================
+   3.3 · KULAK EĞİTİMİ: ARALIK · BATI: EZGİ DİKTESİ
+   ===================================================== */
+.arDinle { flex-wrap: wrap; }
+.arYon { margin: 6px 0 8px; }
+.arKademeler { display: grid; gap: 6px; margin: 8px 0 10px; }
+.arKademe { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 8px 10px; border-radius: 14px;
+  border: 1.5px solid var(--cizgi); background: var(--kart); color: var(--metin); cursor: pointer; font: inherit; }
+.arKademe i { flex: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-style: normal; font-weight: 900; background: var(--zemin2); color: var(--metin); font-size: 14px; }
+.arKademe.bitti i { background: var(--dogru); color: #fff; }
+.arKademe span { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.arKademe b { font-size: 15px; }
+.arKademe small { color: var(--soluk); font-weight: 700; font-size: 12.5px; }
+.arKademe .arEn { flex: none; font-weight: 900; color: var(--soluk); }
+.arKademe.kilitli { opacity: .55; cursor: default; }
+.dkYazici .porte { width: 100%; height: auto; max-height: 190px; display: block; touch-action: none; }
+.dkPorteKap { overflow-x: auto; }
+.dkAraclar { display: flex; gap: 8px; align-items: stretch; margin-top: 6px; }
+.dkAraclar .palet { flex: 1; margin-top: 0; }
+.dkPalet .paletSatir { grid-template-columns: repeat(auto-fit, minmax(58px, 1fr)); }
+.dkSure { display: flex; flex-direction: column; align-items: center; gap: 0; }
+.dkSure .dkSimge { width: 22px; height: 30px; color: var(--metin); }
+.dkSil { flex: none; margin: 0; padding: 8px 12px; align-self: center; }
+.ritimKutu .porte.dikte { width: 100%; height: auto; }
+.siklar.genisPortler .sik .porte.dikte { width: 100%; height: auto; max-height: 86px; }

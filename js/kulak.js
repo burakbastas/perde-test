@@ -85,7 +85,21 @@ function kulakNota(hz, t, d, kazanc) {
   };
   SES.sonSes = Math.max(SES.sonSes || 0, t + d + 0.3);
 }
-// olaylar: [{k: koma, t: başlangıç (sn), d: süre (sn)}]; o: { kaydir, bitince, nota(i) }
+// 3.3: kısa, yumuşak sayım tıkı (dikte öncesi ölçü sayımı)
+function kulakTik(t, kazanc) {
+  const c = SES.ctx;
+  if (!c) return;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = 'sine'; o.frequency.value = 1760;
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime((kazanc || 1) * 0.28, t + 0.004);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
+  o.connect(g); g.connect(SES.ana);
+  try { o.start(t); o.stop(t + 0.09); } catch (e) {}
+  o.onended = function () { try { g.disconnect(); } catch (e) {} };
+  SES.sonSes = Math.max(SES.sonSes || 0, t + 0.1);
+}
+// olaylar: [{k: koma | hz: frekans | tik: true, t: başlangıç (sn), d: süre (sn)}]; o: { kaydir, bitince, nota(i) }
 function kulakCal(olaylar, o) {
   o = o || {};
   kulakDur();
@@ -98,7 +112,9 @@ function kulakCal(olaylar, o) {
     if (kimlik !== KULAK.kimlik) return;
     const t0 = c.currentTime + 0.08;
     olaylar.forEach(function (e, i) {
-      if (e.k > 0) kulakNota(kulakHz(e.k, o.kaydir), t0 + e.t, e.d, e.v);
+      if (e.tik) kulakTik(t0 + e.t, e.v);   // 3.3: sayım tıkı (dikte)
+      else if (e.hz) kulakNota(e.hz, t0 + e.t, e.d, e.v);   // 3.3: Batı sesleri (eşit tamperamanlı)
+      else if (e.k > 0) kulakNota(kulakHz(e.k, o.kaydir), t0 + e.t, e.d, e.v);
       if (o.nota) KULAK.zamanlayici.push(setTimeout(function () { if (kimlik === KULAK.kimlik) o.nota(i); }, (e.t + 0.08) * 1000));
     });
     KULAK.zamanlayici.push(setTimeout(function () {
@@ -149,7 +165,7 @@ function kulakArdArda(listeler, ara) {
   const L = [];
   let t = 0;
   listeler.forEach(function (p) {
-    p.forEach(function (e) { L.push({ k: e.k, t: t + e.t, d: e.d }); });
+    p.forEach(function (e) { L.push({ k: e.k, hz: e.hz, tik: e.tik, v: e.v, t: t + e.t, d: e.d }); });
     t += kulakSon(p) + (ara == null ? 0.8 : ara);
   });
   return L;
@@ -161,7 +177,8 @@ function kulakDinle(parcalar, o) {
   parcalar.forEach(function (p) { p.olaylar.forEach(function (e) { tum.push(e.k); }); });
   if (o.karar) tum.push(o.karar);
   const a = kulakAhenk(tum);
-  return { kulak: true, parcalar: parcalar, karar: o.karar || null, kaydir: a.kaydir, ahenk: a.ad, ara: o.ara == null ? 0.9 : o.ara };
+  return { kulak: true, parcalar: parcalar, karar: o.karar || null, kaydir: a.kaydir, ahenk: o.bati ? null : a.ad, ara: o.ara == null ? 0.9 : o.ara,
+    kararOlay: o.kararOlay || null, kararAd: o.kararAd || null, oto: o.oto || null };   // 3.3: Batı (dikte) için Hz'li karar ve iki kez otomatik çalma
 }
 
 // ---------- SORU İÇİ DÜĞMELER ----------
@@ -194,9 +211,9 @@ function kulakDugmeler(d, otomatik) {
   ana.onclick = function (e) { e.stopPropagation(); cal(ana, butun, true); };
   sayilan.push(ana); hepsi.push(ana);
   const satir = h('div', { class: 'kulakSatir' }, ana);
-  if (d.karar) {
-    const kb = h('button', { class: 'dugme ince kararDugme', type: 'button', title: 'Karar sesini bir kez çalar' }, '🎯 Karar');
-    kb.onclick = function (e) { e.stopPropagation(); cal(kb, [{ k: d.karar, t: 0, d: 1.2 }], false); };
+  if (d.karar || d.kararOlay) {
+    const kb = h('button', { class: 'dugme ince kararDugme', type: 'button', title: 'Karar sesini bir kez çalar' }, '🎯 ' + (d.kararAd || 'Karar'));
+    kb.onclick = function (e) { e.stopPropagation(); cal(kb, d.kararOlay || [{ k: d.karar, t: 0, d: 1.2 }], false); };
     hepsi.push(kb);
     satir.appendChild(kb);
   }
@@ -211,9 +228,9 @@ function kulakDugmeler(d, otomatik) {
     });
     kap.appendChild(s2);
   }
-  kap.appendChild(h('div', { class: 'kulakBilgi' }, sayac, h('small', null, d.ahenk + ' ahengi')));
+  kap.appendChild(h('div', { class: 'kulakBilgi' }, sayac, d.ahenk ? h('small', null, d.ahenk + ' ahengi') : null));
   yaz();
-  if (otomatik) setTimeout(function () { if (document.body.contains(ana) && !(TUR && TUR.q && TUR.q.cevaplandi)) cal(ana, butun, true); }, 350);
+  if (otomatik) setTimeout(function () { if (document.body.contains(ana) && !(TUR && TUR.q && TUR.q.cevaplandi)) cal(ana, d.oto || butun, true); }, 350);
   return kap;
 }
 // 3.1.1: görsel sorularda isteğe bağlı dinleme (otomatik çalmaz). d: { cesniler: [kimlik] }; iki çeşni aynı perdeden çalar
@@ -892,7 +909,7 @@ const KA_TUR = {
 };
 let KA = null;   // araç durumu (oturum içinde)
 function kaDurum() {
-  if (!KA) KA = { sekme: 'cesni', cesni: 'd-ussak', karsi: 'd-buselik', makam: 'ussak', seyirNo: 0, gcCesni: 'd-hicaz', gcPerde: 'Neva', yavas: false,
+  if (!KA) KA = { sekme: 'aralik', cesni: 'd-ussak', karsi: 'd-buselik', makam: 'ussak', seyirNo: 0, gcCesni: 'd-hicaz', gcPerde: 'Neva', yavas: false,
     ayar: { cesni: { havuz: 'dortlu', tur: 'karisik', zor: 'oto' }, makam: { havuz: 'ilk10', tur: 'karisik', zor: 'oto' }, gocurme: { havuz: 'dortlu', tur: 'karisik', zor: 'oto', gocur: 'makam' } } };
   return KA;
 }
@@ -922,14 +939,15 @@ function kulakAraci() {
   const A = kaDurum();
   const govde = h('div', { class: 'kulakArac' });
   const sekme = h('div', { class: 'segment' });
-  [['cesni', 'Dörtlü-Beşli'], ['makam', 'Makam'], ['gocurme', 'Göçürme']].forEach(function (x) {
+  [['aralik', 'Aralık'], ['cesni', 'Dörtlü-Beşli'], ['makam', 'Makam'], ['gocurme', 'Göçürme']].forEach(function (x) {   // 3.3: Aralık sekmesi (kulak-aralik.js)
     sekme.appendChild(h('button', { type: 'button', class: A.sekme === x[0] ? 'aktif' : '', onclick: function () { kulakDur(); A.sekme = x[0]; kulakAraci(); } }, x[1]));
   });
   govde.appendChild(sekme);
-  if (A.sekme === 'cesni') kaCesniCiz(govde, A);
+  if (A.sekme === 'aralik') kaAralikCiz(govde, A);
+  else if (A.sekme === 'cesni') kaCesniCiz(govde, A);
   else if (A.sekme === 'makam') kaMakamCiz(govde, A);
   else kaGocurmeCiz(govde, A);
-  govde.appendChild(kaAntrenmanCiz(A.sekme));
+  if (A.sekme !== 'aralik') govde.appendChild(kaAntrenmanCiz(A.sekme));
   govde.appendChild(h('p', { class: 'kucukNot' }, 'Sesler Kız ahenginde çalar: Rast perdesi La sesinden duyulur. Çok pest kalan ezgiler Sipürde ya da Bolâhenk’te çalınır. Perdeler 53 komalı AEU sistemine göredir. Seyir örnekleri: SymbTr derlemi (CC BY-NC-SA 4.0).'));
   aracModal('👂 Kulak eğitimi', govde);
   const kutu = $('kutu'); if (kutu) kutu.scrollTop = 0;

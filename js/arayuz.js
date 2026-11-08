@@ -652,6 +652,9 @@ function hakkinda() {
 }
 function yenilikler() {
   sayfa('🆕 Yenilikler', h('div', { class: 'metinSayfa', html:
+    '<h3>Sürüm 3.3</h3><ul>' +
+    '<li>👂 Kulak eğitimine <b>Aralık</b> sekmesi: bakiye, küçük ve büyük mücenneb, tanini, artık ikili. Dokuz kademe; önce birbirinden çok farklı aralıklar, 1 komalık farklar en sonda. 10 sorudan 8’ini bilince sonraki kademe açılır.</li>' +
+    '<li>🎹 Batı Teorisi’ne <b>Ezgi diktesi</b> ünitesi: Do’dan başlayan ezgiyi duy ve porteye yaz. Önce Do–Re, sonra Mi, Fa, Sol; ses kümesi oturunca tartım (ikilik, dörtlük, sekizlik, noktalı dörtlük). Uzun diktede her doğru nota sayılır.</li></ul>' +
     '<h3>Sürüm 3.2</h3><ul>' +
     '<li>🏛️ Ortak dersler’e iki yeni ders: <b>Türk Müziği Kültürü</b> (5 konu) ve <b>Türk Halk Müziği Bilgisi</b> (6 konu). Her konu için kısa konu anlatımı.</li>' +
     '<li>✏️ Her ünitede kısa bir <b>Anladım mı?</b> testi: ayrıntı değil, ünitenin genel çıkarımını yoklayan sorular.</li>' +
