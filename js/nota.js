@@ -165,6 +165,37 @@ function porteSVG(spec) {
   return svg;
 }
 
+// 3.3.1: Şıklardaki portelerin boş üst/alt payını kırp (bütün şıklar aynı dikey aralıkta kalır).
+// Glifler yazı tipinin em kutusunu verdiği için mürekkep sınırı SMuFL ölçülerinden tahmin edilir
+// (porte aralığı = font-size / 4): sol anahtarı 4,4 aralık yukarı / 2,7 aşağı, nota başı ±0,6, işaretler +2 / −1,6.
+function porteKirp(svgler) {
+  let ust = 1e9, alt = -1e9;
+  const uygun = svgler.filter(function (s) { return /^0 0 [\d.]+ 140$/.test(s.getAttribute('viewBox') || ''); });
+  if (!uygun.length || uygun.length !== svgler.length) return;
+  uygun.forEach(function (s) {
+    s.querySelectorAll('line, text').forEach(function (c) {
+      let a, b;
+      if (c.tagName === 'line') {
+        a = Math.min(+c.getAttribute('y1'), +c.getAttribute('y2')); b = Math.max(+c.getAttribute('y1'), +c.getAttribute('y2'));
+      } else {
+        const y = parseFloat(c.getAttribute('y')) || 0, fs = parseFloat(c.getAttribute('font-size')) || 40, sp = fs / 4;
+        const kod = (c.textContent || '').codePointAt(0) || 0;
+        let m;
+        if (kod === 0xE050) m = [4.4, 2.7];
+        else if (kod >= 0xE0A0 && kod <= 0xE0A4) m = [0.6, 0.6];
+        else if (kod >= 0xE000 && kod <= 0xF8FF) m = [2.0, 1.6];
+        else m = [0.8 * fs / sp, 0.3 * fs / sp];   // düz yazı (etiket)
+        a = y - m[0] * sp; b = y + m[1] * sp;
+      }
+      if (isFinite(a) && isFinite(b)) { ust = Math.min(ust, a); alt = Math.max(alt, b); }
+    });
+  });
+  if (!(alt > ust)) return;
+  ust = Math.max(0, Math.floor(ust - 4)); alt = Math.min(140, Math.ceil(alt + 4));
+  if (alt - ust >= 132) return;
+  uygun.forEach(function (s) { const v = s.getAttribute('viewBox').split(' '); s.setAttribute('viewBox', v[0] + ' ' + ust + ' ' + v[2] + ' ' + (alt - ust)); });
+}
+
 // =====================================================
 // PORTEYE YERLEŞTİRME BİLEŞENİ
 // cfg: { slotlar:[{sabit:nota}|{konum:nota}|{}], palet:'aeu'|'aeuKarisik'|'bati'|null, smin, smax, etiketler:[] }
@@ -266,6 +297,7 @@ function yerlestirici(cfg) {
     let s = Math.round((ALT_CIZGI_Y - p.y) / 5) + 30;
     s = Math.max(smin, Math.min(smax, s));
     const eski = durum[aktif];
+    if (!ilk && eski && eski.s === s) return;   // 3.3.1: sürüklerken satır değişmediyse yeniden çizme
     durum[aktif] = { s: s, a: eski ? eski.a : null };
     ciz();
   }

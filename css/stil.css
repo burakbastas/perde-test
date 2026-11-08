@@ -1,9 +1,9 @@
 /* =====================================================
    PERDE MACERASI · çini / İznik teması
    ===================================================== */
-@font-face { font-family: SeyirNota; src: url(../fonts/seyir-nota.woff?v=3.0.5) format("woff"); font-display: block; }
-@font-face { font-family: Nunito; src: url(../fonts/nunito.woff?v=3.0.5) format("woff"); font-weight: 200 1000; font-display: swap; }
-@font-face { font-family: "Baloo 2"; src: url(../fonts/baloo2.woff?v=3.0.5) format("woff"); font-weight: 400 800; font-display: swap; }
+@font-face { font-family: SeyirNota; src: url(../fonts/seyir-nota.woff?v=3.3.1) format("woff"); font-display: block; }
+@font-face { font-family: Nunito; src: url(../fonts/nunito.woff?v=3.3.1) format("woff"); font-weight: 200 1000; font-display: swap; }
+@font-face { font-family: "Baloo 2"; src: url(../fonts/baloo2.woff?v=3.3.1) format("woff"); font-weight: 400 800; font-display: swap; }
 
 :root {
   --zemin: #fbf5ea;
@@ -24,6 +24,7 @@
   --erguvan: #a3366e;
   --altin: #d9a520;
   --altinAcik: #ffe08a;
+  --altinAcik2: #fff3c4; --altinYazi: #3b2a00; --altinYazi2: #5b4300;   /* 3.3.1: altın zeminli kutuların yazısı (koyu temada açık) */
   --dogru: #1e9e57;
   --dogruZemin: #dcf6e6;
   --yanlis: #d63b36;
@@ -41,7 +42,7 @@
     --zemin: #0b1430; --zemin2: #111c3d; --kart: #16224a; --metin: #eef1fb; --soluk: #a8b1cc; --cizgi: #2a376a;
     --ust: #0b1430; --ust2: #08102a;
     --turkuaz: #2bb9bb; --kobalt: #6f8ff0; --mercan: #f26d55; --safran: #f6bc45; --zumrut: #3bbd7c; --mor: #a684e6; --kiremit: #e57f4f; --erguvan: #e46aa5;
-    --altin: #e9bd3d; --altinAcik: #6b5410;
+    --altin: #e9bd3d; --altinAcik: #6b5410; --altinAcik2: #8a6d1c; --altinYazi: #ffe9b0; --altinYazi2: #f3d27a;
     --dogru: #43cf82; --dogruZemin: #133a2a; --yanlis: #ff6b66; --yanlisZemin: #45191c; --secim: #8ea8ff; --vurgu: #ff8a6e;
     --golge: 0 3px 0 rgba(0, 0, 0, .35); --kilit: #2b3760; --kilitKenar: #3a4878; --desen: rgba(142, 168, 255, .06);
     color-scheme: dark;
@@ -51,7 +52,7 @@
   --zemin: #0b1430; --zemin2: #111c3d; --kart: #16224a; --metin: #eef1fb; --soluk: #a8b1cc; --cizgi: #2a376a;
   --ust: #0b1430; --ust2: #08102a;
   --turkuaz: #2bb9bb; --kobalt: #6f8ff0; --mercan: #f26d55; --safran: #f6bc45; --zumrut: #3bbd7c; --mor: #a684e6; --kiremit: #e57f4f; --erguvan: #e46aa5;
-  --altin: #e9bd3d; --altinAcik: #6b5410;
+  --altin: #e9bd3d; --altinAcik: #6b5410; --altinAcik2: #8a6d1c; --altinYazi: #ffe9b0; --altinYazi2: #f3d27a;
   --dogru: #43cf82; --dogruZemin: #133a2a; --yanlis: #ff6b66; --yanlisZemin: #45191c; --secim: #8ea8ff; --vurgu: #ff8a6e;
   --golge: 0 3px 0 rgba(0, 0, 0, .35); --kilit: #2b3760; --kilitKenar: #3a4878; --desen: rgba(142, 168, 255, .06);
   color-scheme: dark;
@@ -133,6 +134,9 @@ button { font-family: inherit; color: inherit; }
   padding: 5px 11px; font-size: 13px; font-weight: 800; cursor: pointer; white-space: nowrap;
 }
 .cip.aktif { background: var(--kobalt); border-color: var(--kobalt); color: #fff; }
+/* 3.3.1: koyu temada seçili çipin beyaz yazısı okunaklı olsun */
+:root[data-tema="koyu"] .cip.aktif { background: #4a6bd4; border-color: #4a6bd4; }
+@media (prefers-color-scheme: dark) { :root:not([data-tema="acik"]) .cip.aktif { background: #4a6bd4; border-color: #4a6bd4; } }
 .cip.altin { background: var(--altinAcik); border-color: var(--altin); }
 .cipler { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0 4px; }
 .segment { display: flex; background: var(--zemin2); border-radius: 14px; padding: 4px; gap: 4px; margin: 8px 0; }
@@ -159,8 +163,8 @@ button { font-family: inherit; color: inherit; }
 .yapiskan .filtreBaslik { margin: 4px 0 4px; }
 .merdiven { display: grid; gap: 6px; margin: 10px 0; }
 .basamak { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 14px; background: var(--zemin); border: 1.5px solid var(--cizgi); }
-.basamak.simdi { border: 2.5px solid var(--safran); background: var(--altinAcik); color: #3b2a00; }
-.basamak.simdi small { color: #5b4300; }
+.basamak.simdi { border: 2.5px solid var(--safran); background: var(--altinAcik); color: var(--altinYazi); }
+.basamak.simdi small { color: var(--altinYazi2); }
 .basamak.kapali { opacity: .7; }
 .basamakMetin { flex: 1; display: flex; flex-direction: column; }
 .basamakMetin b { font-family: "Baloo 2"; font-size: 17px; line-height: 1.1; }
@@ -209,7 +213,7 @@ ol.hesap li { margin: 3px 0; }
 .uniteBas .cubuk > div { background: #fff; }
 .uniteEylem { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
 .uniteEylem .cip { background: rgba(255,255,255,.95); border: 0; color: #1d2440; }
-.uniteEylem .cip.altin { background: var(--altinAcik); color: #3d2e00; }
+.uniteEylem .cip.altin { background: var(--altinAcik); color: var(--altinYazi); }
 .dugumAlan { position: relative; width: 260px; max-width: 100%; margin: 6px auto 0; }
 .yolCizgi { position: absolute; left: 0; top: 0; overflow: visible; }
 .yolCizgi path { fill: none; stroke: var(--dal); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 2 12; opacity: .45; }
@@ -264,7 +268,7 @@ ol.hesap li { margin: 3px 0; }
 .dalUnite.kilit .duMetin b { opacity: .7; }
 .dalUnite.sonOynanan { background: color-mix(in srgb, var(--safran) 22%, transparent); border-radius: 10px; transition: background 1.2s; }
 .duOk { flex: none; color: var(--soluk); font-size: 20px; font-weight: 800; }
-.kurBandi { display: flex; align-items: center; gap: 8px; background: var(--altinAcik); color: #3b2a00; border-radius: 14px; padding: 8px 10px; font-size: 13px; font-weight: 700; margin: 8px 0; }
+.kurBandi { display: flex; align-items: center; gap: 8px; background: var(--altinAcik); color: var(--altinYazi); border-radius: 14px; padding: 8px 10px; font-size: 13px; font-weight: 700; margin: 8px 0; }
 .kurBandi span { flex: 1; }
 .kapatX { border: 0; background: none; font-size: 16px; cursor: pointer; color: inherit; }
 
@@ -303,11 +307,11 @@ details.nasil summary { font-weight: 800; cursor: pointer; }
 .kolKart { min-height: 70px; border-radius: 14px; border: 2px solid var(--cizgi); background: var(--zemin2); color: var(--soluk);
   font-weight: 800; font-size: 13.5px; padding: 6px 4px; cursor: pointer; line-height: 1.2; }
 .kolKart.acik { background: var(--kart); color: var(--metin); border-color: var(--turkuaz); }
-.kolKart.altin { background: linear-gradient(135deg, var(--altinAcik), #fff3c4); color: #3b2a00; border-color: var(--altin); }
+.kolKart.altin { background: linear-gradient(135deg, var(--altinAcik), var(--altinAcik2)); color: var(--altinYazi); border-color: var(--altin); }
 .icazet { position: relative; text-align: center; background: var(--kart); border-radius: 22px; padding: 16px 14px 14px; margin-bottom: 14px;
   border: 3px double var(--altin); box-shadow: var(--golge); }
 .icazetMaskot svg { width: 72px; height: 72px; }
-.icazetUst { font-size: 11px; letter-spacing: 3px; font-weight: 900; color: var(--altin); }
+.icazetUst { font-size: 11px; letter-spacing: 3px; font-weight: 900; color: color-mix(in srgb, var(--altin) 72%, var(--metin)); }
 .icazetUnvan { font-family: "Baloo 2"; font-size: 30px; font-weight: 800; color: var(--kobalt); line-height: 1.1; }
 .icazetAlt { font-size: 13.5px; color: var(--soluk); }
 .istatistik { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 12px; }
@@ -344,7 +348,7 @@ details.nasil summary { font-weight: 800; cursor: pointer; }
 .soruAlt { text-align: center; color: var(--soluk); font-weight: 700; margin: 6px 0 10px; font-size: 15px; }
 svg.porte { display: block; width: 100%; height: auto; max-height: 150px; color: var(--metin); }
 .soruKutu svg.porte { max-width: 380px; margin: 0 auto; }
-.ipucu { max-width: 460px; margin: 0 auto 10px; padding: 9px 12px; border-radius: 12px; background: var(--altinAcik); color: #3b2a00;
+.ipucu { max-width: 460px; margin: 0 auto 10px; padding: 9px 12px; border-radius: 12px; background: var(--altinAcik); color: var(--altinYazi);
   border: 2px dashed var(--altin); font-size: 14.5px; font-weight: 700; text-align: center; }
 .ipucuListe { max-width: 460px; margin: 0 auto 6px; padding: 10px 12px 10px 34px; background: var(--kart); border-radius: 14px; border: 1.5px solid var(--cizgi); font-weight: 700; }
 .ipucuListe li { margin: 2px 0; }
@@ -353,6 +357,10 @@ svg.porte { display: block; width: 100%; height: auto; max-height: 150px; color:
 .siklar.kisaAdlar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .siklar.portler { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .siklar.genisPortler { display: grid; grid-template-columns: 1fr; gap: 8px; }
+@media (min-width: 700px) {   /* 3.3.1: tablet ve PC'de dört porte iki sıraya sığsın; uzun diziler tek sütunda, yüksekliği sınırlı */
+  .siklar.genisPortler:not(.tekSutun) { grid-template-columns: 1fr 1fr; }
+  .siklar.genisPortler.tekSutun .sik svg.porte { max-height: clamp(78px, calc((100vh - 450px) / 4), 124px); }
+}
 .siklar.glifler { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .sik { border: 2px solid var(--cizgi); border-radius: 14px; background: var(--kart); cursor: pointer; touch-action: manipulation;
   min-height: 54px; padding: 10px; font-size: 17px; font-weight: 800; box-shadow: 0 3px 0 var(--cizgi); color: var(--metin); }
@@ -482,7 +490,7 @@ svg.cember { width: 100%; max-width: 300px; height: auto; display: block; margin
 .yeniUnvan small { display: block; font-size: 12.5px; color: var(--soluk); font-weight: 700; }
 .giris { text-align: center; }
 .girisUst { font-size: 12.5px; font-weight: 800; color: var(--dal); margin-bottom: 4px; }
-.uyariKutu { background: var(--altinAcik); color: #3b2a00; border-radius: 14px; padding: 10px; font-size: 14px; font-weight: 700; margin: 10px 0 4px; }
+.uyariKutu { background: var(--altinAcik); color: var(--altinYazi); border-radius: 14px; padding: 10px; font-size: 14px; font-weight: 700; margin: 10px 0 4px; }
 .uyariKutu .dugme { margin-top: 8px; }
 .metinSayfa { font-size: 15px; }
 .metinSayfa ul { padding-left: 20px; }
@@ -514,22 +522,22 @@ svg.cember { width: 100%; max-width: 300px; height: auto; display: block; margin
 }
 
 /* İletişim (WhatsApp) */
-.iletisim { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; background: #1faa59; border-radius: 18px;
-  padding: 14px 14px; margin: 0 0 12px; box-shadow: 0 4px 0 #13803f; text-align: left; }
-.iletisim:active { transform: translateY(2px); box-shadow: 0 2px 0 #13803f; }
+.iletisim { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; background: #178c49; border-radius: 18px;
+  padding: 14px 14px; margin: 0 0 12px; box-shadow: 0 4px 0 #0f6a35; text-align: left; }
+.iletisim:active { transform: translateY(2px); box-shadow: 0 2px 0 #0f6a35; }
 .iletisimIkon { font-size: 30px; width: 46px; height: 46px; flex: none; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.2); border-radius: 50%; }
 .iletisimMetin { flex: 1; display: flex; flex-direction: column; }
 .iletisimMetin b { font-family: "Baloo 2"; font-size: 19px; line-height: 1.1; }
 .iletisimMetin small { font-size: 13px; opacity: .92; font-weight: 700; }
 .iletisimOk { font-size: 26px; font-weight: 800; }
 #kutu .iletisim { margin-top: 6px; }
-.iletisimBag { display: inline-block; background: #1faa59; color: #fff; text-decoration: none; font-weight: 800; padding: 8px 16px; border-radius: 20px; }
+.iletisimBag { display: inline-block; background: #178c49; color: #fff; text-decoration: none; font-weight: 800; padding: 8px 16px; border-radius: 20px; }
 
 .harfAralik { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin: 8px 0; text-align: center; }
 .harfAralik span { background: var(--zemin); border-radius: 8px; padding: 5px 0; font-size: 12px; font-weight: 800; display: flex; flex-direction: column; gap: 2px; }
 .harfAralik b { font-size: 11px; color: var(--soluk); }
-.harfAralik .bakiyeli { background: var(--altinAcik); color: #3b2a00; }
-.harfAralik .bakiyeli b { color: #5b4300; }
+.harfAralik .bakiyeli { background: var(--altinAcik); color: var(--altinYazi); }
+.harfAralik .bakiyeli b { color: var(--altinYazi2); }
 
 /* =====================================================
    GENİŞ EKRAN: tablet ve bilgisayar
@@ -645,6 +653,7 @@ svg.cember { width: 100%; max-width: 300px; height: auto; display: block; margin
   .siklar .sik:nth-child(n+10)::before { display: none; }
   .siklar.glifler .sik::before { font-size: 12px; }
   .siklar.adlar .sik { padding-left: 36px; padding-right: 36px; }   /* 3.2.2: uzun şıkta numara metnin üstüne binmesin */
+  .siklar.portler .sik, .siklar.genisPortler .sik { padding-left: 32px; }   /* 3.3.1: kırpılmış portede numara anahtara binmesin */
   .tusIpucu { display: block; }
 }
 
@@ -907,6 +916,17 @@ svg.komaDaire { width: 100%; max-width: 320px; height: auto; }
 
 /* 3.0.5: geri bildirim paneli tek ekrana sığsın */
 .geriPorte svg.porte { max-height: 150px; }
+/* 3.3.1: sığmayan panelde sıkışık düzen; Devam düğmesi her durumda görünür kalsın */
+.geriBildirim #oyDevam { position: sticky; bottom: 0; z-index: 1; }
+.geriBildirim.sikis { padding-top: 10px; }
+.geriBildirim.sikis .geriBaslik { font-size: 18px; gap: 8px; }
+.geriBildirim.sikis .geriMaskot svg { width: 34px; height: 34px; }
+.geriBildirim.sikis .geriAciklama { font-size: 13.5px; line-height: 1.35; margin-top: 4px; }
+.geriBildirim.sikis .hkKart { padding: 6px 8px 8px; margin: 6px 0 2px; }
+.geriBildirim.sikis .hkKart svg.merdiven { max-height: 104px; }
+.geriBildirim.sikis .hkSatir { margin-top: 2px; }
+.geriBildirim.sikis .geriPorte svg.porte { max-height: 120px; }
+.geriBildirim.sikis .hkNot { margin: 2px 0; }
 details.hesapKatla { margin: 4px 0; }
 details.hesapKatla summary { cursor: pointer; font-weight: 800; color: var(--kobalt); font-size: 14px; }
 
@@ -1025,3 +1045,9 @@ details.hesapKatla summary { cursor: pointer; font-weight: 800; color: var(--kob
 .dkSil { flex: none; margin: 0; padding: 8px 12px; align-self: center; }
 .ritimKutu .porte.dikte { width: 100%; height: auto; }
 .siklar.genisPortler .sik .porte.dikte { width: 100%; height: auto; max-height: 86px; }
+
+/* 3.3.1: yatay tablet ve 768 px yüksek dizüstü: porteye yazarken palet Kontrol düğmesinin altında kalmasın */
+@media (min-width: 700px) and (max-height: 860px) {
+  svg.porte.etkilesim { max-height: 170px; }
+  .paletDugme .bravura { font-size: 28px; height: 36px; }
+}

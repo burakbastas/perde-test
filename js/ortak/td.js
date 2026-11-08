@@ -59,7 +59,7 @@ ORTAK_DERS({ id: 'td', ad: 'Türk Dili 1', kisa: 'TDİ101', ikon: '✍️', renk
     ['Atatürk’ün dildeki yabancı kelimelerle ilgili düşüncesi ne zaman değişmiştir?', '1935 yılı ortalarında', ['1928 yılında', '1923 yılında', '1938 yılında']],
     ['Türkçe hangi bakımdan dünya dilleri arasında öne çıkar?', 'En çok akrabalık adına sahip dil olmasıyla', ['En çok yansıma kelimesine sahip olmasıyla', 'En eski yazılı dil olmasıyla', 'En az ek kullanan dil olmasıyla']],
     ['Türkçedeki “hala” ve “teyze” İngilizcede hangi tek kelimeyle karşılanır?', 'Aunt', ['Uncle', 'Cousin', 'Sister-in-law']],
-    ['“yaz-” fiilinin kök anlamı nedir?', 'Bir yerden bir yere genişleyerek hareket etmek', ['Kazımak, yırtmak', 'İşaret koymak', 'Söylemek']],
+    ['“yaz-” fiilinin kök anlamı nedir?', 'Bir yerden bir yere genişleyerek hareket etmek', ['Bir yüzeyi kazıyarak ya da yırtarak iz bırakmak', 'Bir şeyin üstüne işaret ya da çizgi koymak', 'Sözü sesli olarak başkasına iletmek']],
     ['“Kelimeler çevrilebilir ancak … çevrilemez.” cümlesindeki boşluğa ne gelir?', 'Kültür', ['Ses', 'Ek', 'Alfabe']],
     ['1830’lardan önce hiçbir dilde “bilgisayar” karşılığının olmaması hangi ilişkiye örnektir?', 'Dil-teknoloji', ['Dil-din', 'Dil-siyaset', 'Dil-zaman']],
     ['Eski Türkçede askerî terimlerin kalabalık olmasının sebebi nedir?', 'Türklerin savaşçı bir toplum olması', ['Yazının erken bulunması', 'Ilıman iklim', 'Dinî inanışlar']]
@@ -99,7 +99,7 @@ ORTAK_DERS({ id: 'td', ad: 'Türk Dili 1', kisa: 'TDİ101', ikon: '✍️', renk
     ['Türk dilinin “karanlık dönemi” hangisidir?', 'Yazılı kaynaklarla takip edilemeyen dönem', ['Karahanlı dönemi', 'Osmanlı Türkçesi dönemi', 'Uygur dönemi']],
     ['Türk, Moğol, Mançu-Tunguz, Kore ve Japon dillerinin ortak olduğu varsayılan dönem hangisidir?', 'Altay dönemi', ['En Eski Türkçe dönemi', 'İlk Türkçe dönemi', 'Eski Türkçe dönemi']],
     ['Sümerce ile Türkçe arasında 168 ortak kelime tespit eden kimdir?', 'Osman Nedim Tuna', ['Ahmet Bican Ercilasun', 'Talat Tekin', 'Muharrem Ergin']],
-    ['Hun, Avar, Bulgar, Sabir, Hazar topluluklarının ortaya çıktığı dönem hangisidir?', 'İlk Türkçe (Ana Bulgarca ve Ana Türkçe) dönemi', ['Altay dönemi', 'Köktürk dönemi', 'Karahanlı dönemi']],
+    ['Hun, Avar, Bulgar, Sabir, Hazar topluluklarının ortaya çıktığı dönem hangisidir?', 'İlk Türkçe (Ana Bulgarca ve Ana Türkçe) dönemi', ['Altay (Ana Altayca) dönemi', 'Eski Türkçe (Köktürk ve Uygur) dönemi', 'Orta Türkçe (Karahanlı ve Harezm) dönemi']],
     ['Türk yazı dili hangi yüzyıla kadar tek bir yazı dili olarak devam etmiştir?', '13. yüzyıl', ['8. yüzyıl', '11. yüzyıl', '15. yüzyıl']],
     ['“Belli yerleşim bölgelerine özgü, yazı dili hâline gelmemiş dil” hangisinin tanımıdır?', 'Ağız', ['Lehçe', 'Şive', 'Yazı dili']],
     ['Orhun Abideleri hangi yazıtlardır?', 'Tonyukuk, Köl Tigin, Bilge Kağan', ['Ongin, Çoyr, Hoytu Tamir', 'Köl Tigin, Ongin, İhe-Nur', 'Tonyukuk, Çoyr, Hangiday']],
@@ -159,7 +159,7 @@ ORTAK_DERS({ id: 'td', ad: 'Türk Dili 1', kisa: 'TDİ101', ikon: '✍️', renk
     ['“+lA-” eki hangi tür yapım ekidir?', 'İsimden fiil yapan ek', ['İsimden isim yapan ek', 'Fiilden isim yapan ek', 'Fiilden fiil yapan ek']],
     ['“Getiri, koşu, yapı, öneri” kelimelerindeki ek hangisidir?', '-I/-U (fiilden isim)', ['+CI (isimden isim)', '+lA- (isimden fiil)', '-(I)ş- (fiilden fiil)']],
     ['“Güzelleş-, sözleş-, kaynaş-” kelimelerindeki ek temelde ne ekidir?', 'Çatı eki', ['Hâl eki', 'İyelik eki', 'Zaman eki']],
-    ['+CI ekinin ilk ve en yaygın işlevi nedir?', 'Meslek ya da uğraş bildiren adlar türetmek', ['Bolluk bildirmek', 'Küçültme yapmak', 'Fiil türetmek']]
+    ['+CI ekinin ilk ve en yaygın işlevi nedir?', 'Meslek ya da uğraş bildiren adlar türetmek', ['Bolluk ve toplu bulunma yeri bildiren adlar türetmek', 'Küçültme ve sevgi bildiren adlar türetmek', 'İsimlerden yeni fiiller türetmek']]
   ] },
 { no: 8, ad: 'Morfolojik özellikler II: çekim ekleri',
   ozet: [
@@ -201,7 +201,7 @@ ORTAK_DERS({ id: 'td', ad: 'Türk Dili 1', kisa: 'TDİ101', ikon: '✍️', renk
     ['Küçük ünlü uyumu hangi dönemde yoktur?', 'Eski Anadolu Türkçesi', ['Türkiye Türkçesi', 'Osmanlıcanın son dönemi', 'Günümüz yazı dili']],
     ['Ses tellerini titreştirmeden çıkan seslere ne denir?', 'Ötümsüz', ['Ötümlü', 'Sürekli', 'Yuvarlak']],
     ['Hangisi Türkçe kelimelerin sonunda bulunamayan seslerdendir?', 'd', ['t', 'k', 'r']],
-    ['“derd > dert, aheng > ahenk” hangi kuralın sonucudur?', 'Türkçede bazı ünsüzlerin kelime sonunda bulunamaması', ['Büyük ünlü uyumu', 'Diftong olmaması', 'Küçük ünlü uyumu']],
+    ['“derd > dert, aheng > ahenk” hangi kuralın sonucudur?', 'Türkçede bazı ünsüzlerin kelime sonunda bulunamaması', ['Türkçede bazı ünsüzlerin kelime başında bulunamaması', 'Kalınlık-incelik uyumu (büyük ünlü uyumu)', 'Türkçede iki ünlünün yan yana bulunamaması']],
     ['“kan > han, katun > hatun” örnekleri hangi duruma istisnadır?', 'Türkçe kelimelerin h ile başlayamaması', ['Kelime sonunda b bulunamaması', 'Diftong olmaması', 'Büyük ünlü uyumu']],
     ['Eski Türkçedeki “kod-” fiili günümüzde hangi biçimdedir?', 'koy-', ['kov-', 'koş-', 'kon-']],
     ['Kazakça ve Kırgızcada hangi eğilim vardır?', 'Ünlüleri yuvarlaklaştırma', ['Ünlüleri düzleştirme', 'Ünsüzleri yumuşatma', 'Diftong kullanma']],

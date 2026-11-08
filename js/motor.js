@@ -338,7 +338,7 @@ function soruGoster() {
   const q = TUR.q = { veri: veri, butonlar: [], cevaplandi: false, ipucuNo: 1 };
   $('oyDolgu').style.width = (TUR.sonsuz ? (TUR.dogru % 10) * 10 : TUR.k / TUR.sorular.length * 100) + '%';
   kalpYaz();
-  $('oyGeri').classList.remove('acik', 'dogru', 'yanlis');
+  $('oyGeri').classList.remove('acik', 'dogru', 'yanlis', 'sikis');
   const g = bosalt($('oyGovde'));
   g.scrollTop = 0;
 
@@ -466,6 +466,11 @@ function secimCiz(alan, veri, q) {
     q.butonlar.push(kayit);
     kap.appendChild(b);
   });
+  if (siklar.some(function (x) { return x.porte; })) {   // 3.3.1: boş payı kırp; uzun diziler geniş ekranda da tek sütunda kalsın
+    const L = [].slice.call(kap.querySelectorAll('svg.porte'));
+    porteKirp(L);
+    if (genis && Math.max.apply(null, L.map(function (s) { return +((s.getAttribute('viewBox') || '').split(' ')[2]) || 0; })) > 300) kap.classList.add('tekSutun');
+  }
   alan.appendChild(kap);
 }
 
@@ -762,6 +767,14 @@ function panelSigdir(sh, ic) {
   if (!tasiyor()) return;
   const gp = ic.querySelector('.geriPorte');
   if (gp) { const d = h('details', { class: 'hesapKatla' }, h('summary', null, 'Doğru yazımı göster')); gp.parentNode.insertBefore(d, gp); d.appendChild(gp); }
+  // 3.3.1: küçük ekranlarda sıkışık düzen, hâlâ sığmazsa hata kartındaki merdiven katlanır
+  if (!tasiyor()) return;
+  sh.classList.add('sikis');
+  ic.querySelectorAll('.hkKart .mdKutu').forEach(function (md) {
+    if (!tasiyor()) return;
+    const d = h('details', { class: 'hesapKatla' }, h('summary', null, 'Merdiveni göster'));
+    md.parentNode.insertBefore(d, md); d.appendChild(md);
+  });
 }
 
 // ---------- Otomatik geçiş ----------

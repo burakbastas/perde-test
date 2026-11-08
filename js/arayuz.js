@@ -652,6 +652,12 @@ function hakkinda() {
 }
 function yenilikler() {
   sayfa('🆕 Yenilikler', h('div', { class: 'metinSayfa', html:
+    '<h3>Sürüm 3.3.1</h3><ul>' +
+    '<li>🌙 Karanlık temada ipucu, uyarı ve unvan kutularının yazısı artık okunuyor.</li>' +
+    '<li>📱 Küçük telefonlarda yanlış cevap paneli ekrana sığıyor; <b>Devam</b> düğmesi hep görünür.</li>' +
+    '<li>🎼 Porte şıkları daha derli toplu: tablette ve bilgisayarda dört şık kaydırmadan görünüyor.</li>' +
+    '<li>✍️ Ortak derslerde cevabı uzunluğundan ele veren şıklar yeniden yazıldı.</li>' +
+    '<li>⚡ Porteye yazarken sürükleme daha akıcı; yazı tipleri açılışta iki kez inmiyor.</li></ul>' +
     '<h3>Sürüm 3.3</h3><ul>' +
     '<li>👂 Kulak eğitimine <b>Aralık</b> sekmesi: bakiye, küçük ve büyük mücenneb, tanini, artık ikili. Dokuz kademe; önce birbirinden çok farklı aralıklar, 1 komalık farklar en sonda. 10 sorudan 8’ini bilince sonraki kademe açılır.</li>' +
     '<li>🎹 Batı Teorisi’ne <b>Ezgi diktesi</b> ünitesi: Do’dan başlayan ezgiyi duy ve porteye yaz. Önce Do–Re, sonra Mi, Fa, Sol; ses kümesi oturunca tartım (ikilik, dörtlük, sekizlik, noktalı dörtlük). Uzun diktede her doğru nota sayılır.</li></ul>' +

@@ -1,3 +1,16 @@
+# Seyir 3.3.1 – yükleme notu
+
+Kapsamlı test sonrası düzeltmeler. Yeni dosya yok. Değişenler: `index.html`, `sw.js`, `manifest.webmanifest`, `css/stil.css`, `js/cekirdek.js`, `js/motor.js`, `js/nota.js`, `js/dikte.js`, `js/arayuz.js`, `js/ortak/ati.js`, `js/ortak/td.js`, `js/ortak/anlama.js`, `GUNCELLEME.md`. Kayıt taşıması yok.
+
+- Koyu tema: altın zeminli kutularda (ipucu, uyarı, kurulum bandı, unvan merdiveni, altın kart, harf-aralık tablosu) yazı rengi sabit koyu kahverengiydi, okunmuyordu (kontrast ~1,9). Yeni değişkenler: `--altinYazi`, `--altinYazi2`, `--altinAcik2`. Koyu temada seçili çip ve iletişim düğmesi de koyulaştırıldı.
+- Geri bildirim paneli: 360×640 telefonda Perde ünitelerindeki hata kartlı panel 18–57 px taşıyor, Devam ekran dışında kalıyordu. `panelSigdir` artık sığmazsa sıkışık düzene geçiyor, gerekirse merdiveni katlıyor; Devam panelin altına yapışık.
+- Porte şıkları: üstteki/alttaki boş pay kırpılıyor (`porteKirp`, nota.js). Tablet/PC’de kısa porteler iki sütun, uzun diziler tek sütun ve ekran yüksekliğine göre. Masaüstünde göçürme/dizi sorularında 260–560 px kaydırma gidiyor.
+- Yatay tablet ve 768 px yüksek dizüstü (1024×768, 1366×768): porteye yazma sorularında işaret paletinin ikinci sırası Kontrol düğmesinin altında kalıyordu; kısa geniş ekranlarda porte 170 px, palet düğmeleri küçültüldü.
+- Ortak dersler: doğru şıkkı çeldiricilerden 2–3 kat uzun olan 18 soru (ATİ 7, TDİ 4, TMK 4, THM 3) yeniden yazıldı.
+- Performans: porteye yazma ve dikte sürüklemesinde satır değişmedikçe yeniden çizim yok. CSS yazı tipi adresleri `?v=3.0.5` kalmıştı; ön yükleme ve service worker `?v=` sürümüyle uyuşmadığı için yazı tipleri iki kez iniyordu.
+
+**Önce test:** `seyir-3.3.1-test.zip` paketini perde-test deposuna yükle.
+
 # Seyir 3.3.0 – yükleme notu
 
 Yeni dosyalar: `js/kulak-aralik.js` (Kulak eğitimi → Aralık sekmesi), `js/dikte.js` (Batı Teorisi → Ezgi diktesi). Değişenler: `index.html`, `sw.js`, `manifest.webmanifest`, `css/stil.css`, `js/cekirdek.js`, `js/kulak.js` (Hz ile çalma, sayım tıkı, iki kez otomatik çalma), `js/motor.js` (yeni soru tipi `melodi`, Batı ve Meşk Yolu sırasına `b21`), `js/arayuz.js`, `GUNCELLEME.md`. Paketi açıp bütün dosyaları yükle.

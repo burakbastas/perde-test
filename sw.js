@@ -1,7 +1,7 @@
 // Seyir service worker
 // Uygulama dosyaları: ağ öncelikli (3 sn zaman aşımı), olmazsa önbellek.
 // Yazı tipleri ve ikonlar: önbellek öncelikli.
-const SURUM = '3.3.0';
+const SURUM = '3.3.1';
 const CACHE = 'perdetest-' + SURUM;
 const DOSYALAR = [
   './', './index.html', './manifest.webmanifest?v=' + SURUM, './icon-192.png?v=' + SURUM, './icon-512.png?v=' + SURUM,

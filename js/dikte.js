@@ -475,10 +475,12 @@ function melodiYazici(cfg) {
   let basili = false, ekleme = false;
   function sesAyarla(p) {
     const n = N[aktif];
-    if (!n || n.kS) return;
+    if (!n || n.kS) return false;
     let s = Math.round((ALT_CIZGI_Y - p.y) / 5) + 30;
     s = Math.max(cfg.sMin || 26, Math.min(cfg.sMax || 37, s));
+    if (n.s === s) return false;
     n.s = s;
+    return true;
   }
   function isle(e, ilk) {
     if (kilitli || cfg.mod === 'tartim') return;
@@ -500,7 +502,7 @@ function melodiYazici(cfg) {
         if (cfg.mod === 'eksik' && !N[aktif].bos) { ciz(); return; }
       }
     }
-    sesAyarla(p);
+    if (!sesAyarla(p) && !ilk) return;   // 3.3.1: sürüklerken satır değişmediyse yeniden çizme
     ciz();
   }
   function baglaSvg() {
