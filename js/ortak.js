@@ -84,9 +84,12 @@ function ortakSorular(d, uniteler, adet, kronAdet) {
   }
   const L = karistir(secilen).map(function (x) { return ortakSecimSorusu(x[0], x[1]); });
   const ol = ortakOlaylar(d, uniteler);
+  // 3.3.2: kronoloji soruları toplam sayıya dahildir (etiketteki soru sayısı tutsun)
   for (let i = 0; i < (kronAdet || 0) && ol.length >= 4; i++) {
     const q = ortakKronolojiSorusu(ol, 4);
-    if (q) L.splice(Math.floor(Math.random() * (L.length + 1)), 0, q);
+    if (!q) continue;
+    if (L.length >= adet && L.length > 1) L.splice(L.length - 1, 1);
+    L.splice(Math.floor(Math.random() * (L.length + 1)), 0, q);
   }
   return L;
 }

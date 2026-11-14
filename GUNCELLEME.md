@@ -1,3 +1,23 @@
+# Seyir 3.3.2 – yükleme notu
+
+Hata denetimi düzeltmeleri. Yeni dosya yok, yeni içerik yok. Değişenler: `index.html`, `sw.js`, `manifest.webmanifest`, `css/stil.css` (yalnız `?v=`), `js/cekirdek.js`, `js/motor.js`, `js/arayuz.js`, `js/ortak.js`, `js/kulak-aralik.js`, `GUNCELLEME.md`. Kayıt taşıması yok; `DURUM.kulak.aralik.ust` ilk açılışta eski kayıttan hesaplanır.
+
+- Tekrar: `ogeCevap` kutuyu yalnız vadesi gelmiş (ya da yeni) öğede yükseltiyor. Önceden aynı seviye aynı gün üç kez oynanınca öğe 3. kutuya çıkıyor, kartı altına dönüyordu. Yanlış öğe aynı gün listede kalmaya devam ediyor; metinler buna göre düzeltildi (“yarın gelir” yazıyordu).
+- Meşk Yolu: “BURADASIN” yalnız sıradaki ilk bitmemiş ünitede (`meskSiradaki`, motor.js). Dal görünümleri değişmedi.
+- Sesli sorular kapalıyken `uniteKarisik` (Sandık, Altınla) 👂 seviyelerini ve sesli soruları atlıyor.
+- Gün serisi tur açılınca değil ilk cevapta yazılıyor.
+- Sandık ödülü (⭐ +2) için soruların %60’ı (8’de 5) doğru olmalı; tutmazsa sandık yeniden denenebilir.
+- Süreli sorularda (süreli final, Altınla, ortak ders denemeleri, Sonsuz Meşk Usta/Pîr) pencere açıkken sayaç duruyor.
+- `yedekYukle`: alan türleri denetleniyor (`yedekGecerli`); bozuk kod reddediliyor, eski kayıt korunuyor.
+- İlerlemeyi sıfırla, taşıma yedeğini (`_yedek`) de siliyor.
+- Ortak dersler: kronoloji soruları toplam sayıya dahil (ATİ vize 20, final 30, ünite testi 10 soru).
+- İlk açılış: “Batı notasını biliyorum” seçeneği rehberden sonra Meşk Yolu’nu açıp kısa bir yönlendirme gösteriyor.
+- Aralık kademeleri: iki seçenekli kademelerde (1, 3, 8) eşik 9/10. Açılmış en üst kademe saklanıyor, eşik değişikliği kimsenin açık kademesini kilitlemez.
+
+Değiştirilmeyenler (karar): öğesi olmayan sorular (Ahenk dalı, sesli sorular) Tekrar listesine girmiyor.
+
+**Önce test:** `seyir-3.3.2-test.zip` paketini perde-test deposuna yükle.
+
 # Seyir 3.3.1 – yükleme notu
 
 Kapsamlı test sonrası düzeltmeler. Yeni dosya yok. Değişenler: `index.html`, `sw.js`, `manifest.webmanifest`, `css/stil.css`, `js/cekirdek.js`, `js/motor.js`, `js/nota.js`, `js/dikte.js`, `js/arayuz.js`, `js/ortak/ati.js`, `js/ortak/td.js`, `js/ortak/anlama.js`, `GUNCELLEME.md`. Kayıt taşıması yok.

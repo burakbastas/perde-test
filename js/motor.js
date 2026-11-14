@@ -62,6 +62,12 @@ function meskSirasi() {
 }
 
 // ---------- Durum sorguları ----------
+// Meşk Yolu'nda sıradaki ünite: önerilen sırada, bitmemiş ve açık seviyesi olan ilk ünite
+function meskSiradaki() {
+  const L = meskSirasi();
+  for (let i = 0; i < L.length; i++) { const u = L[i]; if (!u.sonsuz && !uniteBitti(u) && u.seviyeler.some(acikMi)) return u; }
+  return null;
+}
 function yildizOf(id) { return DURUM.yildiz[id] || 0; }
 function bittiMi(s) { return yildizOf(s.id) > 0; }
 // Zincir: kilit sırasına giren seviyeler. Köprü (bonus) seviyeleri her zaman isteğe bağlıdır;
@@ -197,7 +203,8 @@ const LEITNER_GUN = [0, 1, 2, 4, 8, 16];
 function ogeCevap(id, dogru) {
   if (!id) return;
   const r = DURUM.tekrar[id] || { k: 0, t: bugun(), d: 0, y: 0 };
-  if (dogru) { r.d++; r.k = Math.min(5, r.k + 1); r.t = gunEkle(LEITNER_GUN[r.k]); }
+  // 3.3.2: kutu yalnız vadesi gelmiş (ya da yeni) öğede yükselir; aynı gün üst üste doğru bilmek kutuyu şişirmez
+  if (dogru) { r.d++; if (r.t <= bugun()) { r.k = Math.min(5, r.k + 1); r.t = gunEkle(LEITNER_GUN[r.k]); } }
   else { r.y++; r.k = 0; r.t = bugun(); }
   DURUM.tekrar[id] = r;
 }
@@ -259,7 +266,6 @@ const JOKER_LIMIT = 3;
 // o: { tip, baslik, sorular, kalp (0: kalpsiz), joker, sure (sn/soru, 0: yok), kayit (Leitner'a yaz), ipucuAcik, bitince(sonuc) }
 function turBaslat(o) {
   if (!o.sorular || !o.sorular.length) { toast('Bu turda soru yok'); return; }
-  if (o.tip !== 'deneme' && o.tip !== 'rehber' && o.tip !== 'ortak') seriGuncelle();
   TUR = Object.assign({ k: 0, hata: 0, dogru: 0, atlanan: 0, ceza: 0, jokerSay: 0, jokerKullandi: false, yeniKart: [], q: null, zaman: null }, o);
   TUR.kalpVar = (o.kalp || 0) > 0;
   TUR.kalpMax = o.kalp || 0;
@@ -417,20 +423,23 @@ function soruGoster() {
   const sk = TUR.sonsuz && TUR.sonsuz !== 'dikte' ? sonsuzKat(TUR.dogru) : null;
   if (sk && sk.sure && veri.tip !== 'vur' && !veri.dinle) {
     // Usta ve Pîr katlarında cezasız süre: dolunca kalp gitmez, yalnız bu soru puana sayılmaz
-    const sn = veri.tip === 'secim' ? sk.sure : sk.sure + 15, bas = Date.now(), cubuk = $('oySure');
+    const sn = veri.tip === 'secim' ? sk.sure : sk.sure + 15, cubuk = $('oySure');
+    let bas = Date.now(), son = bas;
     cubuk.hidden = false;
     TUR.zaman = setInterval(function () {
-      const kalan = sn - (Date.now() - bas) / 1000;
+      const simdi = Date.now(); if (modalAcikMi()) bas += simdi - son; son = simdi;   // 3.3.2: pencere açıkken süre durur
+      const kalan = sn - (simdi - bas) / 1000;
       cubuk.style.width = Math.max(0, kalan / sn * 100) + '%';
       if (kalan <= 0) { clearInterval(TUR.zaman); q.sureDoldu = true; }
     }, 100);
   } else if (TUR.sure && veri.tip !== 'vur' && !veri.dinle) {
     const sn = (veri.tip === 'secim' ? TUR.sure : TUR.sure + 10);
-    const bas = Date.now();
+    let bas = Date.now(), son = bas;
     const cubuk = $('oySure');
     cubuk.hidden = false;
     TUR.zaman = setInterval(function () {
-      const kalan = sn - (Date.now() - bas) / 1000;
+      const simdi = Date.now(); if (modalAcikMi()) bas += simdi - son; son = simdi;   // 3.3.2: pencere açıkken süre durur
+      const kalan = sn - (simdi - bas) / 1000;
       cubuk.style.width = Math.max(0, kalan / sn * 100) + '%';
       if (kalan <= 0) { clearInterval(TUR.zaman); if (!q.cevaplandi) cevapla(false, '⏰ Süre doldu'); }
     }, 100);
@@ -682,6 +691,8 @@ function cevapla(dogru, ozelMesaj, dogruGorsel, ekAciklama) {
   if (q.cevaplandi && q.sonucVerildi) return;
   q.cevaplandi = true; q.sonucVerildi = true;
   clearInterval(TUR.zaman);
+  // 3.3.2: gün serisi tur açılınca değil, ilk cevapta yazılır
+  if (!TUR.seriBakildi) { TUR.seriBakildi = true; if (TUR.tip !== 'deneme' && TUR.tip !== 'rehber' && TUR.tip !== 'ortak') seriGuncelle(); }
   $('oyKontrol').hidden = true;
   if (q.ipucuBtn) q.ipucuBtn.disabled = true;
   const veri = q.veri;
@@ -945,17 +956,23 @@ function kartSatiri(r) {
 }
 
 // Ünitenin seviyelerinden karışık sorular
-function uniteKarisik(u, n, sadeceUretim) {
+function uniteKarisik(u, n, sadeceUretim, sesliDe) {
   const L = [];
-  const sev = u.seviyeler;
+  // 3.3.2: sesli sorular kapalıysa 👂 seviyeleri ve sesli sorular karışık tura girmez
+  const sessiz = DURUM.ayar.kulak === false && !sesliDe;
+  const sessizSev = u.seviyeler.filter(function (s) { return !s.kulak; });
+  const sev = sessiz && sessizSev.length ? sessizSev : u.seviyeler;
   let deneme = 0;
-  while (L.length < n && deneme < 60) {
+  while (L.length < n && deneme < 120) {
     deneme++;
     const s = rastgele(sev);
     const q = s.uret(1)[0];
-    if (sadeceUretim && q.tip === 'secim' && deneme < 45) continue;
+    if (sessiz && q && q.dinle && q.dinle.kulak) continue;
+    if (sadeceUretim && q.tip === 'secim' && deneme < 90) continue;
     L.push(q);
   }
+  // Ünitenin bütün soruları sesliyse (ezgi diktesi) sessiz tur kurulamaz: ünite olduğu gibi sorulur
+  if (sessiz && !L.length && !sesliDe) return uniteKarisik(u, n, sadeceUretim, true);
   return karistir(L);
 }
 
@@ -964,13 +981,14 @@ function sandikBaslat(u) {
     tip: 'sandik', sorular: uniteKarisik(u, 8), kalp: 0, joker: false, kayit: true, etiket: '🎁 Sandık',
     bitince: function (r) {
       let odul = '';
-      if (!DURUM.sandik[u.id]) { DURUM.sandik[u.id] = true; DURUM.bonus += 2; odul = '⭐ +2 (ilk açılış)'; }
+      const esik = Math.ceil(r.toplam * 0.6), alinmis = !!DURUM.sandik[u.id];   // 3.3.2: ödül için 8 sorudan 5 doğru
+      if (!alinmis && r.dogru >= esik) { DURUM.sandik[u.id] = true; DURUM.bonus += 2; odul = '⭐ +2 (ilk açılış)'; }
       kaydet();
       modalAc(h('div', { class: 'sonuc' },
-        h('div', { class: 'sonucMaskot', html: bulbulSVG('mutlu') }),
+        h('div', { class: 'sonucMaskot', html: bulbulSVG(odul || alinmis ? 'mutlu' : 'anlat') }),
         h('h2', null, '🎁 Tekrar sandığı'),
         h('p', null, r.dogru + ' / ' + r.toplam + ' doğru'),
-        odul ? h('p', null, odul) : h('p', { class: 'kucukNot' }, 'Sandığın ödülünü daha önce almıştın; bu tur pratikti.'),
+        odul ? h('p', null, odul) : h('p', { class: 'kucukNot' }, alinmis ? 'Sandığın ödülünü daha önce almıştın; bu tur pratikti.' : 'Sandığın ödülü için en az ' + esik + ' doğru gerekiyor. İstediğin zaman yeniden deneyebilirsin.'),
         kartSatiri(r),
         dugme(yolaDonMetni(), function () { modalKapat(); turdanCik(false); }, 'gri')), { kapatilamaz: true });
     }
@@ -1027,7 +1045,7 @@ function tekrarBaslat() {
         h('div', { class: 'sonucMaskot', html: bulbulSVG('mutlu') }),
         h('h2', null, '🎯 Tekrar bitti'),
         h('p', null, r.dogru + ' / ' + r.toplam + ' doğru'),
-        h('p', { class: 'kucukNot' }, 'Doğru bildiklerin daha uzun aralıklarla, yanlışların yarın yeniden karşına çıkacak.'),
+        h('p', { class: 'kucukNot' }, 'Doğru bildiklerin daha uzun aralıklarla gelir; yanlışların listede kalır, bugün yeniden çalışabilirsin.'),
         dugme('Tamam', function () { modalKapat(); turdanCik(false); }, 'gri')), { kapatilamaz: true });
     }
   });

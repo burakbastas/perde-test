@@ -3,7 +3,7 @@
 // =====================================================
 'use strict';
 
-const SURUM = '3.3.1';
+const SURUM = '3.3.2';
 const WHATSAPP_NO = '905307302798';
 const UYGULAMA_ADRESI = 'https://burakbastas.github.io/perde-test/';
 const ANAHTAR = 'perdeTestV2';
@@ -136,7 +136,7 @@ function durumYukle() {
 }
 
 function tumKaydiSil() {
-  ['perdeMacerasiV1', 'komaMacerasiV1', 'dortluBesliV1', ANAHTAR].forEach(function (a) {
+  ['perdeMacerasiV1', 'komaMacerasiV1', 'dortluBesliV1', ANAHTAR, ANAHTAR + '_yedek'].forEach(function (a) {   // 3.3.2: taşıma yedeği de silinir
     try { localStorage.removeItem(a); } catch (e) {}
   });
   DURUM = varsayilanDurum();
@@ -156,12 +156,31 @@ function yedekYukle(kod) {
     if (kod.indexOf('PM2:') === 0) veri = JSON.parse(decodeURIComponent(escape(atob(kod.slice(4)))));
     else veri = JSON.parse(kod);
   } catch (e) { return false; }
-  if (!veri || veri.v !== 2 || typeof veri.yildiz !== 'object') return false;
-  DURUM = Object.assign(varsayilanDurum(), veri);
-  DURUM.ayar = Object.assign(varsayilanDurum().ayar, veri.ayar || {});
-  if (typeof gocurmeTasi === 'function') gocurmeTasi();
-  if (typeof kayitTasi === 'function') kayitTasi();
+  if (!yedekGecerli(veri)) return false;
+  // 3.3.2: yeni kayıt sorunsuz yerleşene kadar eskisi elde tutulur
+  const onceki = DURUM;
+  try {
+    DURUM = Object.assign(varsayilanDurum(), veri);
+    DURUM.ayar = Object.assign(varsayilanDurum().ayar, veri.ayar || {});
+    if (typeof gocurmeTasi === 'function') gocurmeTasi();
+    if (typeof kayitTasi === 'function') kayitTasi();
+  } catch (e) { DURUM = onceki; return false; }
   kaydet();
+  return true;
+}
+// Yedek kodundaki alanların türü doğru mu? (elle değiştirilmiş ya da yarım kopyalanmış kod kaydı bozmasın)
+function yedekGecerli(veri) {
+  const nesne = function (x) { return !!x && typeof x === 'object' && !Array.isArray(x); };
+  if (!nesne(veri) || veri.v !== 2 || !nesne(veri.yildiz)) return false;
+  const v = varsayilanDurum();
+  for (const k in v) {
+    if (!(k in veri)) continue;
+    if (nesne(v[k]) && !nesne(veri[k])) return false;
+    if (typeof v[k] === 'number' && (typeof veri[k] !== 'number' || !isFinite(veri[k]))) return false;
+  }
+  for (const id in veri.yildiz) { const y = veri.yildiz[id]; if (typeof y !== 'number' || y < 0 || y > 3) return false; }
+  if (veri.seri && (typeof veri.seri.son !== 'string' || typeof veri.seri.sayi !== 'number')) return false;
+  for (const id in (veri.tekrar || {})) { const r = veri.tekrar[id]; if (!nesne(r) || typeof r.k !== 'number' || typeof r.t !== 'string') return false; }
   return true;
 }
 

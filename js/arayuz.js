@@ -167,7 +167,8 @@ function uniteBlok(u) {
     yol += ' C ' + a.x + ' ' + ym + ', ' + b.x + ' ' + ym + ', ' + b.x + ' ' + b.y;
   }
   alan.innerHTML = '<svg class="yolCizgi" viewBox="0 0 ' + GEN + ' ' + H + '" width="' + GEN + '" height="' + H + '"><path d="' + yol + '"/></svg>';
-  let simdiKondu = false;
+  // 3.3.2: Meşk Yolu görünümünde işaret yalnız sıradaki ilk bitmemiş ünitede; dal görünümlerinde her ünitede
+  let simdiKondu = YOL_FILTRE === null && meskSiradaki() !== u;
   dugumler.forEach(function (x, i) {
     const p = pts[i];
     let durum, etiket, tik, boyut = 62, yildiz = null;
@@ -488,7 +489,7 @@ function tekrarCiz(g) {
   });
   g.appendChild(ant);
   g.appendChild(h('details', { class: 'nasil' }, h('summary', null, 'Tekrar nasıl çalışır?'),
-    h('p', null, 'Her öğe (perde, aralık, çeşni, makam…) 6 kutudan birindedir. Doğru bildikçe üst kutuya çıkar ve daha seyrek sorulur (1, 2, 4, 8, 16 gün). Yanlış yaptığında ilk kutuya döner ve ertesi gün yeniden gelir.')));
+    h('p', null, 'Her öğe (perde, aralık, çeşni, makam…) 6 kutudan birindedir. Doğru bildikçe üst kutuya çıkar ve daha seyrek sorulur (1, 2, 4, 8, 16 gün). Yanlış yaptığında ilk kutuya döner ve listede kalır: aynı gün yeniden çalışabilirsin.')));
 }
 
 // =====================================================
@@ -652,6 +653,14 @@ function hakkinda() {
 }
 function yenilikler() {
   sayfa('🆕 Yenilikler', h('div', { class: 'metinSayfa', html:
+    '<h3>Sürüm 3.3.2</h3><ul>' +
+    '<li>🎯 <b>Tekrar</b> kutuları artık aynı gün üst üste oynayınca şişmiyor: bir öğe, vadesi geldiğinde doğru bilinirse üst kutuya çıkar. Yanlışların listede kalır, aynı gün yeniden çalışabilirsin.</li>' +
+    '<li>🧭 <b>Meşk Yolu</b>’nda tek bir “BURADASIN” var: sıradaki adımın.</li>' +
+    '<li>🔇 Sesli sorular kapalıyken Sandık ve Altınla turlarında da sesli soru gelmiyor.</li>' +
+    '<li>🎁 Sandık ödülü için 8 sorudan 5 doğru gerekiyor. 🔥 Gün serisi ilk cevabınla sayılıyor.</li>' +
+    '<li>⏱️ Süreli sorularda bir pencere açıkken süre duruyor.</li>' +
+    '<li>👂 Aralık kademelerinde iki seçenekli olanlar 9 doğruyla geçiliyor; açtığın kademeler açık kalır.</li>' +
+    '<li>💾 Bozuk yedek kodu kaydının üstüne yazmıyor; ortak ders denemelerinde soru sayıları etiketle tutuyor.</li></ul>' +
     '<h3>Sürüm 3.3.1</h3><ul>' +
     '<li>🌙 Karanlık temada ipucu, uyarı ve unvan kutularının yazısı artık okunuyor.</li>' +
     '<li>📱 Küçük telefonlarda yanlış cevap paneli ekrana sığıyor; <b>Devam</b> düğmesi hep görünür.</li>' +
@@ -923,6 +932,14 @@ function ilkAcilis() {
       if (seviye === 'hic') {
         sekmeAc('ogren');
         toast('📚 “Porte ve notalar” modülüyle başla!', 2500);
+      } else if (seviye === 'bati') {
+        // 3.3.2: porteyi bilen için Öğren'in ilk modülleri gereksiz; Meşk Yolu'ndaki sıradaki adım gösterilir
+        YOL_FILTRE = null; sekmeAc('yol');
+        modalAc(h('div', { class: 'karsilama' },
+          h('div', { class: 'karsilamaMaskot', html: bulbulSVG('mutlu') }),
+          h('h2', null, 'Porteyi biliyorsun'),
+          h('p', null, 'Öğren’deki porte ve nota modüllerini geçebilirsin. Meşk Yolu’nda sıradaki adımın “BURADASIN” ile işaretli: koma ve perdelerle başlıyorsun.'),
+          dugme('Anladım', modalKapat)));
       } else if (seviye === 'tsm') {
         modalAc(h('div', { class: 'karsilama' },
           h('div', { class: 'karsilamaMaskot', html: bulbulSVG('mutlu') }),

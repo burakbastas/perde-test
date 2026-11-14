@@ -37,9 +37,13 @@ function arKayit() {
   const k = kaKayit();
   k.aralik = k.aralik || { en: {}, zor: 1 };
   k.aralik.en = k.aralik.en || {};
+  // 3.3.2: açılmış en üst kademe saklanır; eşik değişse de açılmış kademe yeniden kilitlenmez
+  if (k.aralik.ust == null) { let n = 1; while (n < AR_KADEMELER.length && (k.aralik.en[n] || 0) >= 8) n++; k.aralik.ust = n; }
   return k.aralik;
 }
-function arAcik(no) { return no <= 1 || (arKayit().en[no - 1] || 0) >= 8; }
+// İki şıklı kademelerde (1, 3, 8) şansla 8/10 tutturmak kolay olduğu için eşik 9; ötekilerde 8
+function arEsik(no) { const kd = AR_KADEMELER[no - 1]; return kd && (kd.tip === 'genis' || (kd.kume.length === 1 && kd.kume[0].length === 2)) ? 9 : 8; }
+function arAcik(no) { const K = arKayit(); return no <= K.ust || (K.en[no - 1] || 0) >= arEsik(no - 1); }
 function arEnUst() { let n = 1; while (n < AR_KADEMELER.length && arAcik(n + 1)) n++; return n; }
 function arMetin(a) { return a.ad + ' · ' + a.k; }
 
@@ -156,6 +160,8 @@ function arTur(no, oto) {
       const K = arKayit();
       const eskiUst = arEnUst();
       K.en[no] = Math.max(K.en[no] || 0, r.dogru);
+      const esik = arEsik(no);
+      if (r.dogru >= esik && no < AR_KADEMELER.length) K.ust = Math.max(K.ust, no + 1);
       let not = '';
       if (oto) {
         let y = no;
@@ -167,14 +173,14 @@ function arTur(no, oto) {
       const yeniAcildi = arEnUst() > eskiUst;
       const sonraki = no < AR_KADEMELER.length && arAcik(no + 1) ? no + 1 : null;
       modalAc(h('div', { class: 'sonuc' },
-        h('div', { class: 'sonucMaskot', html: bulbulSVG(r.dogru >= 8 ? 'mutlu' : 'anlat') }),
+        h('div', { class: 'sonucMaskot', html: bulbulSVG(r.dogru >= esik ? 'mutlu' : 'anlat') }),
         h('h2', null, '👂 ' + kd.ad),
         h('p', null, r.dogru + ' / ' + r.toplam + ' doğru'),
-        yeniAcildi ? h('p', null, '🔓 Kademe ' + (no + 1) + ' açıldı: ' + AR_KADEMELER[no].ad) : (r.dogru < 8 ? h('p', { class: 'kucukNot' }, 'Sonraki kademe için 10 sorudan 8’i gerekiyor.') : null),
+        yeniAcildi ? h('p', null, '🔓 Kademe ' + (no + 1) + ' açıldı: ' + AR_KADEMELER[no].ad) : (r.dogru < esik && !sonraki ? h('p', { class: 'kucukNot' }, 'Sonraki kademe için 10 sorudan ' + (esik === 9 ? '9’u' : '8’i') + ' gerekiyor.' + (esik === 9 ? ' (İki seçenekli kademelerde eşik 9.)' : '')) : null),
         not ? h('p', { class: 'kucukNot' }, not) : null,
         oto ? dugme('Bir tur daha', function () { modalKapat(); arTur(arKayit().zor, true); })
-          : sonraki && r.dogru >= 8 ? dugme('Kademe ' + sonraki + ' →', function () { modalKapat(); arTur(sonraki); }) : dugme('Tekrar', function () { modalKapat(); arTur(no); }),
-        !oto && sonraki && r.dogru >= 8 ? dugme('Tekrar', function () { modalKapat(); arTur(no); }, 'ikincil') : null,
+          : sonraki && r.dogru >= esik ? dugme('Kademe ' + sonraki + ' →', function () { modalKapat(); arTur(sonraki); }) : dugme('Tekrar', function () { modalKapat(); arTur(no); }),
+        !oto && sonraki && r.dogru >= esik ? dugme('Tekrar', function () { modalKapat(); arTur(no); }, 'ikincil') : null,
         dugme('Kulak eğitimine dön', function () { modalKapat(); turdanCik(false); kulakAraci(); }, 'ikincil'),
         dugme('Kapat', function () { modalKapat(); turdanCik(false); }, 'gri')), { kapatilamaz: true });
     }
@@ -202,14 +208,15 @@ function kaAralikCiz(g, A) {
   const liste = h('div', { class: 'arKademeler' });
   AR_KADEMELER.forEach(function (kd) {
     const acik = arAcik(kd.no), en = K.en[kd.no];
-    const b = h('button', { type: 'button', class: 'arKademe' + (acik ? '' : ' kilitli') + (en >= 8 ? ' bitti' : ''), disabled: !acik, onclick: function () { if (acik) arTur(kd.no); } },
-      h('i', null, en >= 8 ? '✓' : acik ? String(kd.no) : '🔒'),
+    const gecti = en >= arEsik(kd.no) || K.ust > kd.no;   // sonraki kademesi açılmış olan geçilmiş sayılır
+    const b = h('button', { type: 'button', class: 'arKademe' + (acik ? '' : ' kilitli') + (gecti ? ' bitti' : ''), disabled: !acik, onclick: function () { if (acik) arTur(kd.no); } },
+      h('i', null, gecti ? '✓' : acik ? String(kd.no) : '🔒'),
       h('span', null, h('b', null, kd.ad), h('small', null, kd.tip === 'genis' ? 'B–S, K–T · hangisi geniş?' : kd.kume.length > 1 ? (kd.kume === AR_UCLU ? 'güvenli üçlüler' : '') + (kd.yon === 'i' ? ' · inici' : kd.yon === 'k' ? ' · karışık yön' : ' · çıkıcı') : kd.kume[0].map(function (x) { return ARALIK[x].ad; }).join(' – ') + (kd.yon === 'k' ? ' · karışık' : ''))),
       h('small', { class: 'arEn' }, en != null ? en + '/10' : ''));
     liste.appendChild(b);
   });
   const anten = h('div', { class: 'kaAntrenman' }, h('h3', null, '🎯 Kademeler'),
-    h('p', { class: 'kucukNot' }, 'Her kademe 10 soru; 8 doğru ile sonraki açılır. İlk dört kademede aralık çıkıcı; ilk altı kademede alt ses sabit (' + P.ad + ').'),
+    h('p', { class: 'kucukNot' }, 'Her kademe 10 soru; 8 doğru ile sonraki açılır (iki seçenekli kademelerde 9). İlk dört kademede aralık çıkıcı; ilk altı kademede alt ses sabit (' + P.ad + ').'),
     liste,
     dugme('▶ Otomatik antrenman (kademe ' + Math.min(ust, K.zor || 1) + ')', function () { arTur(Math.min(arEnUst(), arKayit().zor || 1), true); }),
     h('p', { class: 'kucukNot' }, 'Otomatik antrenmanda 9/10 ile açık kademeler içinde bir üste çıkarsın, 6 ya da daha azında bir alta inersin.'));
