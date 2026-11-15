@@ -1,3 +1,19 @@
+# Seyir 3.4.0 – yükleme notu
+
+Batı Teorisi 18–20. ünitelere (Majör tonlar: diyezliler `b6`, bemollüler `b7`, Minör tonlar `b8`) görsel sorular. Yeni dosya yok. Değişenler: `index.html`, `sw.js`, `manifest.webmanifest`, `css/stil.css`, `js/cekirdek.js` (yalnız sürüm), `js/bati.js`, `js/motor.js`, `js/arayuz.js` (Yenilikler), `GUNCELLEME.md`. Kayıt taşıması yok; seviye kimlikleri aynı, kimsenin ilerlemesi değişmez.
+
+- Yeni soru biçimleri (`tonGorselSoru`, bati.js sonu):
+  - `klavyeMajor` / `klavyeMinor`: donanım portede, karar sesine klavyede dokun. `ilgiliKlavye`: verilen karar tuşundan 3 yarım ses aşağı/yukarı.
+  - `donanimYaz`: donanımı porteye yaz (işaret türünü seç, sırayla yerlerine dokun; üstüne dokunup kaydırarak düzelt). Harf ve sıra doğruysa doğru; oktav alışılmış yerde değilse doğru yazım geri bildirimde gösterilir. Kısmi puan: yanlışlar yarıdan fazla değilse bir düzeltme hakkı.
+  - `diziKur`: majör dizi portede, her notanın işaretini seç (mevcut `yer` tipi).
+  - Porteli şıklar: `donanimDogru` (hangisi doğru yazılmış), `diziTon` / `diziTonMinor` (diziden donanım), `ilgiliPorte` (karar sesinden ilgili tonun kararı), `ayniAdPorte`.
+- Motor: yeni soru tipi `ozel` (`q.ozel = { karar, ciz(alan, veri, q, kontrol) }`); soru portesinde `kirp: true`.
+- Seviye karışımları: yalnız yazılı (yazı → yazı) soru b6 ve b7’de kalmadı, b8’de yalnız b8-2’nin beşte biri. `b6-yer` ve `b7-yer` “Donanımı porteye yaz” oldu (yazılı taş dizme `donanimDiz` seviyelerden çıktı, kod duruyor).
+- Dersler: b6’ya “Klavyede gör”, b8’e “Klavyede küçük üçlü” kartı.
+- Düzeltmeler: b6/b7’de `tonDonanim` soruların %30’unda minör ton soruyordu (minör b8’de anlatılıyor) → `tonDonanimMajor`. Batı `yer` sorularında (aralık kurma dahil) harfi doğru, işareti yanlış cevaba “Ses doğru, yazım farklı” deniyordu (`esSesNotu` koma hesabı ♯/♭ tanımıyor) → Batı paletinde bu not kapalı.
+
+**Önce test:** `seyir-3.4.0-test.zip` paketini perde-test deposuna yükle.
+
 # Seyir 3.3.2 – yükleme notu
 
 Hata denetimi düzeltmeleri. Yeni dosya yok, yeni içerik yok. Değişenler: `index.html`, `sw.js`, `manifest.webmanifest`, `css/stil.css` (yalnız `?v=`), `js/cekirdek.js`, `js/motor.js`, `js/arayuz.js`, `js/ortak.js`, `js/kulak-aralik.js`, `GUNCELLEME.md`. Kayıt taşıması yok; `DURUM.kulak.aralik.ust` ilk açılışta eski kayıttan hesaplanır.

@@ -353,7 +353,11 @@ function soruGoster() {
   const kutu = h('div', { class: 'soruKutu' + (s.porte ? ' porteli' : '') + (s.glif ? ' glifli' : '') });
   if (s.metin) kutu.appendChild(h('div', { class: 'soruMetin' + (s.kucuk ? ' kucuk' : '') }, s.metin));
   if (s.glif) kutu.appendChild(h('div', { class: 'soruGlif bravura' }, s.glif));
-  if (s.porte) kutu.appendChild(porteSVG(s.porte));
+  if (s.porte) {
+    const ps = porteSVG(s.porte);
+    kutu.appendChild(ps);
+    if (s.porte.kirp) { porteKirp([ps]); ps.classList.add('kirpik'); }   // 3.4: kısa porte (donanım, tek nota) kutuyu boş yere uzatmasın
+  }
   if (s.svg) kutu.appendChild(h('div', { class: 'ritimKutu' }, s.svg()));
   if (veri.dinle) kutu.appendChild(dinleDugmesi(veri.dinle, true));
   else if (veri.dinleSecenek && typeof kulakSecenekDugmesi === 'function' && !TUR.sonsuz && DURUM.ayar.kulak !== false) kutu.appendChild(kulakSecenekDugmesi(veri.dinleSecenek));   // 3.1.1
@@ -416,6 +420,7 @@ function soruGoster() {
   else if (veri.tip === 'sinif') sinifCiz(alan, veri, q, kontrol);
   else if (veri.tip === 'acik') acikCiz(alan, veri, q, kontrol);   // 3.2: yazılıya hazırlık (yazili.js)
   else if (veri.tip === 'melodi') melodiCiz(alan, veri, q, kontrol);   // 3.3: ezgi diktesi (dikte.js)
+  else if (veri.tip === 'ozel') veri.ozel.ciz(alan, veri, q, kontrol);   // 3.4: soruya özel etkileşim (klavye, donanım yazma: bati.js)
 
   jokerYaz();
   ustBilgiYaz();
@@ -517,7 +522,7 @@ function yerCiz(alan, veri, q, kontrol) {
     const goster = kabul.find(function (k) { return esit(deger, k); }) || (q.duzeltme ? q.kismiHedef : y.beklenen);
     bil.kilitle(y.sadeceAdim ? deger.map(function (n, i) { return adim(n) === adim(goster[i]) ? n : goster[i]; }) : goster);
     kontrol.hidden = true;
-    const es = dogru || y.sadeceAdim ? null : esSesNotu(deger, y);
+    const es = dogru || y.sadeceAdim || y.palet === 'bati' ? null : esSesNotu(deger, y);   // 3.4: Batı notalarında koma karşılaştırması yapılmaz (Do ile Do♯ “aynı ses” görünüyordu)
     cevapla(dogru ? (q.duzeltme ? 'yarim' : true) : false, es ? es.baslik : null, dogru ? null : porteSVG({ notalar: y.beklenen, aralik: 40, etiketler: y.etiketler }), es ? es.metin : null);
   };
 }
@@ -877,6 +882,7 @@ function kararSayisi(v) {
   if (!v) return 0;
   if (v.tip === 'yer') return v.yer.slotlar.filter(function (sl) { return !sl.sabit; }).length || 1;
   if (v.tip === 'sinif') return v.sinif.ogeler.length;
+  if (v.tip === 'ozel') return (v.ozel && v.ozel.karar) || 1;
   if (v.tip === 'dizi') return v.dizi.acik ? (v.dizi.beklenen || []).length || 1 : v.dizi.uzunluk || 1;
   return 1;
 }

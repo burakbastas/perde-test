@@ -653,6 +653,11 @@ function hakkinda() {
 }
 function yenilikler() {
   sayfa('🆕 Yenilikler', h('div', { class: 'metinSayfa', html:
+    '<h3>Sürüm 3.4.0</h3><ul>' +
+    '<li>🎹 <b>Batı Teorisi 18–20. üniteler</b> (majör tonlar ve minör tonlar) artık daha görsel: karar sesini <b>klavyede</b> gösteriyor, donanımı <b>porteye kendin yazıyorsun</b>, majör diziyi nota nota kuruyorsun.</li>' +
+    '<li>🎼 Yazılı şıkların çoğu porteli oldu: “hangi donanım doğru yazılmış”, “bu dizinin donanımı hangisi”, ilgili ve aynı adlı minör soruları porteden soruluyor.</li>' +
+    '<li>📚 Bu ünitelerin derslerine klavye çizimli iki kart eklendi.</li>' +
+    '<li>🛠️ Majör ton ünitelerinde henüz anlatılmamış minör tonlar sorulmuyor; Batı notası yazma sorularında yanlış işarete “ses doğru, yazım farklı” denmiyor.</li></ul>' +
     '<h3>Sürüm 3.3.2</h3><ul>' +
     '<li>🎯 <b>Tekrar</b> kutuları artık aynı gün üst üste oynayınca şişmiyor: bir öğe, vadesi geldiğinde doğru bilinirse üst kutuya çıkar. Yanlışların listede kalır, aynı gün yeniden çalışabilirsin.</li>' +
     '<li>🧭 <b>Meşk Yolu</b>’nda tek bir “BURADASIN” var: sıradaki adımın.</li>' +
