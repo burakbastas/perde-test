@@ -400,14 +400,15 @@ function usulSoru0(tip, u, havuz) {
   } else if (tip === 'birlesim') {
     const dogru = birlesimMetni(u);
     const dis = benzersiz(karistir(USULLER.filter(function (x) { return x.birlesim && birlesimMetni(x) !== dogru; })).map(birlesimMetni)).slice(0, 3);
-    q.soru = { metin: u.ad }; q.alt = 'Hangi küçük usullerin birleşimi?';
+    q.soru = { metin: u.ad, kucuk: true, svg: function () { return usulSVG(u, { heceYok: true }); } }; q.alt = 'Hangi küçük usullerin birleşimi?';   // 3.5: usulün vuruşları da görünür
     q.siklar = [dogru].concat(dis).map(function (x) { return { key: x, metin: x }; });
     q.dogru = dogru; q.dogruMetin = dogru;
     q.aciklama = '<b>' + u.ad + '</b> (' + u.zaman + ') = ' + u.birlesim.map(function (i) { return USUL[i].ad + ' (' + USUL[i].zaman + ')'; }).join(' + ');
     q.ipucu = 'Zamanları topla: ' + u.zaman + ' etmeli.';
   } else if (tip === 'birlesimAd') {
     const b = birlesimMetni(u);
-    q.soru = { metin: b, kucuk: true }; q.alt = 'Bu birleşim hangi usul?';
+    // 3.5: küçük usullerin vuruşları yan yana
+    q.soru = { metin: b, kucuk: true, svg: function () { return h('div', { class: 'usulBirlesim' }, u.birlesim.map(function (i) { return h('div', { class: 'ubParca' }, usulSVG(USUL[i], { heceYok: true })); })); } }; q.alt = 'Bu birleşim hangi usul?';
     const dis = karistir(USULLER.filter(function (x) { return x !== u && birlesimMetni(x) !== b; })).sort(function (a, c) { return (a.zaman === u.zaman ? 0 : 1) - (c.zaman === u.zaman ? 0 : 1); }).slice(0, 3);
     q.siklar = [u].concat(dis).map(function (x) { return { key: x.id, metin: x.ad }; });
     q.dogru = u.id; q.dogruMetin = u.ad;

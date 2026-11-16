@@ -49,7 +49,35 @@ function dortle(dogruKey, havuzListesi, tumListe, anahtar) {
   return karistir(once).concat(karistir(sonra)).slice(0, 3);
 }
 
+// 3.5: koma cetveli (yalnız görsel; ses yok). k komalık parça dolu çizilir; Artık İkili'de 13. koma taralı.
+function kmCetvelSVG(v, toplam) {
+  const W = 300, x0 = 12, bw = (W - 24) / toplam;
+  const svg = svgEl('svg', { class: 'komaCetvel', viewBox: '0 0 ' + W + ' 46', preserveAspectRatio: 'xMidYMid meet', role: 'img', 'aria-label': 'Koma cetveli' });
+  for (let i = 0; i < toplam; i++) {
+    const dolu = i < v.koma[0], yari = v.koma.length > 1 && i >= v.koma[0] && i < v.koma[1];
+    svg.appendChild(svgEl('rect', { x: x0 + i * bw + 1, y: 8, width: bw - 2, height: 22, rx: 4, class: 'kcKutu' + (dolu ? ' dolu' : yari ? ' yari' : '') }));
+  }
+  gYazi(svg, x0 + bw / 2, 42, '1', { 'font-size': 9, opacity: .6 });
+  gYazi(svg, x0 + (toplam - 0.5) * bw, 42, String(toplam), { 'font-size': 9, opacity: .6 });
+  return svg;
+}
+function kmCetvelSoru(tip, havuz) {
+  const v = rastgele(havuz), toplam = havuz.some(function (x) { return x.koma[0] > 9; }) ? 13 : 9;
+  const q = { oge: v.oge, tip: 'secim', aciklama: kmAciklama(v), ipucu: 'Kutuları say: her kutu bir koma. Simge harfi: ' + v.kod };
+  const dis = karistir(havuz.filter(function (x) { return x !== v; }).concat(KM_VERI.filter(function (x) { return x !== v && havuz.indexOf(x) < 0 && x.koma[0] <= toplam; }))).slice(0, 3);
+  if (tip === 'cetvelAd') {
+    q.soru = { svg: function () { return kmCetvelSVG(v, toplam); } }; q.alt = 'Her kutu bir koma. Boyalı aralık hangisi?';
+    q.siklar = [v].concat(dis).map(function (x) { return { key: x.ad, metin: x.ad }; });
+    q.dogru = v.ad; q.dogruMetin = v.ad + ' (' + kmKoma(v) + ' koma)';
+  } else {
+    q.soru = { metin: v.ad }; q.alt = 'Cetvelde hangisi? Her kutu bir koma';
+    q.siklar = [v].concat(dis).map(function (x) { return { key: x.ad, svg: function () { return kmCetvelSVG(x, toplam); } }; });
+    q.dogru = v.ad; q.dogruMetin = kmKoma(v) + ' koma';
+  }
+  return q;
+}
 function kmSoru0(tip, havuz, agir) {
+  if (tip === 'cetvelAd' || tip === 'adCetvel') return kmCetvelSoru(tip, havuz);
   if (tip === 'simgeAd' || tip === 'adSimge' || tip === 'simgeKoma' || tip === 'simgeKod') {
     const pool = kmSemboller(havuz);
     const adaylar = [];
@@ -203,6 +231,7 @@ function kmUretici(h_, tipler, agir) {
   };
 }
 const KM_TUM = ['adKoma', 'komaAd', 'adKod', 'kodAd'];
+const KM_TUM_G = ['adKoma', 'cetvelAd', 'adKod', 'adCetvel', 'komaAd', 'cetvelAd', 'kodAd', 'adCetvel'];   // 3.5: Koma 1'e cetvel soruları
 const KM_SEMBOL = ['simgeAd', 'adSimge', 'simgeKoma', 'simgeKod'];
 
 function komaCetveliSVG() {
@@ -244,9 +273,9 @@ const KOMA_UNITELER = [
     ogeler: KM_VERI.map(function (v) { return v.oge; }),
     seviyeler: [
       // 2.11: ilk dört seviye ikiye indirildi (km2 → km1, km4 → km3; yıldızlar taşındı)
-      { id: 'km1', tip: 'seviye', ad: 'Koma, Bakiye, Tanini: değer ve harf', soruSay: 8, uret: kmUretici([0, 1, 4], KM_TUM) },
-      { id: 'km3', tip: 'seviye', ad: 'Mücennebler eklendi: değer ve harf', soruSay: 8, uret: kmUretici([0, 1, 2, 3, 4], KM_TUM) },
-      { id: 'km5', tip: 'boss', ad: 'Artık İkili eklendi: karışık', soruSay: 8, uret: kmUretici([0, 1, 2, 3, 4, 5], KM_TUM) }
+      { id: 'km1', tip: 'seviye', ad: 'Koma, Bakiye, Tanini: değer ve harf', soruSay: 8, uret: kmUretici([0, 1, 4], KM_TUM_G) },
+      { id: 'km3', tip: 'seviye', ad: 'Mücennebler eklendi: değer ve harf', soruSay: 8, uret: kmUretici([0, 1, 2, 3, 4], KM_TUM_G) },
+      { id: 'km5', tip: 'boss', ad: 'Artık İkili eklendi: karışık', soruSay: 8, uret: kmUretici([0, 1, 2, 3, 4, 5], KM_TUM_G) }
     ]
   },
   {

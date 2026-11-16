@@ -438,6 +438,16 @@ function soruOktavPorte(p, yon) {
     aciklama: '<b>' + p.ad + '</b> → <b>' + k.ad + '</b> (' + kacis(perdeYazimMetni(k)) + ')'
   };
 }
+// 3.5: şıkları yazı yerine portede perde olarak göster (ses yok). soruPerde verilirse soru da portede sorulur.
+function perdeSikPorte(q, soruPerde) {
+  const L = q.siklar.map(function (x) { return { key: x.key, p: perdeOge(x.key) }; });
+  if (L.some(function (x) { return !x.p; })) return q;
+  q.siklar = L.map(function (x) { return { key: x.key, porte: { notalar: x.p.parcalar, aralik: 48, enAz: 130 } }; });
+  if (soruPerde) q.soru = { porte: Object.assign({ kirp: true }, perdePorte(soruPerde)) };
+  else if (q.soru && q.soru.porte) q.soru.porte = Object.assign({ kirp: true }, q.soru.porte);
+  q.alt = q.alt.replace('hangi perde?', 'portede hangisi?').replace('perde hangisi?', 'perde portede hangisi?').replace('Hangi perde olur?', 'Portede hangisi olur?');
+  return q;
+}
 function soruOktavYaz(p, yon) {
   const k = oktavKardes(p, yon);
   return {
@@ -459,7 +469,7 @@ function oktavUretici(tipler) {
         if (!oktavKardes(p, yon)) yon = -yon;
         if (oktavKardes(p, yon)) break;
       }
-      L.push(tip === 'ad' ? soruOktav(p, yon) : tip === 'porte' ? soruOktavPorte(p, yon) : soruOktavYaz(p, yon));
+      L.push(tip === 'ad' ? soruOktav(p, yon) : tip === 'porte' ? soruOktavPorte(p, yon) : tip === 'ap' ? perdeSikPorte(soruOktav(p, yon)) : tip === 'pp' ? perdeSikPorte(soruOktavPorte(p, yon)) : soruOktavYaz(p, yon));
     }
     return karistir(L);
   };
@@ -520,6 +530,7 @@ function komsuUretici(tipler, sure) {
     for (let i = 0; i < n; i++) {
       const tip = tipler[i % tipler.length];
       if (tip === 'aralik') { L.push(soruTamdanAralik()); continue; }
+      if (tip === 'aralikP') { L.push(perdeSikPorte(soruTamdanAralik())); continue; }
       if (tip === 'iki') { L.push(soruIkiYazim(PERDE[rastgele(P_IKI_HAVUZ)])); continue; }
       if (tip === 'ikiYaz') { L.push(soruPerdeYaz(PERDE[rastgele(P_IKI_HAVUZ)], 'iki')); continue; }
       if (tip === 'portead' || tip === 'adporte') {
@@ -527,10 +538,10 @@ function komsuUretici(tipler, sure) {
         L.push(tip === 'portead' ? soruPorteAd(p, PERDELER, 0.8) : soruAdPorte(p, PERDELER, 0.8));
         continue;
       }
-      const yon = tip === 'ust' ? 1 : -1;
+      const yon = tip === 'ust' || tip === 'ustP' ? 1 : -1;
       let p;
       for (let d = 0; d < 20; d++) { p = PERDE[rastgele(paketeKadar(2))]; if (komsuPerde(p, yon)) break; }
-      L.push(soruKomsu(p, yon));
+      L.push(tip === 'ustP' || tip === 'altP' ? perdeSikPorte(soruKomsu(p, yon), p) : soruKomsu(p, yon));
     }
     return karistir(L);
   };
@@ -541,10 +552,10 @@ PERDE_UNITELER.push({
   kisa: 'Rast–Gerdâniye, Irak–Evç, Kürdi–Sünbüle…',
   ogeler: [],
   seviyeler: [
-    { id: 'p6-1', tip: 'seviye', ad: 'Bir oktav tiz, bir oktav pest', soruSay: 8, uret: oktavUretici(['ad']) },
-    { id: 'p6-2', tip: 'seviye', ad: 'Porteden oktav kardeşine', soruSay: 8, uret: oktavUretici(['porte', 'ad']) },
+    { id: 'p6-1', tip: 'seviye', ad: 'Bir oktav tiz, bir oktav pest', soruSay: 8, uret: oktavUretici(['ap', 'ad', 'pp', 'ap']) },
+    { id: 'p6-2', tip: 'seviye', ad: 'Porteden oktav kardeşine', soruSay: 8, uret: oktavUretici(['pp', 'porte', 'ap']) },
     { id: 'p6-yer', tip: 'yer', ad: 'Oktavını porteye yaz', soruSay: 8, uret: oktavUretici(['yaz']) },
-    { id: 'p6-boss', tip: 'boss', ad: 'Oktav finali', soruSay: 12, uret: oktavUretici(['ad', 'porte', 'yaz', 'ad']) }
+    { id: 'p6-boss', tip: 'boss', ad: 'Oktav finali', soruSay: 12, uret: oktavUretici(['ap', 'porte', 'yaz', 'pp', 'ad']) }
   ]
 });
 PERDE_UNITELER.push({
@@ -552,11 +563,11 @@ PERDE_UNITELER.push({
   kisa: 'Perdeler arası koma farkı, aynı perdenin iki yazımı',
   ogeler: [],
   seviyeler: [
-    { id: 'p7-1', tip: 'seviye', ad: 'Hemen üstteki, hemen alttaki', soruSay: 8, uret: komsuUretici(['ust', 'alt']) },
-    { id: 'p7-2', tip: 'seviye', ad: 'Tam perdeden aralık ekle', soruSay: 8, uret: komsuUretici(['aralik']) },
+    { id: 'p7-1', tip: 'seviye', ad: 'Hemen üstteki, hemen alttaki', soruSay: 8, uret: komsuUretici(['ustP', 'alt', 'altP', 'ust']) },
+    { id: 'p7-2', tip: 'seviye', ad: 'Tam perdeden aralık ekle', soruSay: 8, uret: komsuUretici(['aralikP', 'aralik']) },
     { id: 'p7-3', tip: 'seviye', ad: 'Aynı ses, öteki yazım', soruSay: 8, uret: komsuUretici(['iki']) },
     { id: 'p7-yer', tip: 'yer', ad: 'İki yazımı da kur', soruSay: 6, uret: komsuUretici(['ikiYaz']) },
-    { id: 'p7-boss', tip: 'boss', ad: '⏱️ Perde avı: süreli final', soruSay: 14, sure: 12, uret: komsuUretici(['portead', 'adporte', 'ust', 'aralik', 'iki', 'alt', 'portead']) }
+    { id: 'p7-boss', tip: 'boss', ad: '⏱️ Perde avı: süreli final', soruSay: 14, sure: 12, uret: komsuUretici(['portead', 'adporte', 'ustP', 'aralikP', 'iki', 'altP', 'portead', 'ust', 'aralik']) }
   ]
 });
 PERDE_UNITELER[5].ders = function () {

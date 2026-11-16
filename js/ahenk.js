@@ -47,8 +47,77 @@ const AH_BILGI = [
   { s: 'Ahenk neyi değiştirir?', d: 'Seslerin duyulduğu yüksekliği', y: ['Notanın yazılışını', 'Makamın dizisini', 'Usulü'] }
 ];
 
+// ---- 3.5: görsel ve sesli ahenk soruları ----
+// Bolâhenk'e göre kaç yarım ses / kaç koma pest
+const AH_YARIM = { bolahenk: 0, sipurde: 2, mustahsen: 3, kiz: 5, mansur: 7, sah: 9, davud: 10, bolahenkNey: 12, kizNey: 17, mansurNey: 19 };
+const AH_KOMA = { bolahenk: 0, sipurde: 9, mustahsen: 13, kiz: 22, mansur: 31, sah: 40, davud: 44 };
+// Klavyede (Do4 = 0) Rast'ın duyulduğu tuş: Bolâhenk'te Re4; yazılan Rast = Sol4 (7)
+function ahenkTus(a) { return 2 - AH_YARIM[a.id]; }
+function ahenkKlavyeSVG(a) {
+  return klavye({ bas: -8, son: 7, sabit: true, verilen: [{ y: 7, etiket: 'yazılan' }, { y: ahenkTus(a), etiket: 'duyulan', sinif: 'dogru' }] }).el;
+}
+// Ney boyları (şematik): boy, sesin pestliğiyle uzar. Tizden peste sıralı; vurgu: işaretlenecek ahenk
+function neyBoylariSVG(L, vurguId) {
+  const S = L.slice().sort(function (x, y) { return x.sira - y.sira; });
+  const enUzun = Math.pow(2, AH_YARIM[S[S.length - 1].id] / 12), birim = 250 / enUzun, sat = S.length > 10 ? 10 : 13;
+  const svg = svgEl('svg', { class: 'neyBoy', viewBox: '0 0 300 ' + (S.length * sat + 20), preserveAspectRatio: 'xMidYMid meet', role: 'img', 'aria-label': 'Ney boyları' });
+  S.forEach(function (x, i) {
+    const w = birim * Math.pow(2, AH_YARIM[x.id] / 12), y = 4 + i * sat;
+    svg.appendChild(svgEl('rect', { x: 20, y: y, width: w, height: sat - 5, rx: (sat - 5) / 2, class: 'neyCubuk' + (x.id === vurguId ? ' vurgu' : '') }));
+    svg.appendChild(svgEl('rect', { x: 16, y: y - 1.5, width: 9, height: sat - 2, rx: 3, class: 'neyBaspare' + (x.id === vurguId ? ' vurgu' : '') }));
+  });
+  gYazi(svg, 150, S.length * sat + 15, 'kısa ney tiz · uzun ney pest', { 'font-size': 9, opacity: .65, 'font-weight': 600 });
+  return svg;
+}
+function ahenkGorselSoru(tip, a, havuz, q) {
+  const nisfiye = function (x) { return x.tur === 'ney' ? AH_NISFIYE.find(function (y) { return y.rast === x.rast; }) : x; };
+  if (tip === 'klavyeAd') {
+    a = nisfiye(a); q.aciklama = ahenkAciklama(a);
+    q.soru = { svg: function () { return ahenkKlavyeSVG(a); } }; q.alt = 'Sarı tuş yazılan Rast (Sol), yeşil tuş duyulduğu ses. Hangi nısfiye ahengi?';
+    q.siklar = ahenkSiklari(a, AH_NISFIYE, 'ad'); q.dogru = a.id; q.dogruMetin = a.ad;
+    q.ipucu = 'Bolâhenk’te Rast, Re’den duyulur. Re’den yeşil tuşa kadar say.';
+  } else if (tip === 'adKlavye') {
+    a = nisfiye(a); q.aciklama = ahenkAciklama(a);
+    const y = ahenkTus(a);
+    q.tip = 'ozel';
+    q.soru = { metin: a.ad, kucuk: a.ad.length > 18 }; q.alt = 'Yazılan Rast sarı tuş. Bu ahenkte hangi tuştan duyulur? Dokun';
+    q.klavye = { bas: -8, son: 7, tam: true, verilen: [{ y: 7, etiket: 'yazılan' }], hedefPc: ((y % 12) + 12) % 12, hedefY: y, hedefEtiket: a.rast };
+    q.ozel = { karar: 1, ciz: klavyeSoruCiz };
+    q.dogruMetin = a.rast;
+    q.ipucu = 'Bolâhenk’te Rast = Re. Oradan ' + a.aralik.toLowerCase() + ' pest.';
+  } else if (tip === 'boyAd' || tip === 'adBoy') {
+    const kume = havuz.length >= 4 ? havuz : AHENKLER;
+    if (tip === 'boyAd') {
+      q.soru = { svg: function () { return neyBoylariSVG(kume, a.id); } }; q.alt = 'Neyler tizden peste dizili. İşaretli olan hangi ahenk?';
+      q.siklar = ahenkSiklari(a, kume, 'ad'); q.dogru = a.id; q.dogruMetin = a.ad;
+    } else {
+      q.soru = { metin: a.ad, kucuk: a.ad.length > 18 }; q.alt = 'Neyler tizden peste dizili. Bu ahengin neyi hangisi?';
+      const dis = karistir(kume.filter(function (x) { return x !== a; })).slice(0, 3);
+      q.siklar = [a].concat(dis).map(function (x) { return { key: x.id, svg: function () { return neyBoylariSVG(kume, x.id); } }; });
+      q.dogru = a.id; q.dogruMetin = (a.sira + 1) + '. sırada (tizden peste)';
+    }
+    q.ipucu = 'Tizden peste: Bolâhenk, Sipürde, Müstahsen, Kız, Mansur, Şah, Davud; neyler bunlardan bir oktav pest.';
+  } else if (tip === 'dinle') {
+    // Aynı ezgi önce Bolâhenk'te, sonra sorulan ahenkte çalınır (yalnız nısfiyeler)
+    a = nisfiye(a);
+    if (a.id === 'bolahenk') a = rastgele(AH_NISFIYE.filter(function (x) { return x.id !== 'bolahenk'; }));
+    const ezgi = [243, 252, 260, 265, 274].map(function (k) { return k + 22; });   // Rast beşlisi, Bolâhenk yüksekliğinde
+    const A = kulakDiziOlay(ezgi, 'ci', 0.36), B = kulakDiziOlay(ezgi.map(function (k) { return k - AH_KOMA[a.id]; }), 'ci', 0.36);
+    const dis = karistir(AH_NISFIYE.filter(function (x) { return x.id !== 'bolahenk' && x !== a && Math.abs(AH_YARIM[x.id] - AH_YARIM[a.id]) >= 2; })).slice(0, 2);
+    q.aciklama = ahenkAciklama(a);
+    q.kulak = true;
+    q.soru = { metin: '👂 Aynı ezgi, iki ahenk', kucuk: true }; q.alt = 'Önce Bolâhenk’te (yerinden) çalar, sonra başka bir ahenkte. İkincisi hangisi?';
+    q.dinle = kulakDinle([{ etiket: 'Bolâhenk', olaylar: A }, { etiket: 'İkinci', olaylar: B }], {});
+    q.dinle.ahenk = null;
+    q.siklar = [a].concat(dis).map(function (x) { return { key: x.id, metin: x.ad }; }); q.dogru = a.id; q.dogruMetin = a.ad;
+    q.ipucu = 'İkinci çalışın ilk sesi, birincinin ilk sesinden ne kadar pest?';
+    q.geriEk = kulakGeri({ kaydir: q.dinle.kaydir, dogru: { etiket: a.ad, olaylar: kulakArdArda([A, B], 0.7) } });
+  }
+  return q;
+}
 function ahenkSoru(tip, a, havuz) {
   const q = { oge: null, tip: 'secim', aciklama: ahenkAciklama(a), ipucu: 'Bolâhenk’ten ' + a.aralik.toLowerCase() + ' pest.' };
+  if (['klavyeAd', 'adKlavye', 'boyAd', 'adBoy', 'dinle'].indexOf(tip) >= 0) return ahenkGorselSoru(tip, a, havuz, q);
   if (tip === 'adYeni') {
     q.soru = { metin: a.ad, kucuk: a.ad.length > 18 }; q.alt = 'Yeni adı (Bolâhenk’e göre) hangisi?';
     q.siklar = ahenkSiklari(a, havuz, 'yeniTam'); q.dogru = a.id; q.dogruMetin = a.yeniTam;
@@ -110,16 +179,17 @@ function ahenkTablosu(L) {
 const AHENK_UNITELER = [
   { id: 'a1', dal: 'ahenk', no: 1, ad: 'Nısfiye ahenkleri', kisa: 'Bolâhenk, Sipürde, Müstahsen, Kız, Mansur, Şah, Davud', ogeler: [],
     seviyeler: [
-      { id: 'a1-1', tip: 'seviye', ad: 'Eski ad, yeni ad', soruSay: 8, uret: ahenkUretici(AH_NISFIYE, ['adYeni', 'yeniAd']) },
-      { id: 'a1-2', tip: 'seviye', ad: 'Rast hangi sesten?', soruSay: 8, uret: ahenkUretici(AH_NISFIYE, ['adRast', 'rastAd']) },
-      { id: 'a1-yer', tip: 'yer', ad: 'Tizden peste diz', soruSay: 5, uret: ahenkUretici(AH_NISFIYE, ['sirala']) },
-      { id: 'a1-boss', tip: 'boss', ad: 'Nısfiyeler finali', soruSay: 10, uret: ahenkUretici(AH_NISFIYE, ['adYeni', 'rastAd', 'yeniAd', 'adRast', 'halk', 'sirala']) }
+      { id: 'a1-1', tip: 'seviye', ad: 'Eski ad, yeni ad', soruSay: 8, uret: ahenkUretici(AH_NISFIYE, ['adYeni', 'klavyeAd', 'yeniAd', 'boyAd']) },
+      { id: 'a1-2', tip: 'seviye', ad: 'Rast hangi sesten?', soruSay: 8, uret: ahenkUretici(AH_NISFIYE, ['adKlavye', 'rastAd', 'klavyeAd', 'adRast']) },
+      { id: 'a1-yer', tip: 'yer', ad: 'Tizden peste diz', soruSay: 5, uret: ahenkUretici(AH_NISFIYE, ['sirala', 'adKlavye', 'adBoy', 'sirala', 'adKlavye']) },
+      { id: 'a1-kulak', tip: 'seviye', ad: '👂 Aynı ezgi, iki ahenk', soruSay: 6, yeni: true, kulak: true, uret: ahenkUretici(AH_NISFIYE.filter(function (a) { return a.id !== 'bolahenk'; }), ['dinle']) },
+      { id: 'a1-boss', tip: 'boss', ad: 'Nısfiyeler finali', soruSay: 10, uret: ahenkUretici(AH_NISFIYE, ['adYeni', 'klavyeAd', 'adKlavye', 'boyAd', 'halk', 'sirala', 'rastAd', 'adBoy', 'yeniAd', 'adRast']) }
     ] },
   { id: 'a2', dal: 'ahenk', no: 2, ad: 'Neyler ve ahenk bilgisi', kisa: 'Bolâhenk, Kız ve Mansur neyleri; mâbeyin', ogeler: [],
     seviyeler: [
-      { id: 'a2-1', tip: 'seviye', ad: 'Ney ahenkleri', soruSay: 8, uret: ahenkUretici(AH_NEY.concat(AH_NISFIYE), ['adYeni', 'yeniAd', 'halk']) },
+      { id: 'a2-1', tip: 'seviye', ad: 'Ney ahenkleri', soruSay: 8, uret: ahenkUretici(AH_NEY.concat(AH_NISFIYE), ['adYeni', 'boyAd', 'yeniAd', 'adBoy', 'halk', 'boyAd', 'adYeni', 'adBoy']) },
       { id: 'a2-2', tip: 'seviye', ad: 'Ahenk bilgisi', soruSay: 7, uret: ahenkUretici(AHENKLER, ['bilgi']) },
-      { id: 'a2-boss', tip: 'boss', ad: 'Ahenk büyük finali', soruSay: 12, uret: ahenkUretici(AHENKLER, ['adYeni', 'yeniAd', 'rastAd', 'bilgi', 'halk', 'adRast']) }
+      { id: 'a2-boss', tip: 'boss', ad: 'Ahenk büyük finali', soruSay: 12, uret: ahenkUretici(AHENKLER, ['adYeni', 'boyAd', 'klavyeAd', 'bilgi', 'adKlavye', 'halk', 'adBoy', 'yeniAd', 'rastAd', 'adRast', 'boyAd', 'bilgi']) }
     ] }
 ];
 AHENK_UNITELER[0].ders = function () {

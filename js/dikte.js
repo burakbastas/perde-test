@@ -12,7 +12,7 @@
 
 const DK_DO = 28;
 const DK_SURE = { 1: 'sekizlik', 2: 'dörtlük', 3: 'noktalı dörtlük', 4: 'ikilik' };
-const DK_OLCU = { '2/4': 4, '4/4': 8 };
+const DK_OLCU = { '2/4': 4, '4/4': 8, '3/4': 6, '5/8': 5, '7/8': 7, '9/8': 9 };   // sekizlik sayısı (3.5: Semai ve aksak usuller)
 
 function dkHz(s) {
   const o = Math.floor(s / 7), h = ((s % 7) + 7) % 7;
@@ -20,9 +20,25 @@ function dkHz(s) {
   return 440 * Math.pow(2, (midi - 69) / 12);
 }
 function dkAd(s) { return HARF_AD[((s % 7) + 7) % 7] + (s >= 35 ? '’' : ''); }
+// 3.5: Türk müziği diktesi. M.sis = { don: [donanım notaları], a: { harf: işaret }, kararK, kararAd, ad } ise sesler komayla çalınır,
+// donanım anahtardan sonra çizilir ve notalar perde adıyla anılır. M.grup = [2, 3…] aksak usulün sekizlik grupları.
+function dkNota(M, s) { const hh = ((s % 7) + 7) % 7; return { h: hh, o: Math.floor(s / 7), a: (M && M.sis && M.sis.a[hh]) || null }; }
+function dkKoma(M, s) { return komaOf(dkNota(M, s)); }
+function dkAdM(M, s) {
+  if (!M || !M.sis) return dkAd(s);
+  const p = KOMADAN_PERDE[dkKoma(M, s)];
+  return p ? p.ad : dkAd(s);
+}
+function dkDonEn(M) { return M && M.sis && M.sis.don && M.sis.don.length ? M.sis.don.length * 12 + 6 : 0; }
+function dkVurusBaslari(M) {
+  if (!M.grup) return null;
+  const B = {}; let t = 0;
+  M.grup.forEach(function (g) { B[t] = true; t += g; });
+  return B;
+}
 function dkOnsetler(L) { const o = []; let t = 0; L.forEach(function (n) { o.push(t); t += n.d; }); return o; }
 function dkToplam(L) { return L.reduce(function (t, n) { return t + n.d; }, 0); }
-function dkKopya(M) { return { olcu: M.olcu, notalar: M.notalar.map(function (n) { return { s: n.s, d: n.d }; }) }; }
+function dkKopya(M) { return { olcu: M.olcu, sis: M.sis, grup: M.grup, notalar: M.notalar.map(function (n) { return { s: n.s, d: n.d }; }) }; }
 
 // ---------- ÇİZİM ----------
 // M: { olcu: '2/4' | '4/4' | null, notalar: [{s, d}] }
@@ -30,7 +46,7 @@ function dkKopya(M) { return { olcu: M.olcu, notalar: M.notalar.map(function (n)
 function dkYerlesim(M, o) {
   o = o || {};
   const olcuUz = M.olcu ? DK_OLCU[M.olcu] : 0;
-  let x = M.olcu ? 82 : 64;
+  let x = (M.olcu ? 82 : 64) + dkDonEn(M);
   const kol = [], cizgi = [];
   let t = 0;
   M.notalar.forEach(function (n, i) {
@@ -58,10 +74,12 @@ function dkCiz(M, o) {
   }
   for (let i = 0; i < 5; i++) svgCizgi(svg, 0, W, 50 + i * 10);
   svgGlif(svg, GLIF_SOL, 22, 80);
+  if (M.sis && M.sis.don) donanimCiz(svg, M.sis.don, 48);
+  const olcuUzC = M.olcu ? DK_OLCU[M.olcu] : 0, vurusB = dkVurusBaslari(M);
   if (M.olcu) {
     const p = M.olcu.split('/');
     [[p[0], 69], [p[1], 89]].forEach(function (z) {
-      const t = svgEl('text', { x: 54, y: z[1], 'font-size': 21, 'font-weight': 900, 'text-anchor': 'middle', fill: 'currentColor', 'font-family': 'Nunito, sans-serif' });
+      const t = svgEl('text', { x: 54 + dkDonEn(M), y: z[1], 'font-size': 21, 'font-weight': 900, 'text-anchor': 'middle', fill: 'currentColor', 'font-family': 'Nunito, sans-serif' });
       t.textContent = z[0]; svg.appendChild(t);
     });
   }
@@ -70,7 +88,7 @@ function dkCiz(M, o) {
   const kirisli = {};
   for (let i = 0; i + 1 < M.notalar.length; i++) {
     const a = M.notalar[i], b = M.notalar[i + 1];
-    if (a.d === 1 && b.d === 1 && Y.kol[i].t % 2 === 0 && !(o.bos && (o.bos[i] || o.bos[i + 1]))) { kirisli[i] = i + 1; kirisli[i + 1] = i; i++; }
+    if (a.d === 1 && b.d === 1 && (vurusB ? vurusB[Y.kol[i].t % olcuUzC] && !vurusB[Y.kol[i + 1].t % olcuUzC] : Y.kol[i].t % 2 === 0) && !(o.bos && (o.bos[i] || o.bos[i + 1]))) { kirisli[i] = i + 1; kirisli[i + 1] = i; i++; }
   }
   const yukari = function (s) { return s < 34; };
   M.notalar.forEach(function (n, i) {
@@ -143,19 +161,30 @@ function dkOlaylar(M, o) {
   const L = [];
   let t = 0;
   if (o.sayim && M.olcu) {
-    const v = DK_OLCU[M.olcu] / 2;
-    for (let i = 0; i < v; i++) L.push({ tik: true, t: i * q, d: 0.06, v: i === 0 ? 1.3 : 1 });
-    t = v * q;
+    if (M.grup) { M.grup.forEach(function (g, i) { L.push({ tik: true, t: t, d: 0.06, v: i === 0 ? 1.3 : 1 }); t += g * sek; }); }
+    else {
+      const v = DK_OLCU[M.olcu] / 2;
+      for (let i = 0; i < v; i++) L.push({ tik: true, t: i * q, d: 0.06, v: i === 0 ? 1.3 : 1 });
+      t = v * q;
+    }
   }
+  let sekSay = 0;
+  const olcuUzO = M.olcu ? DK_OLCU[M.olcu] : 0;
   M.notalar.forEach(function (n, i) {
     const d = n.d * sek;
-    L.push({ hz: dkHz(o.s != null ? o.s : n.s), t: t, d: i === M.notalar.length - 1 ? Math.max(d, 1.0) : d * 0.92 });
+    const vurgu = o.vurgu && olcuUzO && sekSay % olcuUzO === 0 ? 1.4 : undefined;   // 3.5: ölçü başı vurgusu (usulü bul soruları)
+    sekSay += n.d;
+    const sure = i === M.notalar.length - 1 ? Math.max(d, 1.0) : d * 0.92;
+    if (M.sis && o.s == null) L.push({ k: dkKoma(M, n.s), t: t, d: sure });
+    else L.push({ hz: dkHz(o.s != null ? o.s : n.s), t: t, d: sure, v: vurgu });
     t += d;
   });
   return L;
 }
 function dkDinle(M, o) {
   const ol = dkOlaylar(M, o);
+  if (M.sis && !(o && o.s != null)) return kulakDinle([{ olaylar: ol }], { karar: M.sis.kararK, oto: kulakArdArda([ol, ol], 1.1), ara: 1.1 });
+  if (o && o.kararsiz) { const dd = kulakDinle([{ olaylar: ol }], { bati: true, oto: kulakArdArda([ol, ol], 1.1), ara: 1.1 }); return dd; }
   return kulakDinle([{ olaylar: ol }], { bati: true, kararOlay: [{ hz: dkHz(DK_DO), t: 0, d: 1.2 }], kararAd: 'Do', oto: kulakArdArda([ol, ol], 1.1), ara: 1.1 });
 }
 function dkGeri(M, o, yazilanF) {
@@ -168,13 +197,14 @@ function dkGeri(M, o, yazilanF) {
         e.stopPropagation(); otoIptal();
         satir.querySelectorAll('.caliyor').forEach(function (x) { x.classList.remove('caliyor'); });
         b.classList.add('caliyor');
-        kulakCal(olaylar, { bitince: function () { b.classList.remove('caliyor'); } });
+        kulakCal(olaylar, { kaydir: kaydir, bitince: function () { b.classList.remove('caliyor'); } });
       };
       satir.appendChild(b);
     };
+    const kaydir = q && q.veri && q.veri.dinle ? q.veri.dinle.kaydir : 0;
     dugmeYap('Çalınan', dkOlaylar(M, o));
     const Y = yazilanF ? yazilanF(q) : null;
-    if (Y) dugmeYap('Senin yazdığın', dkOlaylar(Y, o));
+    if (Y) dugmeYap('Senin yazdığın', dkOlaylar(Object.assign({ sis: M.sis, grup: M.grup }, Y), o));
     kap.appendChild(satir);
     return kap;
   };
@@ -184,9 +214,10 @@ function dkGeri(M, o, yazilanF) {
 // Ses yürüyüşü. P: { kume: [s…], adim (yalnız adım), ucluSay (tam olarak bu kadar üçlü sıçrama), enCokUclu, akor (Do-Mi-Sol-Do' sıçramaları), doBit (olasılık) }
 function dkSesler(say, P) {
   const enAlt = Math.min.apply(null, P.kume), enUst = Math.max.apply(null, P.kume);
-  const akor = [28, 30, 32, 35];
+  const akor = P.akorSet || [28, 30, 32, 35];
+  const BAS = P.bas != null ? P.bas : DK_DO, KARAR = P.karar != null ? P.karar : BAS;
   for (let deneme = 0; deneme < 200; deneme++) {
-    const L = [DK_DO];
+    const L = [BAS];
     let uclu = 0, ayniArd = 0, ok = true;
     for (let i = 1; i < say; i++) {
       const p = L[i - 1];
@@ -201,8 +232,8 @@ function dkSesler(say, P) {
       if (!ad.length) { ok = false; break; }
       let v = rastgele(ad);
       if (i === say - 1 && P.doBit && Math.random() < P.doBit) {
-        const f = Math.abs(DK_DO - p);
-        if (f <= 2 || (P.akor && akor.indexOf(p) >= 0)) v = DK_DO;
+        const f = Math.abs(KARAR - p);
+        if (f <= 2 || (P.akor && akor.indexOf(p) >= 0)) v = KARAR;
       }
       if (Math.abs(v - p) === 2) uclu++;
       ayniArd = v === p ? ayniArd + 1 : 0;
@@ -211,7 +242,7 @@ function dkSesler(say, P) {
     if (!ok) continue;
     if (P.ucluSay != null && uclu !== P.ucluSay) continue;
     if (P.enCokUclu != null && uclu > P.enCokUclu) continue;
-    if (L.every(function (v) { return v === DK_DO; })) continue;
+    if (L.every(function (v) { return v === BAS; })) continue;
     if (L.some(function (v) { return v < enAlt || v > enUst; })) continue;
     if (P.hepsi && !P.kume.every(function (v) { return L.indexOf(v) >= 0; }) && say >= P.kume.length) continue;
     return L;
@@ -220,7 +251,20 @@ function dkSesler(say, P) {
 }
 // Tartım: ölçüleri vuruş desenleriyle doldur. desenler: q [2], h [4], ee [1,1], dqe [3,1]
 const DK_DESEN = { q: [2], h: [4], ee: [1, 1], dqe: [3, 1] };
+// 3.5: aksak usul. Her grup ayrı doldurulur: 2'lik grup → dörtlük ya da iki sekizlik; 3'lük grup → noktalı dörtlük, dörtlük+sekizlik ya da sekizlik+dörtlük
+const DK_GRUP_DESEN = { 2: [[2], [2], [1, 1]], 3: [[3], [3], [2, 1], [2, 1], [1, 2]] };
+function dkRitimGrup(R) {
+  for (let deneme = 0; deneme < 300; deneme++) {
+    const L = [];
+    for (let o = 0; o < R.olcuSay; o++) R.grup.forEach(function (g) { rastgele(R.sade ? [DK_GRUP_DESEN[g][0], DK_GRUP_DESEN[g][0], DK_GRUP_DESEN[g][2]] : DK_GRUP_DESEN[g]).forEach(function (x) { L.push(x); }); });
+    if (R.notaSay && (L.length < R.notaSay[0] || L.length > R.notaSay[1])) continue;
+    if (L[L.length - 1] === 1) continue;
+    return L;
+  }
+  return null;
+}
 function dkRitim(R) {
+  if (R.grup) return dkRitimGrup(R);
   const olcuUz = DK_OLCU[R.olcu];
   for (let deneme = 0; deneme < 300; deneme++) {
     const L = [];
@@ -249,23 +293,26 @@ function dkRitim(R) {
 function dkEzgi(L) {
   for (let d = 0; d < 50; d++) {
     if (L.ritim) {
-      const R = Object.assign({}, L.ritim, { olcu: rastgele(L.ritim.olculer) });
+      const R = Object.assign({}, L.ritim, { olcu: L.olcuSabit || rastgele(L.ritim.olculer) });
+      if (L.ritim.gruplar && L.ritim.gruplar[R.olcu]) R.grup = L.grupSabit || rastgele(L.ritim.gruplar[R.olcu]);
       const olcuSay = R.olcuSayi ? R.olcuSayi[R.olcu] : R.olcuSay;
       R.olcuSay = olcuSay;
       const sure = dkRitim(R);
       if (!sure) continue;
       const ses = dkSesler(sure.length, L.ses);
       if (!ses) continue;
-      return { olcu: R.olcu, notalar: sure.map(function (x, i) { return { s: ses[i], d: x }; }) };
+      return { olcu: R.olcu, sis: L.sis, grup: R.grup, notalar: sure.map(function (x, i) { return { s: ses[i], d: x }; }) };
     }
     const say = L.say[0] + Math.floor(Math.random() * (L.say[1] - L.say[0] + 1));
     const ses = dkSesler(say, L.ses);
-    if (ses) return { olcu: null, notalar: ses.map(function (s) { return { s: s, d: 2 }; }) };
+    if (ses) return { olcu: null, sis: L.sis, notalar: ses.map(function (s) { return { s: s, d: 2 }; }) };
   }
   throw new Error('dikte: ezgi üretilemedi');
 }
-function dkMetin(M) { return M.notalar.map(function (n) { return dkAd(n.s) + (M.olcu ? ' (' + DK_SURE[n.d] + ')' : ''); }).join(', '); }
-function dkKisa(M) { return M.notalar.map(function (n) { return dkAd(n.s); }).join(' – '); }
+function dkMetin(M) { return M.notalar.map(function (n) { return dkAdM(M, n.s) + (M.olcu ? ' (' + DK_SURE[n.d] + ')' : ''); }).join(', '); }
+function dkKisa(M) { return M.notalar.map(function (n) { return dkAdM(M, n.s); }).join(' – '); }
+function dkIlkAd(M) { return M.sis ? dkAdM(M, M.notalar[0].s) : 'Do'; }
+function dkBaslik(L) { return L.sis && L.sis.ad ? L.sis.ad + ' · ' : ''; }
 // Bir notanın sesini (ilk nota hariç) küme içinde komşu bir sesle değiştir
 function dkDegistir(M, L, yasak) {
   const kume = L.ses.kume;
@@ -295,7 +342,7 @@ function dqYon(L) {
     if (ad.length) { b = rastgele(ad); break; }
   }
   if (b == null) throw new Error('yon');
-  const M = { olcu: null, notalar: [{ s: a, d: 2 }, { s: b, d: 2 }] };
+  const M = { olcu: null, sis: L.sis, notalar: [{ s: a, d: 2 }, { s: b, d: 2 }] };
   const o = { dortluk: L.dortluk };
   return {
     oge: null, kulak: true, tip: 'secim',
@@ -303,7 +350,7 @@ function dqYon(L) {
     dinle: dkDinle(M, o),
     siklar: [{ key: 'c', metin: '↗ Çıktı (daha tiz)' }, { key: 'i', metin: '↘ İndi (daha pest)' }, { key: 'a', metin: '→ Aynı kaldı' }], sirali: true,
     dogru: tur, dogruMetin: tur === 'c' ? 'Çıktı' : tur === 'i' ? 'İndi' : 'Aynı kaldı',
-    aciklama: 'Çalınan: <b>' + dkAd(a) + ' → ' + dkAd(b) + '</b>.',
+    aciklama: 'Çalınan: <b>' + dkAdM(M, a) + ' → ' + dkAdM(M, b) + '</b>.',
     geriEk: dkGeri(M, o)
   };
 }
@@ -319,7 +366,7 @@ function dqPorte(L) {
   const o = { dortluk: L.dortluk, sayim: !!M.olcu };
   return {
     oge: null, kulak: true, tip: 'secim',
-    soru: { metin: '👂 Duyduğun ezgi hangisi?', kucuk: true }, alt: 'İlk ses Do',
+    soru: { metin: L.sis ? '👂 ' + dkBaslik(L) + 'hangisini duydun?' : '👂 Duyduğun ezgi hangisi?', kucuk: true }, alt: 'İlk ses ' + dkIlkAd(M),
     dinle: dkDinle(M, o),
     siklar: sec.map(function (x) { return svgSik(x.key, function () { return dkCiz(x.M, { enAz: 160 }); }); }),
     dogru: 'd', dogruMetin: dkKisa(M),
@@ -337,14 +384,14 @@ function dqHata(L) {
   return {
     oge: null, kulak: true, tip: 'secim',
     soru: { svg: function () { return dkCiz(M, { enAz: 200 }); } },
-    alt: '👂 Çalınan, yazılandan bir notada farklı. Hangisi?',
+    alt: '👂 ' + (L.sis ? dkBaslik(L) + 'çalınan bir notada farklı. Hangisi?' : 'Çalınan, yazılandan bir notada farklı. Hangisi?'),
     dinle: dkDinle(v.M, o),
     siklar: siklar, sirali: true, dogru: 'n' + (v.i + 1), dogruMetin: (v.i + 1) + '. nota',
-    aciklama: (v.i + 1) + '. nota yazıda <b>' + dkAd(M.notalar[v.i].s) + '</b>, çalınan <b>' + dkAd(v.M.notalar[v.i].s) + '</b>.',
+    aciklama: (v.i + 1) + '. nota yazıda <b>' + dkAdM(M, M.notalar[v.i].s) + '</b>, çalınan <b>' + dkAdM(M, v.M.notalar[v.i].s) + '</b>.',
     geriEk: function (q) {
       const kap = dkGeri(v.M, o)(q);
       const b = h('button', { class: 'cip kulakParca', type: 'button' }, '🔊 Yazılan');
-      b.onclick = function (e) { e.stopPropagation(); otoIptal(); kulakCal(dkOlaylar(M, o)); };
+      b.onclick = function (e) { e.stopPropagation(); otoIptal(); kulakCal(dkOlaylar(M, o), { kaydir: q && q.veri && q.veri.dinle ? q.veri.dinle.kaydir : 0 }); };
       kap.querySelector('.kulakSatir').appendChild(b);
       return kap;
     }
@@ -359,8 +406,8 @@ function dqEksik(L, kac) {
   const o = { dortluk: L.dortluk, sayim: !!M.olcu };
   return {
     oge: null, kulak: true, tip: 'melodi',
-    soru: { metin: '👂 Eksik ' + (bos.length > 1 ? bos.length + ' notayı' : 'notayı') + ' yaz', kucuk: true },
-    alt: 'Soru işaretli yere dokun, sesi yukarı-aşağı sürükleyerek bul',
+    soru: { metin: L.sis ? '👂 ' + dkBaslik(L) + (bos.length > 1 ? bos.length + ' eksik nota' : 'eksik nota') : '👂 Eksik ' + (bos.length > 1 ? bos.length + ' notayı' : 'notayı') + ' yaz', kucuk: true },
+    alt: L.sis ? 'Soru işaretine dokun, sürükleyerek sesi bul' : 'Soru işaretli yere dokun, sesi yukarı-aşağı sürükleyerek bul',
     dinle: dkDinle(M, o),
     melodi: { mod: 'eksik', M: M, bos: bos, sMin: L.sMin || 26, sMax: L.sMax || 37 },
     dogruMetin: dkKisa(M), aciklama: 'Ezgi: <b>' + dkKisa(M) + '</b>.',
@@ -369,16 +416,16 @@ function dqEksik(L, kac) {
 }
 function dqTartim(L) {
   const M = dkEzgi(L);
-  const o = { dortluk: L.dortluk, sayim: true, s: 32 };
+  const o = { dortluk: L.dortluk, sayim: true, s: 32, kararsiz: !!L.sis || !!L.perdesiz };
   return {
     oge: null, kulak: true, tip: 'melodi',
-    soru: { metin: '👂 Tartımı yaz · ' + M.olcu + ' · ' + (dkToplam(M.notalar) / DK_OLCU[M.olcu]) + ' ölçü', kucuk: true },
+    soru: { metin: '👂 Tartımı yaz · ' + (L.usulAd ? L.usulAd(M) + ' · ' : '') + M.olcu + ' · ' + (dkToplam(M.notalar) / DK_OLCU[M.olcu]) + ' ölçü', kucuk: true },
     alt: 'Ezgi tek seste çalıyor; yalnız süreleri yaz (önce bir ölçü sayım)',
-    dinle: dkDinle({ olcu: M.olcu, notalar: M.notalar }, o),
-    melodi: { mod: 'tartim', M: { olcu: M.olcu, notalar: M.notalar.map(function (n) { return { s: 32, d: n.d }; }) }, sureler: L.sureler },
+    dinle: dkDinle({ olcu: M.olcu, grup: M.grup, notalar: M.notalar }, o),
+    melodi: { mod: 'tartim', M: { olcu: M.olcu, grup: M.grup, notalar: M.notalar.map(function (n) { return { s: 32, d: n.d }; }) }, sureler: L.sureler },
     dogruMetin: M.notalar.map(function (n) { return DK_SURE[n.d]; }).join(', '),
     aciklama: 'Tartım: <b>' + M.notalar.map(function (n) { return DK_SURE[n.d]; }).join(', ') + '</b>.',
-    geriEk: dkGeri({ olcu: M.olcu, notalar: M.notalar }, o, function (q) { return q.dikteDeger ? { olcu: M.olcu, notalar: q.dikteDeger } : null; })
+    geriEk: dkGeri({ olcu: M.olcu, grup: M.grup, notalar: M.notalar }, o, function (q) { return q.dikteDeger ? { olcu: M.olcu, notalar: q.dikteDeger } : null; })
   };
 }
 function dqTam(L) {
@@ -387,8 +434,8 @@ function dqTam(L) {
   const ritimli = !!M.olcu;
   return {
     oge: null, kulak: true, tip: 'melodi',
-    soru: { metin: '👂 Duyduğun ezgiyi yaz' + (ritimli ? ' · ' + M.olcu + ' · ' + (dkToplam(M.notalar) / DK_OLCU[M.olcu]) + ' ölçü' : ' · ' + M.notalar.length + ' nota'), kucuk: true },
-    alt: ritimli ? 'İlk ses Do. Süreyi seç, porteye dokunarak notayı ekle, sürükleyerek yerini düzelt' : 'İlk ses Do verildi. Porteye dokunarak notaları ekle, sürükleyerek düzelt',
+    soru: { metin: L.sis ? '👂 ' + dkBaslik(L) + (ritimli ? (L.usulAd ? L.usulAd(M) + ' ' : '') + M.olcu + ' · ' + (dkToplam(M.notalar) / DK_OLCU[M.olcu]) + ' ölçü yaz' : M.notalar.length + ' nota yaz') : '👂 Duyduğun ezgiyi yaz' + (ritimli ? ' · ' + M.olcu + ' · ' + (dkToplam(M.notalar) / DK_OLCU[M.olcu]) + ' ölçü' : ' · ' + M.notalar.length + ' nota'), kucuk: true },
+    alt: L.sis ? 'İlk ses ' + dkIlkAd(M) + (ritimli ? '. Süreyi seç, + sütununa dokun' : '. + sütununa dokun, sürükleyerek düzelt') : ritimli ? 'İlk ses Do. Süreyi seç, porteye dokunarak notayı ekle, sürükleyerek yerini düzelt' : 'İlk ses Do verildi. Porteye dokunarak notaları ekle, sürükleyerek düzelt',
     dinle: dkDinle(M, o),
     melodi: { mod: 'tam', M: M, sureler: ritimli ? L.sureler : null, sMin: L.sMin || 26, sMax: L.sMax || 37 },
     dogruMetin: dkKisa(M), aciklama: 'Ezgi: <b>' + dkMetin(M) + '</b>.',
@@ -419,7 +466,7 @@ function melodiYazici(cfg) {
   let N;   // [{s, d, kS, kD, bos}]
   if (cfg.mod === 'eksik') N = M.notalar.map(function (n, i) { const b = cfg.bos.indexOf(i) >= 0; return { s: b ? null : n.s, d: n.d, kS: !b, kD: true, bos: b }; });
   else if (cfg.mod === 'tartim') N = [];
-  else N = [{ s: DK_DO, d: sureli ? 2 : 2, kS: true, kD: !sureli }];
+  else N = [{ s: M.notalar[0].s, d: sureli ? 2 : 2, kS: true, kD: !sureli }];
   let aktif = cfg.mod === 'eksik' ? N.findIndex(function (n) { return n.bos; }) : -1;
   let secSure = 2, kilitli = false, renk = null;
   const kap = h('div', { class: 'yerlestir dkYazici' });
@@ -446,7 +493,7 @@ function melodiYazici(cfg) {
     const R = {};
     if (renk) Object.assign(R, renk);
     else N.forEach(function (n, i) { if (n.bos && n.s != null) R[i] = 'var(--secim)'; else if (!n.kS && cfg.mod === 'tam') R[i] = 'var(--secim)'; });
-    svg = dkCiz({ olcu: olcu, notalar: N.map(function (n) { return { s: n.s, d: n.d }; }) }, { etkilesim: !kilitli, aktif: kilitli ? null : aktif, hayalet: !kilitli && hayaletVar(), bos: bosMap, renk: R, enAz: 240 });
+    svg = dkCiz({ olcu: olcu, sis: M.sis, grup: M.grup, notalar: N.map(function (n) { return { s: n.s, d: n.d }; }) }, { etkilesim: !kilitli, aktif: kilitli ? null : aktif, hayalet: !kilitli && hayaletVar(), bos: bosMap, renk: R, enAz: 240 });
     svgKap.appendChild(svg);
     baglaSvg();
     bilgiYaz();
@@ -458,15 +505,15 @@ function melodiYazici(cfg) {
     const kalan = hedef - toplam();
     let m = '';
     if (cfg.mod === 'tartim') m = kalan > 0 ? 'Süre düğmelerine sırayla dokun · kalan ' + kalanMetni(kalan) : 'Tamam; kontrol et';
-    else if (cfg.mod === 'eksik') { const n = N[aktif]; m = n ? (aktif + 1) + '. nota: ' + (n.s == null ? 'porteye dokun' : dkAd(n.s) + ' (sürükleyerek düzelt)') : ''; }
+    else if (cfg.mod === 'eksik') { const n = N[aktif]; m = n ? (aktif + 1) + '. nota: ' + (n.s == null ? 'porteye dokun' : dkAdM(M, n.s) + ' (sürükleyerek düzelt)') : ''; }
     else {
       const n = aktif >= 0 ? N[aktif] : null;
-      if (n) m = (aktif + 1) + '. nota: ' + dkAd(n.s) + (sureli ? ' · ' + DK_SURE[n.d] : '') + (n.kS ? ' (ilk ses verildi' + (sureli ? '; süresini seçebilirsin)' : ')') : ' · sürükleyerek düzelt');
+      if (n) m = (aktif + 1) + '. nota: ' + dkAdM(M, n.s) + (sureli ? ' · ' + DK_SURE[n.d] : '') + (n.kS ? ' (ilk ses verildi' + (sureli ? '; süresini seçebilirsin)' : ')') : ' · sürükleyerek düzelt');
       else m = kalan > 0 ? (sureli ? 'Süreyi seç, + sütununa dokun' : '+ sütununa dokunarak sonraki notayı ekle') + ' · kalan ' + kalanMetni(kalan) : 'Tamam; kontrol et';
     }
     bilgi.textContent = m;
   }
-  function kalanMetni(k) { return olcu ? (k % 2 === 0 ? (k / 2) + ' vuruş' : (k / 2).toLocaleString('tr') + ' vuruş') : (k / 2) + ' nota'; }
+  function kalanMetni(k) { return M.grup ? k + ' sekizlik' : olcu ? (k % 2 === 0 ? (k / 2) + ' vuruş' : (k / 2).toLocaleString('tr') + ' vuruş') : (k / 2) + ' nota'; }
   function noktadan(e) {
     const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
     const m = svg.getScreenCTM(); if (!m) return null;
@@ -487,7 +534,7 @@ function melodiYazici(cfg) {
     const p = noktadan(e);
     if (!p) return;
     if (ilk) {
-      const Y = dkYerlesim({ olcu: olcu, notalar: N }, { hayalet: hayaletVar() });
+      const Y = dkYerlesim({ olcu: olcu, sis: M.sis, grup: M.grup, notalar: N }, { hayalet: hayaletVar() });
       let en = null, ed = 1e9;
       Y.kol.forEach(function (k) { const dd = Math.abs(p.x - k.x); if (dd < ed) { ed = dd; en = k.i; } });
       if (Y.hayalet) { const dd = Math.abs(p.x - Y.hayalet.x); if (dd < ed) { ed = dd; en = -1; } }
@@ -495,7 +542,7 @@ function melodiYazici(cfg) {
       if (en === -1) {
         const d = sureli ? secSure : 2;
         if (!sigar(d)) { toast(olcuUz ? 'Bu süre ölçüye sığmıyor: daha kısa bir süre seç' : 'Nota sayısı tamam'); return; }
-        N.push({ s: DK_DO, d: d });
+        N.push({ s: M.notalar[0].s, d: d });
         aktif = N.length - 1; ekleme = true;
       } else {
         aktif = en;

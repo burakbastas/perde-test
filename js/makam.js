@@ -128,8 +128,43 @@ function parcaMetin(key) { const p = key.split('@'); return CESNI[p[0]].ad + ' �
 function makamSoru(tip, m, havuz) {
   const q = { oge: m.oge, tip: 'secim', aciklama: makamAciklama(m), ipucu: 'Karar: ' + m.karar + ', güçlü: ' + m.guclu };
   const adSik = function (L) { return L.map(function (x) { return { key: x.id, metin: x.ad }; }); };
-  if (tip === 'parcaAd') {
+  // 3.5: makam adının verildiği sorularda isteğe bağlı "Dinle" (otomatik çalmaz)
+  if (['karar', 'guclu', 'yeden', 'kararPorte', 'gucluPorte', 'yedenPorte', 'gucluDokun', 'makamDonanim', 'makamDiziSec'].indexOf(tip) >= 0) q.dinleSecenek = { makam: m.id };
+  const perdeNota = function (ad) { const p = PERDE[ad]; return p ? { h: p.parcalar[0].h, o: p.parcalar[0].o, a: p.parcalar[0].a || null } : null; };
+  if (tip === 'kararPorte' || tip === 'gucluPorte' || tip === 'yedenPorte') {
+    // 3.5: şıklar yazı değil, portede perde
+    const alan = tip.replace('Porte', ''), ad = { karar: 'karar', guclu: 'güçlü', yeden: 'yeden' }[alan], dogru = m[alan];
+    if (!perdeNota(dogru)) return makamSoru(alan, m, havuz);
+    const kd = PERDE[dogru].koma;
+    const yakin = MAKAM_PERDE_SECENEK.filter(function (x) { return x !== dogru && perdeNota(x) && Math.abs(PERDE[x].koma - kd) <= 31; });
+    const dis = karistir(yakin).slice(0, 3);
+    q.soru = { metin: m.ad }; q.alt = 'Bu makamın ' + ad + ' perdesi portede hangisi?';
+    q.siklar = [dogru].concat(dis).map(function (x) { return { key: x, porte: { notalar: [perdeNota(x)], enAz: 130 } }; });
+    q.dogru = dogru; q.dogruMetin = dogru;
+    q.ipucu = alan === 'guclu' ? (m.gucluFarkli ? 'Bu makamın güçlüsü iki parçanın birleştiği ses değil; seyrine göre belirlenir.' : 'Güçlü, alt ve üst parçanın birleştiği perdedir: ' + m.ustAd) : alan === 'karar' ? 'Alt parçanın yeri' : 'Kararın hemen altındaki ses';
+  } else if (tip === 'gucluDokun') {
+    // 3.5: dizi portede, güçlü perdeye dokun
+    const gk = PERDE[m.guclu] ? PERDE[m.guclu].koma : null;
+    const gi = m.dizi.findIndex(function (n) { return komaOf(n) === gk; });
+    if (gi < 0) return makamSoru('guclu', m, havuz);
+    q.soru = { metin: m.ad }; q.alt = 'Dizide güçlü perdeye dokun';
+    q.dogruMetin = m.guclu;
+    q.ipucu = m.gucluFarkli ? 'Bu makamın güçlüsü iki parçanın birleştiği ses değil; seyrine göre belirlenir.' : 'Güçlü, alt ve üst parçanın birleştiği perdedir: ' + m.ustAd;
+    porteDokunSoru(q, { notalar: m.dizi.map(function (n) { return { h: n.h, o: n.o, a: n.a || null }; }), aralik: 36, enAz: 330, hedef: [gi], coklu: false });
+  } else if (tip === 'makamDiziSec') {
+    // 3.5: makam adından dizi; şıklar başka makamların dizileri
+    // geniş porteli şıklar üç tane: dar ekranda kaydırma azalsın
+    const dis = benzersiz(makamCeldirici(m, havuz.length >= 4 ? havuz : MAKAMLAR, 9, diziAnahtar), diziAnahtar).slice(0, 2);
+    const ek = dis.length < 2 ? benzersiz(makamCeldirici(m, MAKAMLAR, 20, diziAnahtar), diziAnahtar).filter(function (x) { return dis.indexOf(x) < 0; }).slice(0, 2 - dis.length) : [];
+    const porte = function (x) { return { notalar: x.dizi, aralik: 33, enAz: 320 }; };
+    q.soru = { metin: m.ad }; q.alt = 'Bu makamın dizisi hangisi?';
+    q.siklar = [m].concat(dis, ek).map(function (x) { return { key: x.id, porte: porte(x), genis: true }; });
+    q.dogru = m.id; q.dogruMetin = m.dizi.map(perdeAdiNota).join(' – ');
+    q.ipucu = m.altAd + ' + ' + m.ustAd;
+  } else if (tip === 'parcaAd') {
     q.soru = { metin: m.altAd + ' + ' + m.ustAd, kucuk: true }; q.alt = 'Bu birleşim hangi makamın dizisi?';
+    // 3.5: birleşim portede de görünür; alt parça mavi, üst parça turuncu, birleşme sesi (güçlü) koyu
+    q.soru.porte = { notalar: m.dizi.map(function (n, i) { return Object.assign({ renk: i < m.gucluIdx ? 'var(--kobalt)' : i > m.gucluIdx ? 'var(--vurgu)' : null }, n); }), aralik: 33, enAz: 320, kirp: true, ayrac: [] };
     q.siklar = adSik([m].concat(makamCeldirici(m, havuz, 3)));
     q.dogru = m.id; q.dogruMetin = m.ad;
   } else if (tip === 'karar' || tip === 'guclu' || tip === 'yeden') {
@@ -232,7 +267,7 @@ function makamUretici(o) {
   };
 }
 
-const MK_KIMLIK = ['parcaAd', 'karar', 'guclu', 'yeden'];
+const MK_KIMLIK = ['parcaAd', 'kararPorte', 'gucluDokun', 'makamDiziSec', 'yedenPorte', 'guclu', 'parcaAd', 'karar'];   // 3.5: görsel ağırlıklı
 const MK_TANI = ['benKimim', 'diziMakam'];
 const MK_DON = ['donanimMakam', 'makamDonanim'];
 
@@ -358,6 +393,25 @@ function makamBul(oge) { return MAKAMLAR.find(function (x) { return x.oge === og
 const SED_PERDE_SECENEK = ['Rast', 'Yegâh', 'Dügâh', 'Çargâh', 'Neva', 'Segâh', 'Acem Aşiran', 'Hüseyni Aşiran', 'Irak'];
 
 function sedSoru(tip, m) {
+  if (tip === 'kaynakPorte' || tip === 'perdePorte') {
+    // 3.5: şed makam soruları portede
+    const q = { oge: m.oge, tip: 'secim', aciklama: makamAciklama(m) + '<br>' + kacis(m.not), ipucu: 'Dizisi: ' + m.altAd + ' + ' + m.ustAd, dinleSecenek: { makam: m.id } };
+    const diziP = function (x) { return { notalar: x.dizi, aralik: 33, enAz: 320 }; };
+    if (tip === 'kaynakPorte') {
+      const dis = benzersiz(karistir(MK_ILK10.filter(function (x) { return x !== m.kaynak; }).map(function (x) { return MAKAM[x]; })), diziAnahtar).filter(function (x) { return diziAnahtar(x) !== diziAnahtar(MAKAM[m.kaynak]); }).slice(0, 2);
+      q.soru = { metin: m.ad, kucuk: true, porte: Object.assign({ kirp: true }, diziP(m)) }; q.alt = 'Bu dizi hangi dizinin göçürülmüşü? Asıl diziyi seç';
+      q.siklar = [MAKAM[m.kaynak]].concat(dis).map(function (x) { return { key: x.id, porte: diziP(x), genis: true }; });
+      q.dogru = m.kaynak; q.dogruMetin = m.kaynakAd;
+    } else {
+      const nota = function (ad) { const p = PERDE[ad]; return p ? p.parcalar[0] : null; };
+      const dis = karistir(SED_PERDE_SECENEK.filter(function (x) { return x !== m.perde && x !== MAKAM[m.kaynak].karar && nota(x); })).slice(0, 3);
+      q.soru = { metin: m.ad, kucuk: true }; q.alt = m.kaynakAd + ' dizisi hangi perdeye göçürülmüş? Portede seç';
+      q.siklar = [m.perde].concat(dis).map(function (x) { return { key: x, porte: { notalar: [nota(x)], enAz: 130 } }; });
+      q.dogru = m.perde; q.dogruMetin = m.perde;
+      q.ipucu = 'Göçürülen makamın kararı, şeddin kararıdır.';
+    }
+    return q;
+  }
   if (tip === 'kaynak' || tip === 'perde') {
     const q = { oge: m.oge, tip: 'secim', aciklama: makamAciklama(m) + '<br>' + kacis(m.not), ipucu: 'Karar: ' + m.karar };
     if (tip === 'kaynak') {
@@ -464,8 +518,22 @@ function gocurmeSorusu(asama, tip, perdesiz) {
     const dogru = KOMADAN_PERDE[komaOf(g.notalar[i])];
     const komsu = PERDELER.filter(function (p) { return p !== dogru && Math.abs(p.koma - dogru.koma) <= 9; });
     const dis = karistir(komsu).slice(0, 3);
+    // 3.5: çoğu soruda kaynak portede (sorulan ses renkli), şıklar portede; isteğe bağlı dinleme: yerinde ve göçürülmüş
+    const kaynak = gocurPerde(yapi, PERDE[yer], 20, 50);
+    const dinle = kaynak && typeof kulakDiziOlay === 'function' ? { olaylar: [{ etiket: 'Yerinde', olaylar: kulakDiziOlay(kaynak.map(komaOf), 'c') }, { etiket: 'Göçürülmüş', olaylar: kulakDiziOlay(g.notalar.map(komaOf), 'c') }] } : null;
+    if (kaynak && Math.random() < 0.7) {
+      const genisK = kaynak.length > 5;
+      return {
+        oge: oge, tip: 'secim', dinleSecenek: dinle,
+        soru: { metin: ad + ' → ' + hedef, kucuk: true, porte: { notalar: kaynak.map(function (n, j) { return j === i ? Object.assign({ renk: 'var(--vurgu)' }, n) : n; }), aralik: genisK ? 33 : 38, enAz: genisK ? 320 : 240, kirp: true } },
+        alt: 'Renkli ses (' + SIRA_AD[i] + ') ' + hedef + ' perdesine göçürülünce portede hangisi olur?',
+        siklar: [{ key: dogru.id, porte: { notalar: [g.notalar[i]], enAz: 130 } }].concat(dis.map(function (p) { return { key: p.id, porte: { notalar: [p.parcalar[0]], enAz: 130 } }; })),
+        dogru: dogru.id, dogruMetin: dogru.ad, aciklama: aciklama,
+        ipucu: 'Aralık dizilişi aynı kalır, sadece başlangıç perdesi değişir.'
+      };
+    }
     return {
-      oge: oge, tip: 'secim',
+      oge: oge, tip: 'secim', dinleSecenek: dinle,
       soru: { metin: ad + ' → ' + hedef, kucuk: true },
       alt: (i === gucluIdx ? 'Güçlü perdesi (' + SIRA_AD[i] + ' ses)' : SIRA_AD[i] + ' ses') + ' hangi perde olur?',
       siklar: [dogru].concat(dis).map(function (p) { return { key: p.id, metin: p.ad }; }),

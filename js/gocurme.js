@@ -41,11 +41,11 @@ const GOCURME_UNITELER = [
 
 // 2.5 · Göçürülmüş (şed) makamlar: kuralı öğrenmiş olan öğrenci, göçürmenin müzikteki karşılığını tanır
 GOCURME_UNITELER.push(gUnite('gc5', 5, 'Göçürülmüş (şed) makamlar', 'Mahur, Hicazkâr, Kürdîlihicazkâr, Nihâvend, Sultânîyegâh', [
-  { id: 'gc5-1', tip: 'seviye', ad: 'Hangi makamın göçürülmüşü?', soruSay: 8, uret: sedUretici(['kaynak', 'perde']) },
-  { id: 'gc5-2', tip: 'seviye', ad: 'Karar, güçlü ve yeden', soruSay: 8, uret: sedUretici(['karar', 'guclu', 'yeden']) },
+  { id: 'gc5-1', tip: 'seviye', ad: 'Hangi makamın göçürülmüşü?', soruSay: 8, uret: sedUretici(['kaynakPorte', 'kaynak', 'perdePorte', 'perde']) },
+  { id: 'gc5-2', tip: 'seviye', ad: 'Karar, güçlü ve yeden', soruSay: 8, uret: sedUretici(['kararPorte', 'gucluDokun', 'yedenPorte', 'guclu', 'karar', 'yeden']) },
   { id: 'gc5-3', tip: 'seviye', ad: 'Donanım', soruSay: 8, uret: sedUretici(['donanimMakam', 'makamDonanim']) },
   { id: 'gc5-4', tip: 'seviye', ad: 'Doğru dizi hangisi?', soruSay: 6, uret: sedUretici(['diziDogru']) },
-  { id: 'gc5-boss', tip: 'boss', ad: 'Şed makamlar finali', soruSay: 10, uret: sedUretici(['kaynak', 'perde', 'guclu', 'donanimMakam', 'diziDogru', 'benKimim', 'yeden']) }
+  { id: 'gc5-boss', tip: 'boss', ad: 'Şed makamlar finali', soruSay: 10, uret: sedUretici(['kaynakPorte', 'perdePorte', 'gucluDokun', 'donanimMakam', 'diziDogru', 'benKimim', 'yedenPorte', 'kaynak', 'kararPorte', 'perde']) }
 ]));
 GOCURME_UNITELER[4].ogeler = SEDLER.map(function (m) { return m.oge; });
 

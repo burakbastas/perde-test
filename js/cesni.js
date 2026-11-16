@@ -78,6 +78,21 @@ function formulCeldirici(c, havuz) {
   return karistir(benzersiz(L)).slice(0, 3);
 }
 
+// 3.5: aralık dizilişi şeridi. Her parçanın genişliği koma sayısıyla orantılı; harfi içinde yazılı.
+const SERIT_KOMA = { T: 9, K: 8, S: 5, B: 4, A: 12, F: 1 };
+function cesniSeritSVG(formul) {
+  const H = String(formul).split(''), toplam = H.reduce(function (t, x) { return t + (SERIT_KOMA[x] || 9); }, 0);
+  const W = 300, birim = (W - 16) / 31;   // tam beşli = 31 koma tam genişlik; dörtlü (22) daha kısa kalır
+  const svg = svgEl('svg', { class: 'cesniSerit', viewBox: '0 0 ' + W + ' 44', preserveAspectRatio: 'xMidYMid meet', role: 'img', 'aria-label': 'Aralık dizilişi' });
+  let x = 8;
+  H.forEach(function (hrf) {
+    const w = (SERIT_KOMA[hrf] || 9) * birim;
+    svg.appendChild(svgEl('rect', { x: x + 1, y: 6, width: w - 2, height: 30, rx: 6, class: 'csParca cs' + hrf }));
+    gYazi(svg, x + w / 2, 26, hrf, { 'font-size': 13, 'font-weight': 800, class: 'csHarf' });
+    x += w;
+  });
+  return svg;
+}
 function cesniSoru(tip, c, havuz, sikSay) {
   sikSay = sikSay || 4;
   const q = { oge: c.oge, tip: 'secim', aciklama: cesniAciklama(c), ipucu: 'Aralıklar: ' + formulGoster(c.formul) };
@@ -91,14 +106,14 @@ function cesniSoru(tip, c, havuz, sikSay) {
     q.dogru = c.id; q.dogruMetin = c.ad;
     q.ipucu = 'Yeri ' + c.yer + ', aralıklar ' + formulGoster(c.formul);
   } else if (tip === 'formulAd') {
-    q.soru = { metin: formulGoster(c.formul) }; q.alt = 'Bu aralık dizilişi hangi dörtlü ya da beşliye ait?';
+    q.soru = { metin: formulGoster(c.formul), kucuk: true, svg: function () { return cesniSeritSVG(c.formul); } }; q.alt = 'Bu aralık dizilişi hangi dörtlü ya da beşliye ait?';   // 3.5: koma oranlı şerit
     const dis = cesniCeldirici(c, havuz.filter(function (x) { return x.formul !== c.formul; }), sikSay - 1);
     q.siklar = [c].concat(dis).map(function (x) { return { key: x.id, metin: x.ad }; });
     q.dogru = c.id; q.dogruMetin = c.ad;
     q.ipucu = c.formul.split('').map(function (x) { return HARF_ARALIK_AD[x]; }).join(' + ');
   } else if (tip === 'adFormul') {
     q.soru = { metin: c.ad }; q.alt = 'Aralık dizilişi nedir?';
-    q.siklar = [c.formul].concat(formulCeldirici(c, havuz)).map(function (x) { return { key: x, metin: formulGoster(x) }; });
+    q.siklar = [c.formul].concat(formulCeldirici(c, havuz)).map(function (x) { return { key: x, genis: true, svg: function () { return cesniSeritSVG(x); } }; });   // 3.5: şıklar koma oranlı şerit
     q.dogru = c.formul; q.dogruMetin = formulGoster(c.formul);
     q.ipucu = 'Yeri ' + c.yer;
   } else if (tip === 'adKarar') {

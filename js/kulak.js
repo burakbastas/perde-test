@@ -174,7 +174,7 @@ function kulakArdArda(listeler, ara) {
 function kulakDinle(parcalar, o) {
   o = o || {};
   const tum = [];
-  parcalar.forEach(function (p) { p.olaylar.forEach(function (e) { tum.push(e.k); }); });
+  parcalar.forEach(function (p) { p.olaylar.forEach(function (e) { if (e.k) tum.push(e.k); }); });
   if (o.karar) tum.push(o.karar);
   const a = kulakAhenk(tum);
   return { kulak: true, parcalar: parcalar, karar: o.karar || null, kaydir: a.kaydir, ahenk: o.bati ? null : a.ad, ara: o.ara == null ? 0.9 : o.ara,
@@ -235,6 +235,18 @@ function kulakDugmeler(d, otomatik) {
 }
 // 3.1.1: görsel sorularda isteğe bağlı dinleme (otomatik çalmaz). d: { cesniler: [kimlik] }; iki çeşni aynı perdeden çalar
 function kulakSecenekDugmesi(d) {
+  if (d.makam) {   // 3.5: makam sorularında dizinin çıkış-inişi
+    const m = MAKAM[d.makam] || (typeof SEDLER !== 'undefined' && SEDLER.find(function (x) { return x.id === d.makam; }));
+    if (!m || !m.dizi) return null;
+    const kapM = kulakDugmeler(kulakDinle([{ etiket: null, olaylar: kulakDiziOlay(m.dizi.map(function (n) { return komaOf(n); }), 'ci', 0.4) }], {}), false);
+    kapM.classList.add('secimli');
+    return kapM;
+  }
+  if (d.olaylar) {   // 3.5: hazır olay listeleri (ahenk, göçürme): [{ etiket, olaylar }]
+    const kapO = kulakDugmeler(kulakDinle(d.olaylar, d.o || {}), false);
+    kapO.classList.add('secimli');
+    return kapO;
+  }
   const L = (d.cesniler || []).map(function (id) { return CESNI[id]; }).filter(Boolean);
   if (!L.length) return null;
   const bas = komaOf(L[0].notalar[0]);

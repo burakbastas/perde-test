@@ -12,10 +12,11 @@ const DALLAR = {
   makam: { ad: 'Makam',         ikon: '🏵️', renk: 'var(--zumrut)',  uniteler: MAKAM_UNITELER },
   ahenk: { ad: 'Ahenk',         ikon: '🌬️', renk: 'var(--erguvan)', uniteler: AHENK_UNITELER },
   usul:  { ad: 'Usul',          ikon: '🥁', renk: 'var(--safran)',  uniteler: USUL_UNITELER },
+  tmd:   { ad: 'Dikte',         ikon: '✍️', renk: 'var(--gulkurusu)', uniteler: TD_UNITELER },   // 3.5: Türk müziği diktesi
   bati:  { ad: 'Batı Teorisi',  ikon: '🎹', renk: 'var(--mor)',     uniteler: BATI_UNITELER }
 };
 // Pedagojik sıra: Koma → Perde → Usul → Dörtlü-Beşli → Göçürme → Makam → Ahenk → Batı
-const DAL_SIRA = ['koma', 'perde', 'usul', 'cesni', 'gocurme', 'makam', 'ahenk', 'bati'];
+const DAL_SIRA = ['koma', 'perde', 'usul', 'cesni', 'gocurme', 'makam', 'ahenk', 'tmd', 'bati'];
 const TR_DALLAR = ['koma', 'perde', 'usul', 'cesni', 'gocurme', 'makam', 'ahenk'];
 
 // Batı Teorisi'nin pedagojik sırası: tartımlar aralıkların arasına; tonlar en sona (TSM'de görülmeyebilir)
@@ -29,7 +30,8 @@ const BATI_SIRA = ['b11', 'b1', 'b12', 'b2', 'b3', 'b13', 'b21', 'b4', 'b14', 'b
 
 // ---------- Sonsuz Meşk: her Türk müziği dalının sonunda ucu açık bir ünite ----------
 // O dalın geçilmiş seviyelerinden karışık sorular; doğru bildikçe zor seviyeler ağırlaşır.
-TR_DALLAR.forEach(function (d) {
+// 3.5: Dikte dalı ünvan hesabına girmez (kimsenin ünvanı değişmesin) ama kendi Sonsuz Meşk'i vardır
+TR_DALLAR.concat(['tmd']).forEach(function (d) {
   const L = DALLAR[d].uniteler;
   L.push({ id: 'sn-' + d, dal: d, no: L.length + 1, ad: 'Sonsuz Meşk', kisa: 'Bitmeyen karışık sorular · rekorunu geç', sonsuz: true, ogeler: [],
     seviyeler: [{ id: 'sn-' + d, tip: 'sonsuz', ad: 'Sonsuz Meşk', soruSay: 0, uret: function () { return []; } }] });
@@ -54,8 +56,8 @@ DAL_SIRA.forEach(function (d) {
 // Önerilen sıra (Meşk Yolu): dallar karışık, pedagojik sırayla. Batı üniteleri (b…) yalnızca
 // Ayarlar'da Batı açıksa görünür; Batı'nın ton konuları en sonda.
 const MESK_SIRA = ['km1', 'b11', 'p1', 'b1', 'km2', 'u1', 'p2', 'km3', 'b12', 'db1', 'u2', 'b2', 'db2', 'p3', 'b3', 'db3', 'b13',
-  'gc1', 'b21', 'b4', 'db4', 'b14', 'gc2', 'b15', 'b16', 'b17', 'u3', 'mk1', 'p4', 'mk2', 'a1', 'mk3', 'gc3', 'u4', 'b18', 'db5', 'mk4', 'p5', 'gc4',
-  'u5', 'b19', 'p6', 'a2', 'db6', 'gc5', 'u6', 'b20', 'mk5', 'p7', 'u7', 'mk6', 'b5', 'b6', 'b7', 'b8', 'b9', 'b10'];
+  'dk1', 'gc1', 'b21', 'b4', 'dk2', 'db4', 'b14', 'dk3', 'gc2', 'b15', 'b16', 'b17', 'u3', 'dk4', 'mk1', 'p4', 'dk5', 'mk2', 'a1', 'mk3', 'gc3', 'u4', 'b18', 'db5', 'mk4', 'dk6', 'p5', 'gc4',
+  'u5', 'b19', 'dk7', 'p6', 'a2', 'db6', 'dk8', 'gc5', 'u6', 'b20', 'dk9', 'mk5', 'p7', 'u7', 'mk6', 'b5', 'b6', 'b7', 'b8', 'b9', 'b10'];
 const MESK_TR = MESK_SIRA.filter(function (id) { return id[0] !== 'b'; });
 function meskSirasi() {
   return MESK_SIRA.filter(function (id) { return DURUM.ayar.bati || id[0] !== 'b'; }).map(function (id) { return UNITE[id]; }).filter(Boolean);
@@ -264,6 +266,46 @@ const JOKERLER = [
 const JOKER_LIMIT = 3;
 
 // o: { tip, baslik, sorular, kalp (0: kalpsiz), joker, sure (sn/soru, 0: yok), kayit (Leitner'a yaz), ipucuAcik, bitince(sonuc) }
+// 3.5: aynı soru art arda gelmesin. İmza: sorunun ekranda görünen hali ve doğru cevabı.
+function soruImza(v) {
+  if (!v) return '';
+  if (v._imza) return v._imza;
+  const s = v.soru || {};
+  let porte = '';
+  try { porte = JSON.stringify(s.porte || (v.yer && v.yer.beklenen) || (v.dizi && v.dizi.beklenen) || (v.klavye && [v.klavye.hedefY, v.klavye.verilen]) || (v.donanim && v.donanim.beklenen) || ''); } catch (e) {}
+  v._imza = [v.tip, s.metin || '', s.glif || '', v.alt || '', v.dogruMetin || '', String(v.dogru || ''), porte, String(v.aciklama || '').slice(0, 90)].join('|');
+  return v._imza;
+}
+// Seviye soruları: turda aynı soru iki kez çıkmışsa yenisiyle değiştir (soru havuzu yetiyorsa)
+function sorulariTekille(sorular, uret) {
+  const gorulen = {}, L = sorular.slice();
+  let yedek = [], deneme = 0;
+  for (let i = 0; i < L.length; i++) {
+    let im = soruImza(L[i]);
+    while (gorulen[im] && deneme < 6) {
+      if (!yedek.length) { deneme++; try { yedek = uret(Math.max(L.length, 4)).filter(Boolean); } catch (e) { yedek = []; deneme = 6; } }
+      // aynı biçimden (tip ve alt yazı) görülmemiş bir soru ara; yoksa herhangi görülmemiş soru
+      const uygun = function (ayniBicim) { return yedek.findIndex(function (y) { return !gorulen[soruImza(y)] && (!ayniBicim || (y.tip === L[i].tip && y.alt === L[i].alt)); }); };
+      let j = uygun(true);
+      if (j < 0 && deneme >= 3) j = uygun(false);
+      if (j < 0) { yedek = []; continue; }
+      L[i] = yedek.splice(j, 1)[0];
+      im = soruImza(L[i]);
+    }
+    gorulen[im] = true;
+  }
+  return L;
+}
+// Sıradaki soru bir öncekiyle aynıysa ilerideki farklı bir soruyla yer değiştir (her tur türünde, sonradan eklenen sorularda da)
+function ardisikAyir() {
+  const L = TUR.sorular, k = TUR.k;
+  if (k < 1 || k >= L.length) return;
+  const onceki = soruImza(L[k - 1]);
+  if (soruImza(L[k]) !== onceki) return;
+  for (let j = k + 1; j < L.length; j++) {
+    if (soruImza(L[j]) !== onceki) { const g = L[k]; L[k] = L[j]; L[j] = g; return; }
+  }
+}
 function turBaslat(o) {
   if (!o.sorular || !o.sorular.length) { toast('Bu turda soru yok'); return; }
   TUR = Object.assign({ k: 0, hata: 0, dogru: 0, atlanan: 0, ceza: 0, jokerSay: 0, jokerKullandi: false, yeniKart: [], q: null, zaman: null }, o);
@@ -340,6 +382,7 @@ function soruGoster() {
   clearInterval(TUR.zaman);
   if (typeof ritimDur === 'function') ritimDur();
   if (typeof kulakDur === 'function') kulakDur();
+  ardisikAyir();
   const veri = TUR.sorular[TUR.k];
   const q = TUR.q = { veri: veri, butonlar: [], cevaplandi: false, ipucuNo: 1 };
   $('oyDolgu').style.width = (TUR.sonsuz ? (TUR.dogru % 10) * 10 : TUR.k / TUR.sorular.length * 100) + '%';
@@ -899,7 +942,7 @@ function kalpTahmini(s) {
 function seviyeBaslat(s, ek) {
   SON_UNITE = s.unite.id;
   if (s.tip === 'sonsuz') { sonsuzBaslat(s.unite.sonsuzDal || s.dal); return; }
-  const q = s.uret(s.soruSay);
+  const q = sorulariTekille(s.uret(s.soruSay), s.uret);
   turBaslat(Object.assign({
     tip: s.tip, seviye: s, sorular: q, kalp: kalpTahmini(s), joker: true, kayit: true, sure: s.sure || 0,
     bitince: function (r) { seviyeSonucu(s, r); }
@@ -975,6 +1018,7 @@ function uniteKarisik(u, n, sadeceUretim, sesliDe) {
     const q = s.uret(1)[0];
     if (sessiz && q && q.dinle && q.dinle.kulak) continue;
     if (sadeceUretim && q.tip === 'secim' && deneme < 90) continue;
+    if (deneme < 100 && L.some(function (y) { return soruImza(y) === soruImza(q); })) continue;   // 3.5: aynı soru iki kez girmesin
     L.push(q);
   }
   // Ünitenin bütün soruları sesliyse (ezgi diktesi) sessiz tur kurulamaz: ünite olduğu gibi sorulur

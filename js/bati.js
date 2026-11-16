@@ -111,6 +111,23 @@ function batiAralikSoru(tip, kodlar, ariza) {
     q.dogru = c; q.dogruMetin = kodAd(c);
     q.aciklama = kodAd(x.kod) + ' çevrilince <b>' + kodAd(c) + '</b> olur: ' + x.kod.slice(1) + ' + ' + c.slice(1) + ' = 9; ' + NIT_AD[x.kod[0]].toLowerCase() + ' ↔ ' + NIT_AD[c[0]].toLowerCase() + '.';
     q.ipucu = 'Sayıların toplamı 9 olur';
+  } else if (tip === 'cevrimSec' || tip === 'cevrimKur') {
+    // 3.5: çevrim portede. Alt nota bir oktav yukarı taşınır: [üst nota, alt nota + oktav]
+    const c = cevrimKod(x.kod), tasinan = { h: x.alt.h, o: x.alt.o + 1, a: x.alt.a || null }, ustN = { h: x.ust.h, o: x.ust.o, a: x.ust.a || null };
+    q.soru = { porte: Object.assign({ kirp: true }, aralikPorte(x)) };
+    q.aciklama = aralikAciklama(x) + '<br>Alt nota bir oktav yukarı taşınır. Çevrimi: <b>' + kodAd(c) + '</b>.';
+    q.ipucu = 'Üstteki nota yerinde kalır; alttaki nota bir oktav yukarı çıkar';
+    if (tip === 'cevrimKur') {
+      q.tip = 'yer'; q.alt = 'Çevrimini yaz: üst nota yerinde, alt notayı bir oktav yukarı taşı';
+      q.yer = { slotlar: [{ sabit: ustN }, {}], palet: 'bati', beklenen: [ustN, tasinan], smax: 44 };
+      q.dogruMetin = kodAd(c);
+    } else {
+      const dis = aralikCeldirici(c).map(function (k) { return aralikKur(ustN, k); }).filter(function (n) { return n && !notaEsit(n, tasinan) && adim(n) <= 44; }).slice(0, 3);
+      if (dis.length < 2) return batiAralikSoru('cevrimPorte', kodlar, ariza);
+      q.alt = 'Bu aralığın çevrimi hangisi?';
+      q.siklar = [tasinan].concat(dis).map(function (n, i) { return { key: i ? 'y' + i : 'd', porte: { notalar: [ustN, { h: n.h, o: n.o, a: n.a || null }], aralik: 52 } }; });
+      q.dogru = 'd'; q.dogruMetin = kodAd(c);
+    }
   } else if (tip === 'cevrimPorte') {
     const c = cevrimKod(x.kod);
     q.soru = { porte: aralikPorte(x) }; q.alt = 'Bu aralığın çevrimi nedir?';
@@ -275,7 +292,24 @@ function minorSoru(tip, kumeler) {
     return d.map(function (n, i) { return (n.a || null) !== (dogalD[i].a || null) ? i : -1; }).filter(function (i) { return i >= 0; })
       .map(function (i) { const n = d[i]; return n.a ? batiAd(n, true) : HARF_AD[n.h] + '♮'; });
   };
-  if (tip === 'tur') {
+  if (tip === 'degisenDokun' || tip === 'turKur') {
+    // 3.5: yükseltilen seslere portede dokun / diziyi işaretleriyle kur
+    const t = Math.random() < 0.5 ? 'armonik' : 'melodik', hedefDizi = minorDizi(s, t);
+    const a1 = degisen('armonik').join(' ve '), a2 = degisen('melodik').join(' ve ');
+    q.aciklama = '<b>' + ton + '</b>: armonikte 7. derece (' + a1 + '), melodikte (çıkarken) 6. ve 7. dereceler (' + a2 + ') yarım ses yükselir.';
+    q.ipucu = t === 'armonik' ? 'Sadece 7. derece' : '6. ve 7. dereceler';
+    const yazilir = hedefDizi.every(function (n) { return !n.a || n.a === '#' || n.a === 'b'; });
+    if (tip === 'turKur' && yazilir) {
+      q.tip = 'yer';
+      q.soru = { metin: ton + ' · ' + MINOR_TUR_AD[t], kucuk: true }; q.alt = 'Her notanın işaretini seç (işaret almıyorsa ∅)';
+      q.yer = { slotlar: hedefDizi.map(function (n, i) { return i === 0 ? { sabit: n } : { konum: { h: n.h, o: n.o } }; }), palet: 'bati', beklenen: hedefDizi };
+      q.dogruMetin = hedefDizi.map(function (n) { return batiAd(n, true); }).join(' ');
+    } else {
+      q.soru = { metin: ton }; q.alt = 'Doğal minör dizi yazılı. ' + (t === 'armonik' ? 'Armonik' : 'Melodik') + ' minörde (çıkarken) yükselen seslere dokun';
+      q.dogruMetin = degisen(t).join(' ve ');
+      porteDokunSoru(q, { notalar: dogalD.map(function (n) { return { h: n.h, o: n.o, a: n.a || null }; }), aralik: 34, enAz: 330, hedef: t === 'armonik' ? [6] : [5, 6], coklu: true });
+    }
+  } else if (tip === 'tur') {
     q.soru = { porte: { notalar: minorDizi(s, tur), aralik: 33, enAz: 320 } }; q.alt = ton + ': hangi minör türü?';
     q.siklar = ['dogal', 'armonik', 'melodik'].map(function (t) { return { key: t, metin: MINOR_TUR_AD[t] }; });
     q.dogru = tur; q.dogruMetin = MINOR_TUR_AD[tur];
@@ -369,9 +403,9 @@ const BATI_UNITELER = [
     { id: 'b4-boss', tip: 'boss', ad: 'Aralık finali', soruSay: 12, uret: batiAralikUretici(['ad', 'ad', 'kur'], TUM_KODLAR, 0.6) }
   ]),
   bUnite('b5', 5, 'Aralık çevrimi', 'Büyük ↔ küçük, artık ↔ eksik', [
-    { id: 'b5-1', tip: 'seviye', ad: 'Adından çevrim', soruSay: 8, uret: batiAralikUretici(['cevrim'], TUM_KODLAR, 0) },
-    { id: 'b5-2', tip: 'seviye', ad: 'Porteden çevrim', soruSay: 8, uret: batiAralikUretici(['cevrimPorte'], TUM_KODLAR, 0.4) },
-    { id: 'b5-boss', tip: 'boss', ad: 'Çevrim finali', soruSay: 10, uret: batiAralikUretici(['cevrim', 'cevrimPorte'], TUM_KODLAR, 0.5) }
+    { id: 'b5-1', tip: 'seviye', ad: 'Adından çevrim', soruSay: 8, uret: batiAralikUretici(['cevrim', 'cevrimSec'], TUM_KODLAR, 0) },
+    { id: 'b5-2', tip: 'seviye', ad: 'Porteden çevrim', soruSay: 8, uret: batiAralikUretici(['cevrimPorte', 'cevrimSec', 'cevrimKur'], TUM_KODLAR, 0.4) },
+    { id: 'b5-boss', tip: 'boss', ad: 'Çevrim finali', soruSay: 10, uret: batiAralikUretici(['cevrim', 'cevrimSec', 'cevrimPorte', 'cevrimKur'], TUM_KODLAR, 0.5) }
   ]),
   bUnite('b6', 6, 'Majör tonlar: diyezliler', 'Sol majörden Do diyez majöre', [
     { id: 'b6-1', tip: 'seviye', ad: '3 diyeze kadar', soruSay: 8, uret: tonUretici(['donanimMajor', 'klavyeMajor', 'tonDonanimMajor', 'diziTon'], araliktan(0, 3)) },
@@ -392,12 +426,12 @@ const BATI_UNITELER = [
     { id: 'b8-boss', tip: 'boss', ad: 'Minör tonlar finali', soruSay: 12, uret: tonUretici(['ilgiliKlavye', 'ayniAdPorte', 'donanimMinor', 'ilgiliPorte', 'klavyeMinor', 'cift', 'tonDonanim', 'diziTonMinor'], araliktan(-7, 7)) }
   ]),
   bUnite('b9', 9, 'Minör türleri', 'Doğal, armonik, melodik', [
-    { id: 'b9-1', tip: 'seviye', ad: 'Diziden türü bul', soruSay: 8, uret: minorUretici(['tur'], araliktan(-3, 3)) },
-    { id: 'b9-2', tip: 'seviye', ad: 'Yükseltilen sesler', soruSay: 8, uret: minorUretici(['degisen'], araliktan(-5, 4)) },
-    { id: 'b9-boss', tip: 'boss', ad: 'Minör türleri finali', soruSay: 10, uret: minorUretici(['tur', 'degisen'], araliktan(-7, 4)) }
+    { id: 'b9-1', tip: 'seviye', ad: 'Diziden türü bul', soruSay: 8, uret: minorUretici(['tur', 'degisenDokun', 'tur', 'turKur'], araliktan(-3, 3)) },
+    { id: 'b9-2', tip: 'seviye', ad: 'Yükseltilen sesler', soruSay: 8, uret: minorUretici(['degisenDokun', 'degisen', 'turKur', 'degisenDokun'], araliktan(-5, 4)) },
+    { id: 'b9-boss', tip: 'boss', ad: 'Minör türleri finali', soruSay: 10, uret: minorUretici(['tur', 'degisenDokun', 'turKur', 'degisen', 'degisenDokun'], araliktan(-7, 4)) }
   ]),
   bUnite('b10', 10, 'Beşliler çemberi ve büyük final', 'Dominant, alt dominant, her şey', [
-    { id: 'b10-1', tip: 'seviye', ad: 'Dominant ve alt dominant', soruSay: 10, uret: tonUretici(['dominant', 'altdominant'], araliktan(-7, 7)) },
+    { id: 'b10-1', tip: 'seviye', ad: 'Dominant ve alt dominant', soruSay: 10, uret: tonUretici(['cemberDominant', 'dominant', 'cemberAlt', 'altdominant', 'cemberDominant', 'cemberAlt'], araliktan(-7, 7)) },
     { id: 'b10-boss', tip: 'boss', ad: 'Batı Teorisi büyük finali', soruSay: 14, uret: function (n) {
         const parca = [
           batiAralikUretici(['ad', 'kur', 'cevrim'], TUM_KODLAR, 0.5)(Math.ceil(n * 0.45)),
@@ -538,7 +572,7 @@ function klavye(cfg) {
     return 'tus ' + (beyazMi(y) ? 'beyaz' : 'siyah') + (isaret[y] ? ' ' + isaret[y] : verilen[y] ? ' ' + (verilen[y].sinif || 'verilen') : secili === y ? ' secili' : '');
   }
   function yaz(y, metin) {
-    const t = svgEl('text', { x: orta(y), y: beyazMi(y) ? 26 : 12, 'text-anchor': 'middle', class: 'tusEtiket' });
+    const t = svgEl('text', { x: Math.max(20, Math.min(W - 20, orta(y))), y: beyazMi(y) ? 26 : 12, 'text-anchor': 'middle', class: 'tusEtiket' });
     t.textContent = metin;
     svg.appendChild(t);
   }
@@ -595,7 +629,7 @@ function klavye(cfg) {
 function klavyeSoruCiz(alan, veri, q, kontrol) {
   const k = veri.klavye;
   let kl = null;
-  kl = klavye({ verilen: k.verilen, degisince: function () { kontrol.disabled = !kl || kl.deger() === null; } });
+  kl = klavye({ bas: k.bas, son: k.son, verilen: k.verilen, degisince: function () { kontrol.disabled = !kl || kl.deger() === null; } });
   q.klavye = kl;
   alan.appendChild(kl.el);
   kontrol.hidden = false;
@@ -604,7 +638,7 @@ function klavyeSoruCiz(alan, veri, q, kontrol) {
   kontrol.onclick = function () {
     if (q.cevaplandi || kl.deger() === null) return;
     const y = kl.deger();
-    const dogru = ((y % 12) + 12) % 12 === k.hedefPc;
+    const dogru = k.tam ? y === k.hedefY : ((y % 12) + 12) % 12 === k.hedefPc;   // tam: oktav da tutmalı (ahenk)
     const isaretler = {}, etiketler = {};
     if (dogru) { isaretler[y] = 'dogru'; etiketler[y] = k.hedefEtiket; }
     else { isaretler[y] = 'yanlis'; isaretler[k.hedefY] = 'dogru'; etiketler[k.hedefY] = k.hedefEtiket; }
@@ -732,7 +766,7 @@ function donanimYazCiz(alan, veri, q, kontrol) {
   };
 }
 
-const TON_GORSEL_TIPLER = ['klavyeMajor', 'klavyeMinor', 'ilgiliKlavye', 'ilgiliPorte', 'ayniAdPorte', 'diziTon', 'diziTonMinor', 'donanimDogru', 'donanimYaz', 'diziKur'];
+const TON_GORSEL_TIPLER = ['cemberDominant', 'cemberAlt', 'klavyeMajor', 'klavyeMinor', 'ilgiliKlavye', 'ilgiliPorte', 'ayniAdPorte', 'diziTon', 'diziTonMinor', 'donanimDogru', 'donanimYaz', 'diziKur'];
 function tonGorselSoru(tip, kumeler) {
   const tum = araliktan(-7, 7);
   const dpo = function (k) { return { notalar: [], donanim: donanimNotalari(k), enAz: 170, kirp: true }; };
@@ -821,6 +855,19 @@ function tonGorselSoru(tip, kumeler) {
     q.dogruMetin = arizaMetni(s) + ': ' + donanimSirasiMetni(s);
     q.ipucu = 'Önce kaç işaret olduğunu bul. Diyez sırası: Fa Do Sol Re La Mi Si; bemol sırası bunun tersi.';
 
+  } else if (tip === 'cemberDominant' || tip === 'cemberAlt') {
+    const yon = tip === 'cemberDominant' ? 1 : -1;
+    const uygun = kumeler.filter(function (k) { return k >= -5 && k <= 6 && k + yon >= -5 && k + yon <= 6; });
+    const k0 = rastgele(uygun.length ? uygun : [0]), hedef = k0 + yon;
+    q.oge = tonOge(k0);
+    q.tip = 'ozel';
+    q.soru = { metin: tonAd(k0, 'majör') }; q.alt = 'Beşliler çemberinde ' + (yon > 0 ? 'dominant' : 'alt dominant') + ' tonuna dokun';
+    q.cember = { verilen: k0, hedef: hedef };
+    q.ozel = { karar: 1, ciz: cemberDokunCiz };
+    q.dogruMetin = tonAd(hedef, 'majör');
+    q.aciklama = 'Beşliler çemberinde ' + (yon > 0 ? 'saat yönünde (tam beşli yukarı, bir diyez fazla / bir bemol eksik)' : 'saat yönünün tersine (tam beşli aşağı, bir bemol fazla / bir diyez eksik)') + ' komşu: <b>' + tonAd(hedef, 'majör') + '</b>.';
+    q.ipucu = yon > 0 ? 'Dominant: saat yönünde bir adım' : 'Alt dominant: saat yönünün tersine bir adım';
+
   } else if (tip === 'diziKur') {
     s = rastgele(sifirsiz());
     const D = majorDizi(s);
@@ -832,4 +879,57 @@ function tonGorselSoru(tip, kumeler) {
     q.ipucu = 'Donanımdaki işaretler dizide hangi notalara denk geliyor? ' + (s > 0 ? 'Diyez sırası: Fa Do Sol Re La Mi Si' : 'Bemol sırası: Si Mi La Re Sol Do Fa');
   }
   return q;
+}
+
+// 3.5: beşliler çemberinde bir tona dokunma. veri.cember: { verilen: s, hedef: s }
+function cemberDokunCiz(alan, veri, q, kontrol) {
+  const C = veri.cember, sira = [0, 1, 2, 3, 4, 5, 6, -5, -4, -3, -2, -1];
+  let secili = null, kilitli = false, sonuc = {};
+  const kap = h('div', { class: 'klavyeKap cemberKap' });
+  const svg = svgEl('svg', { class: 'cember etkilesim', viewBox: '0 0 300 300', preserveAspectRatio: 'xMidYMid meet', role: 'img', 'aria-label': 'Beşliler çemberi' });
+  const bilgi = h('div', { class: 'yerBilgi' });
+  kap.appendChild(svg); kap.appendChild(bilgi);
+  const yer = function (i) { const a = (i * 30 - 90) * Math.PI / 180; return [150 + 118 * Math.cos(a), 150 + 118 * Math.sin(a)]; };
+  function ciz() {
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    svg.appendChild(svgEl('circle', { cx: 150, cy: 150, r: 118, fill: 'none', stroke: 'currentColor', opacity: .25, 'stroke-width': 2 }));
+    sira.forEach(function (s, i) {
+      const p = yer(i);
+      const durum = sonuc[s] || (s === C.verilen ? 'verilen' : s === secili ? 'secili' : '');
+      svg.appendChild(svgEl('circle', { cx: p[0], cy: p[1], r: 25, class: 'cemberDugum ' + durum }));
+      const t = svgEl('text', { x: p[0], y: p[1] + 4, 'font-size': s === 6 ? 9 : 12, 'text-anchor': 'middle', class: 'cemberYazi ' + durum });
+      t.textContent = s === 6 ? 'Fa♯/Sol♭' : batiAd(tonikNota(s, 'majör'), true);
+      svg.appendChild(t);
+    });
+    const m = svgEl('text', { x: 150, y: 146, 'font-size': 11, 'text-anchor': 'middle', fill: 'currentColor', opacity: .7 });
+    m.textContent = 'saat yönü ↻';
+    svg.appendChild(m);
+    const m2 = svgEl('text', { x: 150, y: 162, 'font-size': 10, 'text-anchor': 'middle', fill: 'currentColor', opacity: .55 });
+    m2.textContent = 'beşli yukarı';
+    svg.appendChild(m2);
+    bilgi.textContent = kilitli ? '' : secili === null ? 'Çemberde bir tona dokun' : 'Ton seçildi · başkasına dokunarak değiştirebilirsin';
+    kontrol.disabled = kilitli || secili === null;
+  }
+  function sec(s) { if (kilitli || s === C.verilen || sira.indexOf(s) < 0) return; secili = s; ciz(); }
+  svg.addEventListener('pointerdown', function (e) {
+    const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+    const mm = svg.getScreenCTM(); if (!mm) return;
+    const p = pt.matrixTransform(mm.inverse());
+    let en = -1, ed = 1e9;
+    sira.forEach(function (s, i) { const y = yer(i), d = Math.hypot(p.x - y[0], p.y - y[1]); if (d < ed) { ed = d; en = s; } });
+    if (ed <= 34) sec(en);
+    e.preventDefault();
+  });
+  q.cember = { sec: sec, deger: function () { return secili; } };
+  alan.appendChild(kap);
+  kontrol.hidden = false; kontrol.textContent = 'Kontrol et';
+  ciz();
+  kontrol.onclick = function () {
+    if (q.cevaplandi || secili === null) return;
+    const dogru = secili === C.hedef;
+    sonuc = {}; sonuc[C.hedef] = 'dogru'; if (!dogru) sonuc[secili] = 'yanlis';
+    kilitli = true; ciz();
+    kontrol.hidden = true;
+    cevapla(dogru);
+  };
 }

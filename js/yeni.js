@@ -469,11 +469,11 @@ function ykKopru(birimler, hedefId, mod, ad) {
   const mk6 = {
     id: 'mk6', dal: 'makam', no: 6, ad: 'Yeni makamlar', kisa: 'Acemaşiran, Muhayyer, Muhayyerkürdi, Acemkürdi, Saba, Segâh, Hüzzam', ogeler: MK_YENI7.map(function (i) { return 'm:' + i; }),
     seviyeler: [
-      { id: 'mk6-1', tip: 'seviye', ad: 'Yapı, karar ve güçlü', soruSay: 8, uret: makamUretici({ havuz: MK_YENI7, tipler: ['parcaAd', 'karar', 'guclu'] }) },
+      { id: 'mk6-1', tip: 'seviye', ad: 'Yapı, karar ve güçlü', soruSay: 8, uret: makamUretici({ havuz: MK_YENI7, tipler: ['parcaAd', 'kararPorte', 'gucluDokun', 'makamDiziSec', 'guclu', 'gucluPorte', 'parcaAd', 'karar'] }) },
       ykSeviye('mk6-2', 'Seyir türü ve kimlik', ykKarma([function () { return [mkSeyirTuruSorusu(Y7)]; }, function () { return [mkKimlikYeniSorusu(Y7)]; }]), { soruSay: 8 }),
       ykSeviye('mk6-3', 'Seyri sırala', ykUretici(function () { return mkSeyirSiralaSorusu(Y7); }), { soruSay: 5 }),
       { id: 'mk6-yer', tip: 'yer', ad: 'Diziyi porteye yaz', soruSay: 5, uret: makamUretici({ havuz: MK_YENI7, tipler: ['diziYaz'] }) },
-      { id: 'mk6-boss', tip: 'boss', ad: 'Yeni makamlar finali', soruSay: 10, uret: ykKarma([makamUretici({ havuz: MK_YENI7, tipler: ['karar', 'guclu', 'parcaAd', 'diziYaz'] }), function () { return [mkKimlikYeniSorusu(Y7)]; }, function () { return [mkSeyirSiralaSorusu(Y7)]; }]) }
+      { id: 'mk6-boss', tip: 'boss', ad: 'Yeni makamlar finali', soruSay: 10, uret: ykKarma([makamUretici({ havuz: MK_YENI7, tipler: ['kararPorte', 'gucluDokun', 'parcaAd', 'diziYaz', 'makamDiziSec', 'guclu'] }), function () { return [mkKimlikYeniSorusu(Y7)]; }, function () { return [mkSeyirSiralaSorusu(Y7)]; }]) }
     ]
   };
   mk6.ders = mkYeniDersi;

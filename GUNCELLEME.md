@@ -1,3 +1,36 @@
+# Seyir 3.5.0 – yükleme notu
+
+Türk müziği **Dikte** dalı, 22 üniteye görsel sorular ve "aynı soru arka arkaya" düzeltmesi. Kayıt taşıması yok; var olan seviye kimlikleri aynı, kimsenin ilerlemesi ya da ünvanı değişmez.
+
+Yeni dosyalar: `js/gorsel.js`, `js/tmdikte.js`. Değişenler: `index.html`, `sw.js`, `manifest.webmanifest`, `css/stil.css`, `js/cekirdek.js` (sürüm), `js/motor.js`, `js/arayuz.js`, `js/dikte.js`, `js/kulak.js`, `js/makam.js`, `js/yeni.js`, `js/ahenk.js`, `js/koma.js`, `js/perde.js`, `js/gocurme.js`, `js/usul.js`, `js/cesni.js`, `js/bati.js`, `GUNCELLEME.md`.
+
+## 1. Aynı soru arka arkaya gelmiyor (motor.js)
+- `soruImza(v)`: sorunun ekranda görünen hali ve doğru cevabından imza.
+- `sorulariTekille(sorular, uret)`: seviye turunda aynı soru iki kez çıkmışsa yenisiyle değiştirilir (soru havuzu yetiyorsa).
+- `ardisikAyir()`: her soru çizilmeden önce çalışır; sıradaki soru öncekiyle aynıysa ilerideki farklı bir soruyla yer değiştirir. Sonsuz Meşk, Tekrar ve karışık turlarda da geçerli.
+- Karışık tur üreticisi aynı imzalı soruyu ikinci kez almaz.
+
+## 2. Dikte dalı (`tmd`, üniteler `dk1`–`dk9`, + `sn-tmd` Sonsuz Meşk)
+- `dikte.js` motoru genişletildi: `M.sis` (donanım, harf → işaret, karar koması, ad) varsa sesler komayla çalınır, donanım anahtardan sonra çizilir, notalar perde adıyla anılır; `M.grup` aksak usulün sekizlik grupları (kiriş, sayım tıkları, ölçüye sığma). `DK_OLCU`'ya 3/4, 5/8, 7/8, 9/8 eklendi. Batı ezgi diktesi (b21) davranışı aynı.
+- `tmdikte.js`: bağlam (çeşni / makam / şed) seçimi, usullü üretici, yeni soru türleri (usulü bul, birim say, usulü dinle: ad ve zaman), dokuz ünite ve dersleri.
+- Her soruda çeşninin ya da makamın adı, donanımı ve ilk ses verilir; öğrenci koma işareti seçmez. Aynı çeşni / makam art arda gelmez.
+- Dal `DAL_SIRA`'da, `TR_DALLAR`'da değil: ünvan hesabına ve "Her şey karışık" Sonsuz Meşk'e girmez.
+- Meşk Yolu sırasına serpiştirildi (`MESK_SIRA`). Sesli sorular kapalıysa bütün seviyeler isteğe bağlıdır.
+- Yapılmayan: geçki ünitesi, SymbTr'den gerçek ezgi cümleleri.
+
+## 3. Görsel sorular
+- `gorsel.js`: `porteDokunCiz` (portede notaya dokun; tekli ya da çoklu).
+- Makam 1–4, 6 ve şed makamlar: karar / güçlü / yeden portede (`kararPorte`, `gucluPorte`, `yedenPorte`), güçlüye dizide dokun (`gucluDokun`), makam adından dizi seç (`makamDiziSec`), çeşni birleşimi renkli portede. Makam adı verilen sorularda isteğe bağlı 🔊 Dinle (`dinleSecenek: { makam }`).
+- Ahenk 1–2: yazılan–duyulan klavyesi (`klavyeAd`, `adKlavye`), ney boyları çizimi (`boyAd`, `adBoy`), yeni seviye `a1-kulak` (aynı ezgi iki ahenkte; `yeni: true`).
+- Koma 1: koma cetveli (`cetvelAd`, `adCetvel`). Ses yok.
+- Göçürme 4: kaynak portede, şıklar portede, isteğe bağlı yerinde / göçürülmüş dinleme. Göçürme 5: `kaynakPorte`, `perdePorte`.
+- Perde 6–7: şıklar portede (`perdeSikPorte`). Ses yok.
+- Usul 6–7: birleşim sorularında vuruş çizimleri.
+- Dörtlü-Beşli: aralık dizilişi koma oranlı şeritle (`cesniSeritSVG`).
+- Batı: çevrim portede (`cevrimSec`, `cevrimKur`), minörde yükselen seslere dokun ve diziyi kur (`degisenDokun`, `turKur`), beşliler çemberinde tona dokun (`cemberDokunCiz`). Ses yok.
+
+**Önce test:** `seyir-3.5.0-test.zip` paketini perde-test deposuna yükle.
+
 # Seyir 3.4.0 – yükleme notu
 
 Batı Teorisi 18–20. ünitelere (Majör tonlar: diyezliler `b6`, bemollüler `b7`, Minör tonlar `b8`) görsel sorular. Yeni dosya yok. Değişenler: `index.html`, `sw.js`, `manifest.webmanifest`, `css/stil.css`, `js/cekirdek.js` (yalnız sürüm), `js/bati.js`, `js/motor.js`, `js/arayuz.js` (Yenilikler), `GUNCELLEME.md`. Kayıt taşıması yok; seviye kimlikleri aynı, kimsenin ilerlemesi değişmez.

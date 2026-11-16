@@ -474,7 +474,7 @@ function tekrarCiz(g) {
   const sn = h('div', { class: 'antrenmanlar' });
   const rek = DURUM.rekor || {};
   sn.appendChild(h('button', { class: 'antKart' + (sonsuzAcik('karisik') ? '' : ' kilitli'), type: 'button', onclick: function () { sonsuzBaslat('karisik'); } }, '🌀', h('span', null, 'Her şey karışık' + (rek.karisik ? ' · 🏅 ' + rek.karisik : ''))));
-  TR_DALLAR.forEach(function (d) {
+  TR_DALLAR.concat(['tmd']).forEach(function (d) {
     const ac = sonsuzAcik(d);
     sn.appendChild(h('button', { class: 'antKart' + (ac ? '' : ' kilitli'), type: 'button', onclick: function () { sonsuzBaslat(d); } }, ac ? DALLAR[d].ikon : '🔒', h('span', null, DALLAR[d].ad + (rek[d] ? ' · 🏅 ' + rek[d] : ''))));
   });
@@ -653,6 +653,13 @@ function hakkinda() {
 }
 function yenilikler() {
   sayfa('🆕 Yenilikler', h('div', { class: 'metinSayfa', html:
+    '<h3>Sürüm 3.5.0</h3><ul>' +
+    '<li>✍️ <b>Yeni dal: Dikte.</b> Türk müziği diktesi dörtlülerle başlıyor: önce karar ve üstündeki ses, sonra üç ses, sonra tam dörtlü; ardından usul diktesi, beşliler, makam dizisi, makamda ezgi, usullü ezgi, aksak usuller ve şed makamlar. Çeşninin ya da makamın adı, donanımı ve ilk ses hep verilir.</li>' +
+    '<li>🔁 <b>Aynı soru arka arkaya gelmiyor:</b> bir turda aynı soru iki kez çıkmıyor, art arda da gelmiyor.</li>' +
+    '<li>🏵️ <b>Makam</b> soruları daha görsel: karar, güçlü ve yeden portede; güçlüye dizide dokunuyorsun; çeşni birleşimi renkli portede. Makam adı verilen sorularda isteğe bağlı 🔊 Dinle var.</li>' +
+    '<li>🌬️ <b>Ahenk:</b> yazılan ve duyulan ses klavyede, ney boyları çizimle; yeni 👂 seviyede aynı ezgi iki ahenkte çalıyor.</li>' +
+    '<li>🎼 Koma cetveli, porteli göçürme ve şed soruları, portede oktav ve komşu perdeler, usul birleşimlerinde vuruş çizimi, aralık dizilişi şeridi.</li>' +
+    '<li>🎹 Batı: çevrim portede, minörde yükselen seslere dokunma, beşliler çemberinde ton seçme.</li></ul>' +
     '<h3>Sürüm 3.4.0</h3><ul>' +
     '<li>🎹 <b>Batı Teorisi 18–20. üniteler</b> (majör tonlar ve minör tonlar) artık daha görsel: karar sesini <b>klavyede</b> gösteriyor, donanımı <b>porteye kendin yazıyorsun</b>, majör diziyi nota nota kuruyorsun.</li>' +
     '<li>🎼 Yazılı şıkların çoğu porteli oldu: “hangi donanım doğru yazılmış”, “bu dizinin donanımı hangisi”, ilgili ve aynı adlı minör soruları porteden soruluyor.</li>' +
