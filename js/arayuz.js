@@ -653,133 +653,17 @@ function hakkinda() {
 }
 function yenilikler() {
   sayfa('🆕 Yenilikler', h('div', { class: 'metinSayfa', html:
-    '<h3>Sürüm 3.5.0</h3><ul>' +
-    '<li>✍️ <b>Yeni dal: Dikte.</b> Türk müziği diktesi dörtlülerle başlıyor: önce karar ve üstündeki ses, sonra üç ses, sonra tam dörtlü; ardından usul diktesi, beşliler, makam dizisi, makamda ezgi, usullü ezgi, aksak usuller ve şed makamlar. Çeşninin ya da makamın adı, donanımı ve ilk ses hep verilir.</li>' +
-    '<li>🔁 <b>Aynı soru arka arkaya gelmiyor:</b> bir turda aynı soru iki kez çıkmıyor, art arda da gelmiyor.</li>' +
-    '<li>🏵️ <b>Makam</b> soruları daha görsel: karar, güçlü ve yeden portede; güçlüye dizide dokunuyorsun; çeşni birleşimi renkli portede. Makam adı verilen sorularda isteğe bağlı 🔊 Dinle var.</li>' +
-    '<li>🌬️ <b>Ahenk:</b> yazılan ve duyulan ses klavyede, ney boyları çizimle; yeni 👂 seviyede aynı ezgi iki ahenkte çalıyor.</li>' +
-    '<li>🎼 Koma cetveli, porteli göçürme ve şed soruları, portede oktav ve komşu perdeler, usul birleşimlerinde vuruş çizimi, aralık dizilişi şeridi.</li>' +
-    '<li>🎹 Batı: çevrim portede, minörde yükselen seslere dokunma, beşliler çemberinde ton seçme.</li></ul>' +
-    '<h3>Sürüm 3.4.0</h3><ul>' +
-    '<li>🎹 <b>Batı Teorisi 18–20. üniteler</b> (majör tonlar ve minör tonlar) artık daha görsel: karar sesini <b>klavyede</b> gösteriyor, donanımı <b>porteye kendin yazıyorsun</b>, majör diziyi nota nota kuruyorsun.</li>' +
-    '<li>🎼 Yazılı şıkların çoğu porteli oldu: “hangi donanım doğru yazılmış”, “bu dizinin donanımı hangisi”, ilgili ve aynı adlı minör soruları porteden soruluyor.</li>' +
-    '<li>📚 Bu ünitelerin derslerine klavye çizimli iki kart eklendi.</li>' +
-    '<li>🛠️ Majör ton ünitelerinde henüz anlatılmamış minör tonlar sorulmuyor; Batı notası yazma sorularında yanlış işarete “ses doğru, yazım farklı” denmiyor.</li></ul>' +
-    '<h3>Sürüm 3.3.2</h3><ul>' +
-    '<li>🎯 <b>Tekrar</b> kutuları artık aynı gün üst üste oynayınca şişmiyor: bir öğe, vadesi geldiğinde doğru bilinirse üst kutuya çıkar. Yanlışların listede kalır, aynı gün yeniden çalışabilirsin.</li>' +
-    '<li>🧭 <b>Meşk Yolu</b>’nda tek bir “BURADASIN” var: sıradaki adımın.</li>' +
-    '<li>🔇 Sesli sorular kapalıyken Sandık ve Altınla turlarında da sesli soru gelmiyor.</li>' +
-    '<li>🎁 Sandık ödülü için 8 sorudan 5 doğru gerekiyor. 🔥 Gün serisi ilk cevabınla sayılıyor.</li>' +
-    '<li>⏱️ Süreli sorularda bir pencere açıkken süre duruyor.</li>' +
-    '<li>👂 Aralık kademelerinde iki seçenekli olanlar 9 doğruyla geçiliyor; açtığın kademeler açık kalır.</li>' +
-    '<li>💾 Bozuk yedek kodu kaydının üstüne yazmıyor; ortak ders denemelerinde soru sayıları etiketle tutuyor.</li></ul>' +
-    '<h3>Sürüm 3.3.1</h3><ul>' +
-    '<li>🌙 Karanlık temada ipucu, uyarı ve unvan kutularının yazısı artık okunuyor.</li>' +
-    '<li>📱 Küçük telefonlarda yanlış cevap paneli ekrana sığıyor; <b>Devam</b> düğmesi hep görünür.</li>' +
-    '<li>🎼 Porte şıkları daha derli toplu: tablette ve bilgisayarda dört şık kaydırmadan görünüyor.</li>' +
-    '<li>✍️ Ortak derslerde cevabı uzunluğundan ele veren şıklar yeniden yazıldı.</li>' +
-    '<li>⚡ Porteye yazarken sürükleme daha akıcı; yazı tipleri açılışta iki kez inmiyor.</li></ul>' +
-    '<h3>Sürüm 3.3</h3><ul>' +
-    '<li>👂 Kulak eğitimine <b>Aralık</b> sekmesi: bakiye, küçük ve büyük mücenneb, tanini, artık ikili. Dokuz kademe; önce birbirinden çok farklı aralıklar, 1 komalık farklar en sonda. 10 sorudan 8’ini bilince sonraki kademe açılır.</li>' +
-    '<li>🎹 Batı Teorisi’ne <b>Ezgi diktesi</b> ünitesi: Do’dan başlayan ezgiyi duy ve porteye yaz. Önce Do–Re, sonra Mi, Fa, Sol; ses kümesi oturunca tartım (ikilik, dörtlük, sekizlik, noktalı dörtlük). Uzun diktede her doğru nota sayılır.</li></ul>' +
-    '<h3>Sürüm 3.2</h3><ul>' +
-    '<li>🏛️ Ortak dersler’e iki yeni ders: <b>Türk Müziği Kültürü</b> (5 konu) ve <b>Türk Halk Müziği Bilgisi</b> (6 konu). Her konu için kısa konu anlatımı.</li>' +
-    '<li>✏️ Her ünitede kısa bir <b>Anladım mı?</b> testi: ayrıntı değil, ünitenin genel çıkarımını yoklayan sorular.</li>' +
-    '<li>✍️ Sınav yazılı olduğu için ünitelerde açık uçlu sorular da var: cevabını kur, örnek cevabı aç, söylediğin ana noktaları işaretle. 📋 Soru bankasında bütün sorular ve örnek cevaplar (📌 derste vurgulananlar işaretli).</li></ul>' +
-    '<h3>Sürüm 3.1</h3><ul>' +
-    '<li>👂 <b>Kulak eğitimi</b>: dörtlü-beşliler, göçürmeler ve makamlar artık duyuluyor. Gitar sesi, 53 komalı perdeler; sesler Kız ahenginde (Rast perdesi La sesinden).</li>' +
-    '<li>🧭 Meşk Yolu’nda Dörtlü-Beşli, Göçürme ve Makam ünitelerine 👂 seviyeleri: hangisi, isteneni bul, aynı mı, farklı olanı bul, hangi ses değişti, eksik perde, aralıkları diz, duyduğunu porteye yaz, hangi perdeden, diziden ve seyirden makam. 1 komalık ayrımlar ayrı bir “İnce ayrım” seviyesinde.</li>' +
-    '<li>🎼 <b>Seyirden makam</b>: SymbTr derlemindeki Rauf Yekta, Erol Bingöl ve Şefik Gürmeriç seyir örneklerinden kısa cümleler.</li>' +
-    '<li>🛠️ Öğren → Araçlar’da <b>Kulak eğitimi</b>: dinle, karşılaştır, göçür ve zorluğu kendini ayarlayan antrenman turları.</li>' +
-    '<li>🔊 Dörtlü-Beşli’nin 1–5. ünitelerinde porte, formül, yer ve kurma sorularına isteğe bağlı <b>Dinle</b> düğmesi; her üniteye “Porte ve ad”dan hemen sonra basit bir <b>Dinleyerek tanış</b> seviyesi (duyduğun porte hangisi, yazılan bu mu, iki addan hangisi, çıkıcı mı inici mi, dörtlü mü beşli mi).</li>' +
-    '<li>🎯 Her sesli soruda tek vuruşluk <b>Karar</b> düğmesi. Dinleme sınırsız; Sonsuz Meşk’te Usta katında 3, Pîr katında 2 dinleme hakkı.</li>' +
-    '<li>Bitirdiğin ünitelere eklenen 👂 seviyeleri isteğe bağlıdır; ünvanın ve ilerlemen korunur. Sesli soruları Ayarlar’dan kapatabilirsin.</li></ul>' +
-    '<h3>Sürüm 3.0</h3><ul>' +
-    '<li>🏵️ <b>Yedi yeni makam</b>: Acemaşiran, Muhayyer, Muhayyerkürdi, Acemkürdi, Saba, Segâh ve Hüzzam (Makam dalında 6. ünite). Aynı diziyi paylaşan makamlar seyir ve güçlüleriyle ayrılır.</li>' +
-    '<li>🧭 <b>Seyir</b>: her makamın seyir türü (çıkıcı, inici, inici-çıkıcı) ve yeni “Seyri sırala” soruları.</li>' +
-    '<li>🆕 <b>Yeni soru tipleri</b>: eşleştir, sınıflandır, hatayı bul, doğru mu yanlış mı, farkı bul, eksiğini tamamla, adım adım kur, makamı kur (dört taş), ahenkte hesap.</li>' +
-    '<li>✚ <b>Köprü seviyeleri</b>: zor porteye yazma seviyelerinden önce, bir kısmı hazır gelen isteğe bağlı ara basamaklar.</li>' +
-    '<li>♾️ <b>Sonsuz Meşk artık meydan okuma</b>: zor sorular, Kalfa → Usta → Pîr katları, puanlı rekor, Usta’dan sonra cezasız süre, her 15 doğruda +1 kalp. Eski rekorların ayrıca saklanır.</li>' +
-    '<li>🎼 Koma’nın ilk dört seviyesi ikiye indi (yıldızların taşındı). Koma dalında amaç tabloyu ezberlemek: hesap sorusu yok.</li>' +
-    '<li>📚 Öğren’e yeni modüller: Perde adlarının kökeni, Perde ezberleme araçları (Günün 5 perdesi, eşleştir, kendi çağrışımın), Koma dairesi, Makam karşılaştırma, Genel kültür: formlar. Hızlı bakış’ta sent ve Batı farkı sütunları; Profil’de Kaynaklar ve lisanslar.</li>' +
-    '<li>Bir üniteyi önceden bitirdiysen o üniteye eklenen yeni seviyeler isteğe bağlıdır (✚); ilerlemen ve ünvanın korunur.</li></ul>' +
-    '<h3>Sürüm 2.9</h3><ul>' +
-    '<li>✏️ <b>Düzeltme hakkı</b>: porteye yazma ve dizme sorularında yanlışların yarıdan azsa kırmızı yanar, bir kez düzeltebilirsin. Düzeltirsen yalnız <b>yarım kalp</b> gider.</li>' +
-    '<li>❤️ Uzun seviyelerde daha çok kalp: seviyenin uzunluğuna göre 3, 4 ya da 5.</li>' +
-    '<li>🪜 <b>Yanlışta kart</b>: Perde sorusunda yanlış yapınca ilgili perde merdiveni, Koma sorusunda aralık kartı açılır. Yanlış yaptığın soru birkaç soru sonra bir kez daha gelir. Finallerde kartlar sonda topluca gösterilir.</li>' +
-    '<li>↩︎ Bir seviyede kalınca önce bir önceki seviyeyi ya da dersi tekrar etmen önerilir; ikinci kalışta <b>ipuçlu deneme</b> ücretsizdir.</li>' +
-    '<li>🎖️ Ünvanlar artık toplam üniteye oranla verilir ve <b>kazandığın ünvan hiç düşmez</b>; yeni üniteler eklense de olduğun yerden devam edersin.</li>' +
-    '<li>🥁 <b>Sengin Semai</b> de 6/8 yazılır; mertebe adı sorularından çıkarıldı.</li></ul>' +
-    '<p class="kucukNot">İlerlemen korunur. Güncellemeden önceki kaydın bir kopyası cihazında ayrıca saklanır.</p>' +
-    '<h3>Sürüm 2.8.1</h3><ul>' +
-    '<li>🪜 Öğren’de yeni modül: <b>Perde merdivenleri</b>. İki tam perde arasındaki ara perdeler, porte üzerinde notadan notaya çapraz koma çizgisiyle; her perdenin iki yazımı ve bir oktav tizdeki ya da pestteki eşi.</li>' +
-    '<li>🥁 <b>Sofyan</b> artık 4/4, <b>Yürük Semai</b> 6/8 olarak yazılıyor.</li></ul>' +
-    '<h3>Sürüm 2.8</h3><ul>' +
-    '<li>📚 <b>Öğren sekmesi yenilendi</b>: temel bilgiler tek kartta, ilerlemen ve sıradaki modül görünüyor; dokununca bütün modüller açılır.</li>' +
-    '<li>🥁 Üç yeni modül: <b>Usul nedir?</b>, <b>Ahenk</b> ve <b>Tartım ve ritim</b>. Modüller Dallar ile aynı sırada.</li>' +
-    '<li>📏 Yeni <b>Hızlı bakış</b>: koma, perde, dörtlü-beşli, makam, usul (▶ ile dinle) ve ahenk tabloları tek yerde.</li>' +
-    '<li>🧰 Bendir, Sözlük ve Arka planlar yeni “Araçlar” ızgarasında; Bendir kutusu en son çaldığın usulü ve hızı gösterir.</li>' +
-    '<li>🎓 Öğren’in altında yeni <b>Ortak dersler</b>: konservatuvar 1. sınıf ortak dersleri (Türk Dili 1, Atatürk İlkeleri ve İnkılap Tarihi 1, İngilizce 1) için ünite özetleri, testler, vize ve final denemeleri. İstemezsen Ayarlar’dan gizleyebilirsin.</li></ul>' +
-    '<h3>Sürüm 2.7.1</h3><ul>' +
-    '<li>📱 iPhone’da ses bittikten sonra kilit ekranında kalan boş “Şimdi Çalıyor” kartı artık kayboluyor; uygulama arka plana geçince ses duruyor.</li>' +
-    '<li>🥁 Usul: “hangi elle vurulur?” bilgi soruları kaldırıldı; el, notanın üzerinde işaretli vuruşla soruluyor.</li></ul>' +
-    '<h3>Sürüm 2.7</h3><ul>' +
-    '<li>🎹 <b>Tartım üniteleri baştan yazıldı</b>: 3 yerine 10 ünite ve ♾️ Sonsuz dikte. Temel tartımlardan noktalılara, suslara, bağ ve senkopa, <b>üçlemeye</b>, <b>6/8</b>’e, <b>aksak ölçülere</b> (5/8, 7/8, 9/8) ve dört ölçülük uzun dikteye.</li>' +
-    '<li>👂 Odak artık dikte ve deşifre: duyduğun ritmin notasını seç, kalıp kartlarını sırayla diz, 🔎 yazılan ile çalınan arasındaki farkı bul, eksik vuruşu tamamla, notayı okuyup vur. Son ünitede dinlemeden okuyup vurma.</li>' +
-    '<li>🥁 Mertebe soruları: şıklarda ölçü rakamı yok; yeni “hangi mertebede yazılmış?”, “bir zaman hangi nota?” ve <b>Ağır Aksak, Sengin Semai, Ağır Düyek</b> gibi mertebe adları.</li>' +
-    '<li>🌿 Bir seviyeyi bitirince “Dallar’a dön” seni o dal açık hâlde ana sayfaya götürür; Meşk Yolu’ndan girdiysen Meşk Yolu’na.</li></ul>' +
-    '<h3>Sürüm 2.6</h3><ul>' +
-    '<li>🌿 Ana sayfa artık <b>Dallar</b>: bir dala dokun, üniteleri altında açılsın; istediğin üniteye doğrudan git. Meşk Yolu yan sekmede.</li>' +
-    '<li>🧭 Dallar ve Meşk Yolu <b>öğrenme sırasına</b> göre yeniden dizildi: Koma, Perde, Usul, Dörtlü-Beşli, Göçürme, Makam, Ahenk. Meşk Yolu’nda üniteler dallar arasında karışık, adım adım gelir.</li>' +
-    '<li>🎼 Koma: <b>perde adından işaret</b>. Perde adı verilir, nota porteye hazır konur; sen işaretini seçersin. İki yazımlı perdelerde hem diyezli hem bemollü yazımı. İşaret düğmeleri isimsiz ve her soruda karışık.</li>' +
-    '<li>🎵 Nota adlarında oktav numarası kalktı (Re5 yerine Re); oktavı porte ve perde adı gösteriyor.</li>' +
-    '<li>🥁 <b>Vurma soruları</b> yenilendi: tempo düştü, uygulama sana eşlik etmiyor. Birkaç tık hızı verir, sonra kendin vurursun; vuruşlarının arasındaki oranlar ölçülür. Biraz yavaş vurmak da doğru sayılır (uyarıyla).</li>' +
-    '<li>🥁 Usul soruları: heceler, eller, heceleri sıraya dizme ve <b>mertebe</b> (ör. Sofyan 4/8 → 4/4) soruları eklendi; tek vuruşun sesini sorma kaldırıldı.</li>' +
-    '<li>🎹 Batı Teorisi yeni sırada: tartımlar aralıkların arasında, tonlar en sonda.</li>' +
-    '<li>İlerlemen olduğu gibi duruyor; geçtiğin seviyeler sıra değişse de açık kalır.</li></ul>' +
-    '<h3>Sürüm 2.5</h3><ul>' +
-    '<li>♾️ <b>Sonsuz Meşk</b>: her Türk müziği dalının sonunda ucu açık bir ünite. Bitirdiğin seviyelerden karışık ve bitmeyen sorular, doğru bildikçe zorlaşır. Tekrar sekmesinde “Her şey karışık” da var.</li>' +
-    '<li>🥁 Yeni <b>Usul</b> dalı: 10 zamana kadar 20 usul, 7 ünite. Kalıptan ve sesten usul tanıma, eksik vuruşu bulma, usulü ekrana vurma, <b>mertebeler</b> ve büyük usullerin küçük usullerden nasıl kurulduğu.</li>' +
-    '<li>🥁 Yeni <b>Bendir</b> aracı (Öğren): eser ya da solfej çalışırken istediğin usulü istediğin mertebede ve hızda çalar. Tap tempo, sessiz devir, yavaştan hızlanma.</li>' +
-    '<li>🌬️ Yeni <b>Ahenk</b> dalı: en çok kullanılan ahenklerin adları, Bolâhenk’e göre yerleri ve Rast perdesinin duyulduğu ses.</li>' +
-    '<li>🎹 Batı Teorisi’ne <b>tartım</b> üniteleri: Van, İzmir, Gelibolu, Ankara, Karaman, Bursa, Sahur, Terazi, İstanbul; dinleme, dikte ve vurma.</li>' +
-    '<li>🎶 Perde: <b>oktav kardeşleri</b> ve <b>komşu perdeler, iki yazım</b> üniteleri; süreli “Perde avı” finali.</li>' +
-    '<li>🎻 Dörtlü-Beşli: <b>Çeşniyi dizide bul</b>. 🏵️ Makam: <b>Karcığar ve Sûzinâk</b>, <b>Makam ustalığı</b> (diziyi porteye yazma). 🔁 Göçürme: <b>Şed makamlar</b> (Mahur, Hicazkâr, Kürdîlihicazkâr, Nihâvend, Sultânîyegâh).</li>' +
-    '<li>🎖️ Yeni en üst ünvan: <b>Hâce</b>. Önceki ünvanların korunur.</li></ul>' +
-    '<h3>Sürüm 2.4</h3><ul>' +
-    '<li>🎹 Batı Teorisi: donanımı dizme sorusunda artık kutu sayısı verilmiyor; diyez ve bemollerin hepsi arasından kaç işaret olduğunu da sen buluyorsun.</li>' +
-    '<li>🖼️ Yeni: <b>Arka planlar</b>. Koma tablosu, perdeler ve dörtlü-beşliler telefon ve bilgisayar duvar kâğıdı olarak indirilebiliyor (Öğren ya da Profil).</li>' +
-    '<li>🎵 Porteye yazarken sesi doğru ama başka harfle yazarsan (ör. Re küçük mücenneb diyezi yerine Mi bakiye bemolü) artık “Ses doğru, yazım farklı” der ve nedenini açıklar.</li>' +
-    '<li>🔁 <b>Göçürme</b> yenilendi: perde adlarını bilmeden başlanıyor. Önce dörtlü, beşli ve makam dizisini aralık hesabıyla porteye kuruyorsun; arızalı seslerin perde adları cevaptan sonra dipnotta. Perde adları son ünitede geliyor. İlerlemen yeni ünitelere taşındı.</li></ul>' +
-    '<h3>Sürüm 2.3</h3><ul>' +
-    '<li>💻 <b>Tablet ve bilgisayar</b> görünümü: daha geniş ve okunaklı ekranlar; bilgisayarda menü solda.</li>' +
-    '<li>⏩ Doğru cevaptan sonra <b>otomatik geçiş</b>; yanlışta ekranın herhangi bir yerine dokunarak devam. Ayarlar’dan kapatılabilir.</li>' +
-    '<li>⌨️ Bilgisayarda <b>klavye</b>: 1–4 şık seçer, Enter kontrol eder ve devam eder, ← → derste kart çevirir, Esc kapatır.</li></ul>' +
-    '<h3>Sürüm 2.2</h3><ul>' +
-    '<li>🔁 Yeni <b>Göçürme</b> dalı: aralık adımlarından başlayıp dörtlü, beşli ve makam dizisi göçürmeye 5 ünite. Antrenman Tekrar sekmesinde de duruyor.</li></ul>' +
-    '<h3>Sürüm 2.1</h3><ul>' +
-    '<li>🐦 Uygulamanın yeni adı: <b>Seyir</b>. Yeni bülbüllü ikon.</li>' +
-    '<li>🎖️ Meşk geleneğine dayanan yeni ünvanlar ve ünvan basamakları.</li>' +
-    '<li>💬 Profil ve Ayarlar’dan geliştiriciye doğrudan WhatsApp ile ulaşma.</li>' +
-    '<li>🔁 Göçürmenin hesabı adım adım: hangi aralık kaç koma, işaret nasıl bulunur.</li>' +
-    '<li>🧭 Bülbülün rehberi; Meşk Yolu / Dallar seçicisi kaydırınca üstte kalıyor.</li>' +
-    '<li>📤 “Arkadaşına öner” ekranında QR kod.</li></ul>' +
-    '<p class="uyariKutu">📱 iPhone’da ana ekrana eklediysen eski ad ve ikon görünmeye devam edebilir; oyun aynen çalışır. Uygulamayı silip yeniden ekleme: ilerlemen silinebilir. Mutlaka yapacaksan önce Profil → Yedekle’den kodunu al.</p>' +
-    '<h3>Sürüm 2.0</h3><ul>' +
-    '<li>🧭 Yeni <b>Meşk Yolu</b>: dallar önerilen sırayla, birbirini kilitlemeden.</li>' +
-    '<li>📚 <b>Öğren</b> bölümü ve 📖 sözlük: sıfırdan başlayanlar için.</li>' +
-    '<li>📖 Her ünitede ders ve ısınma turu.</li>' +
-    '<li>✍️ Porteye yazma, işaret seçme ve sıralama soruları.</li>' +
-    '<li>🎶 Perdeler, eserlerde kullanılma sıklığına göre 5 pakete ayrıldı.</li>' +
-    '<li>🎻 Temel dörtlüler eklendi; beşliler “dörtlü + tanini” ile öğretiliyor.</li>' +
-    '<li>🏵️ Yeni <b>Makam</b> dalı: 10 makam, “Ben kimim?”, makam kurma, donanım.</li>' +
-    '<li>🔁 <b>Göçürme antrenmanı</b>: dörtlü, beşli ve makam dizileri.</li>' +
-    '<li>🎹 Yeni <b>Batı Teorisi</b> dalı: aralıklar, tonlar, minör türleri, beşliler çemberi.</li>' +
-    '<li>🎯 Bütün oyunları kapsayan aralıklı <b>Tekrar</b> sistemi.</li>' +
-    '<li>⏩ Biliyorum sınavları, 🏆 ünite altınlama, 🎁 tekrar sandıkları.</li>' +
-    '<li>💾 İlerleme yedekleme ve geri yükleme; karanlık tema.</li>' +
-    '<li>⚡ Daha hızlı açılış (yazı tipleri 424 KB’tan ~94 KB’a indi), çevrimdışı çalışma iyileştirildi, Android geri tuşu desteklendi.</li>' +
-    '<li>📅 Günlük görev kaldırıldı.</li></ul>' }));
+    '<h3>Sürüm 0.35</h3><ul>' +
+    '<li>✍️ <b>Yeni dal: Dikte.</b> Türk müziği diktesi: önce dörtlüler (karar ve üstündeki ses, sonra üç ses, sonra tam dörtlü), ardından usul diktesi, beşliler, makam dizisi, makamda ezgi, usullü ezgi, aksak usuller ve şed makamlar. Çeşninin ya da makamın adı ve ilk ses hep verilir.</li>' +
+    '<li>🔁 Aynı soru bir turda artık iki kez çıkmıyor, art arda da gelmiyor.</li>' +
+    '<li>🏵️ Makam, Ahenk, Koma, Göçürme, Perde, Usul ve Dörtlü-Beşli dallarında yeni görsel sorular: portede karar, güçlü ve yeden; klavye ve ney boyları; koma cetveli; porteli şıklar. Makam sorularında isteğe bağlı 🔊 Dinle.</li></ul>' +
+    '<h3>Sürüm 0.34</h3><ul>' +
+    '<li>🎹 Batı Teorisi’nde majör ve minör ton üniteleri daha görsel: karar sesi klavyede, donanımı porteye kendin yazıyorsun, şıkların çoğu porteli.</li></ul>' +
+    '<h3>Sürüm 0.33</h3><ul>' +
+    '<li>👂 Kulak eğitimine <b>Aralık</b> sekmesi: bakiye, mücennebler, tanini ve artık ikili; dokuz kademe.</li>' +
+    '<li>🎹 Batı Teorisi’ne <b>Ezgi diktesi</b> ünitesi.</li>' +
+    '<li>📱 Küçük telefonlarda ve karanlık temada okunurluk düzeltmeleri.</li></ul>' +
+    '<p class="kucukNot">İlerlemen ve ünvanın her güncellemede korunur.</p>' }));
 }
 
 function yedekSayfasi() {

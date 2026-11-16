@@ -1,4 +1,6 @@
-# Seyir 3.5.0 – yükleme notu
+# Seyir 0.35 – yükleme notu
+
+Sürüm numaraları 0.x düzenine geçti (3.5.0 → 0.35); 1.0, App Store ve Google Play yayınına ayrıldı. Yenilikler sayfası son üç sürümle sınırlandı.
 
 Türk müziği **Dikte** dalı, 22 üniteye görsel sorular ve "aynı soru arka arkaya" düzeltmesi. Kayıt taşıması yok; var olan seviye kimlikleri aynı, kimsenin ilerlemesi ya da ünvanı değişmez.
 
@@ -29,9 +31,9 @@ Yeni dosyalar: `js/gorsel.js`, `js/tmdikte.js`. Değişenler: `index.html`, `sw.
 - Dörtlü-Beşli: aralık dizilişi koma oranlı şeritle (`cesniSeritSVG`).
 - Batı: çevrim portede (`cevrimSec`, `cevrimKur`), minörde yükselen seslere dokun ve diziyi kur (`degisenDokun`, `turKur`), beşliler çemberinde tona dokun (`cemberDokunCiz`). Ses yok.
 
-**Önce test:** `seyir-3.5.0-test.zip` paketini perde-test deposuna yükle.
+**Önce test:** `seyir-0.35-test.zip` paketini perde-test deposuna yükle.
 
-# Seyir 3.4.0 – yükleme notu
+# Seyir 0.34 (eski adıyla 3.4.0) – yükleme notu
 
 Batı Teorisi 18–20. ünitelere (Majör tonlar: diyezliler `b6`, bemollüler `b7`, Minör tonlar `b8`) görsel sorular. Yeni dosya yok. Değişenler: `index.html`, `sw.js`, `manifest.webmanifest`, `css/stil.css`, `js/cekirdek.js` (yalnız sürüm), `js/bati.js`, `js/motor.js`, `js/arayuz.js` (Yenilikler), `GUNCELLEME.md`. Kayıt taşıması yok; seviye kimlikleri aynı, kimsenin ilerlemesi değişmez.
 
